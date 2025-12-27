@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,136 +8,257 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Rakkas&family=Rubik:wght@300;400;700&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Handjet:wght@100..900&family=Silkscreen:wght@400;700&display=swap"
+        rel="stylesheet">
+
     <link rel="stylesheet" href="style.css">
     <!-- html2canvas for export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
+
 <body>
 
-    <header class="app-header">
-        <h1>CCCC</h1>
-        <p>Conservative Classification For Creative Content</p>
-    </header>
+    <main class="card-container" id="main-card">
 
-    <main class="container">
-        <!-- LEFT PANEL: Control Board -->
-        <section id="control-board">
-            
-            <!-- Search Section -->
-            <div class="control-group search-box">
-                <h2>البحث</h2>
-                <div class="search-inputs">
-                    <select id="content-type">
-                        <option value="movie">أفلام</option>
-                        <option value="tv">مسلسلات</option>
-                        <option value="anime">أنمي</option>
-                        <option value="game">ألعاب</option>
-                        <option value="book">كتب</option>
-                    </select>
-                    <input type="text" id="search-query" placeholder="ابحث عن العنوان...">
-                    <button id="search-btn">بحث</button>
-                </div>
-                <!-- Search Results Dropdown -->
-                <div id="search-results" class="hidden"></div>
-            </div>
-
-            <hr>
-
-            <!-- Ratings: Mawjoodat -->
-            <div class="control-group ratings-box">
-                <h2>الموجودات (التقييم)</h2>
-                <div id="ratings-list">
-                    <!-- Rating items will be injected by JS -->
+        <!-- ROW 1 -->
+        <!-- Search (Right - 33%) -->
+        <div class="top-controls">
+            <div class="control-row">
+                <div class="orientation-selector">
+                    <button class="orient-btn active" data-value="horizontal">Horizontal (16:9)</button>
+                    <button class="orient-btn" data-value="vertical">Vertical (9:16)</button>
                 </div>
             </div>
-
-            <hr>
-
-            <!-- Toggles: Mustathniyat -->
-            <div class="control-group toggles-box">
-                <h2>المستثنيات</h2>
-                <div id="toggles-list">
-                    <!-- Toggle items will be injected by JS -->
+            <div class="control-row">
+                <div class="type-selector">
+                    <button class="type-btn active" data-value="anime">أنمي</button>
+                    <button class="type-btn" data-value="manga">مانجا</button>
+                    <button class="type-btn" data-value="movie">فيلم</button>
+                    <button class="type-btn" data-value="tv">مسلسل</button>
+                    <button class="type-btn" data-value="game">لعبة</button>
+                    <button class="type-btn" data-value="book">كتاب</button>
                 </div>
             </div>
+            <div class="control-row">
+                <div class="search-wrapper">
+                    <input type="text" id="search-query" placeholder="...">
+                    <div id="search-results" class="hidden"></div>
+                </div>
+            </div>
+        </div>
 
-            <hr>
-            
-            <!-- User Comment -->
-            <div class="control-group">
-                <h2>ملاحظاتك</h2>
-                <textarea id="user-comment" rows="3" placeholder="أضف ملاحظاتك الشخصية هنا..."></textarea>
+        <!-- Site Title & Description (Left - 66%) -->
+        <header class="card-header">
+            <div class="header-content">
+                <h1 class="logo">CCCC</h1>
+                <p class="subtitle-en">Conservative Classification For Creative Content</p>
+                <p class="subtitle-ar">التصنيف المحافظ للمحتوى الإبداعي</p>
+            </div>
+        </header>
+
+        <!-- ROW 2 -->
+        <!-- Ratings Panel (Right - 33%) -->
+        <section class="ratings-panel">
+            <h2 class="ratings-title">تقييم محتوى الأنمي</h2>
+
+            <div id="ratings-list" class="ratings-grid">
+                <!-- Rating Bars injected by JS -->
             </div>
 
-            <!-- Export Button -->
-            <div class="actions">
-                <button id="export-btn" class="btn-primary">تصدير البطاقة (صورة)</button>
+            <div id="toggles-list" class="toggles-grid">
+                <!-- Toggles injected by JS -->
             </div>
 
+            <div class="warning-text">
+                تنبيه: قبل تصنيف أي محتوى، يرجى قراءة <a href="#" id="open-info-modal">شرح التصانيف والدرجات</a>.
+            </div>
         </section>
 
-        <!-- RIGHT PANEL: Preview Area -->
-        <section id="preview-area">
-            <div id="export-canvas">
-                <!-- Background Blur Layer -->
-                <div class="bg-layer" id="bg-layer"></div>
-                
-                <!-- Main Content Grid -->
-                <div class="card-content">
-                    
-                    <!-- Left Col: Poster -->
-                    <div class="poster-col">
-                        <div class="poster-frame">
-                            <img id="poster-img" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMzMzIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM2NjYiPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==" alt="Poster">
-                        </div>
+        <!-- Info Panel / Canvas (Left - 66%) -->
+        <section class="info-panel horizontal" id="preview-canvas">
+            <div class="canvas-bg">
+                <canvas id="poster-bg" class="bg-image"></canvas>
+                <div class="bg-overlay"></div>
+            </div>
+            <div class="canvas-content">
+                <div class="poster-container">
+                    <div id="poster-img" class="poster-div"></div>
+                </div>
+
+                <div class="info-content-right">
+                    <div class="header-info">
+                        <h2 id="title-text">ANIME TITLE</h2>
+                        <div id="genre-text" class="genre-label">Genre</div>
                     </div>
 
-                    <!-- Right Col: Metadata & Ratings -->
-                    <div class="info-col">
-                        <div class="header-info">
-                            <h1 id="title-text">عنوان العمل</h1>
-                            <div class="meta-tags">
-                                <span id="year-text">0000</span>
-                                <span class="separator">|</span>
-                                <span id="genre-text">تصنيف</span>
-                            </div>
-                        </div>
+                    <div class="synopsis-wrapper">
+                        <div id="synopsis-text" contenteditable="true" placeholder="اكتب نبذة هنا..."></div>
+                    </div>
 
-                        <div class="synopsis-box">
-                            <p id="synopsis-text">نبذة عن العمل ستظهر هنا...</p>
-                        </div>
-
-                        <!-- Dynamic Sticker Grid -->
-                        <div class="stickers-container">
-                            <h3>التصنيفات:</h3>
-                            <div id="stickers-grid" class="stickers-grid">
-                                <!-- Active stickers appear here -->
-                            </div>
-                        </div>
-                        
-                        <!-- Mustathniyat Badges -->
-                        <div id="badges-container" class="badges-container">
-                            <!-- Green badges for "Free of X" -->
-                        </div>
-
-                        <div class="user-comment-display">
-                            <strong>ملاحظة:</strong>
-                            <span id="comment-text-display">...</span>
-                        </div>
-                        
-                        <div class="watermark">
-                            CCCC - Conservative Classification
-                        </div>
+                    <div id="active-stickers" class="stickers-grid-canvas">
+                        <!-- Icons injected here -->
                     </div>
                 </div>
             </div>
-            
-            <p class="preview-hint">هذا نموذج للمخرجات النهائية</p>
+            <div class="classification-label">التصنيف المحافظ للمحتوى الإبداعي</div>
         </section>
+
+        <!-- FOOTER / EXPORT -->
+        <div class="card-footer">
+            <button id="export-btn">EXPORT</button>
+        </div>
+
     </main>
 
-    <script src="app.js"></script>
+    <!-- Information Modal -->
+    <div id="info-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <header class="modal-header">
+                <h2>شرح التصانيف والدرجات</h2>
+                <button id="close-modal" class="close-btn">&times;</button>
+            </header>
+            <div class="modal-body">
+                <section class="modal-section">
+                    <h3 class="section-title">الموجودات</h3>
+                    <div class="modal-grid">
+                        <div class="modal-item">
+                            <img src="assets/icons/كفريات.png" alt="كفريات">
+                            <div class="item-text">
+                                <strong>كفريات:</strong>
+                                <p>ترويج أو تشجيع على الكفر، سخرية من الأديان أو الإله، فلسفات وعقائد فاسدة.</p>
+                            </div>
+                        </div>
+                        <div class="modal-item">
+                            <img src="assets/icons/جنس.png" alt="جنس">
+                            <div class="item-text">
+                                <strong>جنس:</strong>
+                                <p>مشاهد جنسية إيحائية أو مباشرة.</p>
+                            </div>
+                        </div>
+                        <div class="modal-item">
+                            <img src="assets/icons/تعري.png" alt="تعرّي">
+                            <div class="item-text">
+                                <strong>تعرّي:</strong>
+                                <p>ظهور أشخاص بجسد عاري كلياً أو جزئياً.</p>
+                            </div>
+                        </div>
+                        <div class="modal-item">
+                            <img src="assets/icons/مفاسد.png" alt="مفاسد">
+                            <div class="item-text">
+                                <strong>مفاسد:</strong>
+                                <p>ترويج أو تشجيع على القمار أو تعاطي المخدرات أو إظهارها بصفة إيجابية.</p>
+                            </div>
+                        </div>
+                        <div class="modal-item">
+                            <img src="assets/icons/سحر.png" alt="سحر">
+                            <div class="item-text">
+                                <strong>سحر:</strong>
+                                <p>القوى والرموز والتعويذات المرتبطة بالسحر والتنجيم ورؤية المستقبل.</p>
+                            </div>
+                        </div>
+                        <div class="modal-item">
+                            <img src="assets/icons/شذوذ.png" alt="شذوذ">
+                            <div class="item-text">
+                                <strong>شذوذ:</strong>
+                                <p>عرض وتمجيد العلاقات الجنسية المثليّة.</p>
+                            </div>
+                        </div>
+                        <div class="modal-item">
+                            <img src="assets/icons/صادم.png" alt="صادم">
+                            <div class="item-text">
+                                <strong>صادم:</strong>
+                                <p>ظهور أشلاء وما يسبب الصدمات النفسية والتقزز للمشاهد.</p>
+                            </div>
+                        </div>
+                        <div class="modal-item">
+                            <img src="assets/icons/إدمانيّات.png" alt="إدمانيّات">
+                            <div class="item-text">
+                                <strong>إدمانيّات:</strong>
+                                <p>(خاص للألعاب) مصممة للعودة المستمرة والمتابعة الدورية اليومية لتحقيق التقدم.</p>
+                            </div>
+                        </div>
+                        <div class="modal-item">
+                            <img src="assets/icons/تبذير.png" alt="تبذير">
+                            <div class="item-text">
+                                <strong>تبذير:</strong>
+                                <p>(خاص للألعاب) مصممة لربط التقدم بالمال المنفق على أغراض داخل اللعبة.</p>
+                            </div>
+                        </div>
+                        <div class="modal-item">
+                            <img src="assets/icons/قمار.png" alt="قمار">
+                            <div class="item-text">
+                                <strong>قمار:</strong>
+                                <p>(خاص للألعاب) مصممة لتشجيع شراء الصناديق ذات المحتوى العشوائي ونظام السحب.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="modal-section">
+                    <h3 class="section-title">المستثنيات</h3>
+                    <div class="modal-grid small-grid">
+                        <div class="modal-item">
+                            <img src="assets/icons/موسيقى0.png" alt="موسيقى">
+                            <div class="item-text">
+                                <strong>خال من الموسيقى</strong>
+                            </div>
+                        </div>
+                        <div class="modal-item">
+                            <img src="assets/icons/ألفاظ نابية0.png" alt="ألفاظ">
+                            <div class="item-text">
+                                <strong>خال من الألفاظ النابية</strong>
+                            </div>
+                        </div>
+                        <div class="modal-item">
+                            <img src="assets/icons/علاقات حب0.png" alt="علاقات">
+                            <div class="item-text">
+                                <strong>خال من العلاقات خارج الزواج</strong>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="modal-section">
+                    <h3 class="section-title">القيم والدرجات</h3>
+                    <div class="levels-info">
+                        <div class="level-box yellow">المستوى الأول: أصفر</div>
+                        <div class="level-box orange">المستوى الثاني: برتقالي</div>
+                        <div class="level-box red">المستوى الثالث: أحمر</div>
+                    </div>
+
+                    <div class="comparison-table">
+                        <div class="table-header">
+                            <div>الدرجة</div>
+                            <div>في القصصيّات</div>
+                            <div>في الألعاب</div>
+                        </div>
+                        <div class="table-row">
+                            <div class="level-cell yellow">1</div>
+                            <div class="desc-cell">يمكن تخطّي المحتوى دون التأثير على القصّة. ظهور قليل يمكن تخطيه
+                                بسهولة.</div>
+                            <div class="desc-cell">يمكن تجاهله أو استخدام طرق بديلة لإتمام اللعبة.</div>
+                        </div>
+                        <div class="table-row">
+                            <div class="level-cell orange">2</div>
+                            <div class="desc-cell">يمكن تخطي المحتوى دون التأثير على القصة. عدد مرّات ظهور كثير، يسبب
+                                انقطاعات متكررة في تسلسل العرض. الفهم العام للقصة محفوظ رغم التخطي.</div>
+                            <div class="desc-cell">يصعّب إتمام اللعبة ويغيّر من تجربتها، لكن يمكن إتمامها بالكامل مع
+                                تخطّيه.</div>
+                        </div>
+                        <div class="table-row">
+                            <div class="level-cell red">3</div>
+                            <div class="desc-cell">لا يمكن تخطي المحتوى دون التأثير على القصة. عدد مرات ظهور كثير، يفقد
+                                الفهم العام للقصة حين التخطي.</div>
+                            <div class="desc-cell">يستحيل إتمام اللعبة دون المرور عليه.</div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/app.js"></script>
 </body>
+
 </html>
