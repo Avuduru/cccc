@@ -1,0 +1,439 @@
+:root {
+    /* Colors */
+    --bg-dark: #222;
+    --bg-panel: #333;
+    --bg-darker: #111;
+    --text-main: #eee;
+    --text-muted: #aaa;
+    --accent-green: #0f0;
+    /* Retro Terminal Green */
+    --accent-border: #444;
+
+    /* Rating Colors */
+    --color-none: #555;
+    --color-yellow: #f1c40f;
+    --color-orange: #e67e22;
+    --color-red: #c0392b;
+
+    /* Spacing */
+    --gap: 1rem;
+    --padding: 1rem;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Rubik', sans-serif;
+    /* Fallback for general text */
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    /* Prevent full page scroll, internal scrolling instead */
+}
+
+h1,
+h2,
+h3 {
+    font-family: 'Rakkas', cursive;
+    /* Arabic Stylized Font */
+    margin: 0 0 0.5rem 0;
+}
+
+/* Header */
+.app-header {
+    background: var(--bg-darker);
+    padding: 0.5rem 1rem;
+    border-bottom: 2px solid var(--accent-border);
+    text-align: center;
+}
+
+.app-header h1 {
+    font-size: 1.5rem;
+    color: var(--accent-green);
+}
+
+.app-header p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* Main Layout */
+.container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* Control Board (Left Panel) */
+#control-board {
+    width: 350px;
+    background: var(--bg-panel);
+    border-left: 2px solid var(--accent-border);
+    padding: var(--padding);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    flex-shrink: 0;
+}
+
+.control-group h2 {
+    font-size: 1.2rem;
+    color: var(--text-main);
+    border-bottom: 1px solid var(--accent-border);
+    padding-bottom: 0.5rem;
+}
+
+/* Inputs */
+input[type="text"],
+select,
+textarea {
+    width: 100%;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    background: var(--bg-darker);
+    border: 1px solid var(--accent-border);
+    color: white;
+    font-family: inherit;
+    border-radius: 4px;
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    padding: 0.6rem 1.2rem;
+    font-family: inherit;
+    font-weight: bold;
+}
+
+#search-btn {
+    background: var(--accent-green);
+    color: black;
+    width: 100%;
+}
+
+.btn-primary {
+    background: var(--color-yellow);
+    color: black;
+    width: 100%;
+    font-size: 1.1rem;
+}
+
+/* Rating Items */
+.rating-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.8rem;
+    padding: 0.5rem;
+    background: var(--bg-darker);
+    border-radius: 4px;
+}
+
+.rating-label {
+    flex: 1;
+    font-weight: bold;
+}
+
+.rating-controls {
+    display: flex;
+    gap: 5px;
+}
+
+.rating-btn {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid #555;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.rating-btn.active {
+    transform: scale(1.2);
+    border-color: white;
+}
+
+/* Color classes for buttons */
+.btn-none.active {
+    background-color: var(--color-none);
+}
+
+.btn-yellow.active {
+    background-color: var(--color-yellow);
+}
+
+.btn-orange.active {
+    background-color: var(--color-orange);
+}
+
+.btn-red.active {
+    background-color: var(--color-red);
+}
+
+.btn-none:hover {
+    background-color: var(--color-none);
+    opacity: 0.5;
+}
+
+.btn-yellow:hover {
+    background-color: var(--color-yellow);
+    opacity: 0.5;
+}
+
+.btn-orange:hover {
+    background-color: var(--color-orange);
+    opacity: 0.5;
+}
+
+.btn-red:hover {
+    background-color: var(--color-red);
+    opacity: 0.5;
+}
+
+
+/* Toggle Items */
+.toggle-item {
+    margin-bottom: 0.5rem;
+}
+
+.toggle-item label {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+
+/* Preview Area (Right Panel) */
+#preview-area {
+    flex: 1;
+    background: #000;
+    /* Dark canvas background */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    overflow: auto;
+    position: relative;
+}
+
+/* The Export Canvas */
+#export-canvas {
+    width: 800px;
+    height: 450px;
+    /* Fixed Layout */
+    background: #1a1a1a;
+    position: relative;
+    border: 2px solid #333;
+    overflow: hidden;
+    display: flex;
+    /* Flex container for content */
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    direction: rtl;
+    /* Ensure RTL inside canvas */
+}
+
+/* Background Blur */
+.bg-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    filter: blur(20px) brightness(0.3);
+    z-index: 0;
+}
+
+/* Canvas Content */
+.card-content {
+    position: relative;
+    /* Above blur */
+    z-index: 1;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    gap: 20px;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.6) 100%);
+}
+
+/* Left Column: Poster */
+.poster-col {
+    flex: 0 0 30%;
+    /* 30% Width */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.poster-frame {
+    width: 100%;
+    height: 100%;
+    border: 4px solid #fff;
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    background: #000;
+}
+
+.poster-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Right Column: Info */
+.info-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    color: white;
+}
+
+.header-info h1 {
+    font-size: 2.5rem;
+    color: var(--color-yellow);
+    text-shadow: 2px 2px 0px #000;
+    line-height: 1.2;
+    margin-bottom: 0.2rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.meta-tags {
+    font-size: 1rem;
+    color: #ccc;
+    font-family: monospace;
+    margin-bottom: 1rem;
+}
+
+.synopsis-box {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    flex-grow: 0;
+}
+
+.synopsis-box p {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Stickers Grid */
+.stickers-container {
+    flex-grow: 1;
+    margin-top: 0.5rem;
+}
+
+.stickers-container h3 {
+    font-size: 1rem;
+    color: #888;
+    border-bottom: 1px solid #444;
+}
+
+.stickers-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-top: 5px;
+}
+
+/* The Sticker Item (Placeholder for SVG) */
+.sticker {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: #222;
+    border: 2px solid #444;
+    transition: all 0.3s;
+}
+
+.sticker svg {
+    width: 32px;
+    height: 32px;
+    fill: currentColor;
+}
+
+/* Coloring Stickers */
+.sticker.level-1 {
+    border-color: var(--color-yellow);
+    color: var(--color-yellow);
+}
+
+/* Yellow */
+.sticker.level-2 {
+    border-color: var(--color-orange);
+    color: var(--color-orange);
+}
+
+/* Orange */
+.sticker.level-3 {
+    border-color: var(--color-red);
+    color: var(--color-red);
+    background: rgba(192, 57, 43, 0.2);
+}
+
+/* Red */
+
+
+/* Badges */
+.badges-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.badge {
+    background: var(--accent-green);
+    color: black;
+    padding: 2px 8px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    border-radius: 4px;
+}
+
+
+.user-comment-display {
+    margin-top: 10px;
+    font-size: 0.85rem;
+    color: #ddd;
+    border-top: 1px solid #444;
+    padding-top: 5px;
+}
+
+.watermark {
+    margin-top: auto;
+    text-align: left;
+    font-size: 0.7rem;
+    color: #555;
+    font-family: monospace;
+}
+
+.preview-hint {
+    color: #666;
+    margin-top: 10px;
+}

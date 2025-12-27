@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCCC - التصنيف المحافظ للمحتوى الإبداعي</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rakkas&family=Rubik:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+    <!-- html2canvas for export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+
+    <header class="app-header">
+        <h1>CCCC</h1>
+        <p>Conservative Classification For Creative Content</p>
+    </header>
+
+    <main class="container">
+        <!-- LEFT PANEL: Control Board -->
+        <section id="control-board">
+            
+            <!-- Search Section -->
+            <div class="control-group search-box">
+                <h2>البحث</h2>
+                <div class="search-inputs">
+                    <select id="content-type">
+                        <option value="movie">أفلام</option>
+                        <option value="tv">مسلسلات</option>
+                        <option value="anime">أنمي</option>
+                        <option value="game">ألعاب</option>
+                        <option value="book">كتب</option>
+                    </select>
+                    <input type="text" id="search-query" placeholder="ابحث عن العنوان...">
+                    <button id="search-btn">بحث</button>
+                </div>
+                <!-- Search Results Dropdown -->
+                <div id="search-results" class="hidden"></div>
+            </div>
+
+            <hr>
+
+            <!-- Ratings: Mawjoodat -->
+            <div class="control-group ratings-box">
+                <h2>الموجودات (التقييم)</h2>
+                <div id="ratings-list">
+                    <!-- Rating items will be injected by JS -->
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- Toggles: Mustathniyat -->
+            <div class="control-group toggles-box">
+                <h2>المستثنيات</h2>
+                <div id="toggles-list">
+                    <!-- Toggle items will be injected by JS -->
+                </div>
+            </div>
+
+            <hr>
+            
+            <!-- User Comment -->
+            <div class="control-group">
+                <h2>ملاحظاتك</h2>
+                <textarea id="user-comment" rows="3" placeholder="أضف ملاحظاتك الشخصية هنا..."></textarea>
+            </div>
+
+            <!-- Export Button -->
+            <div class="actions">
+                <button id="export-btn" class="btn-primary">تصدير البطاقة (صورة)</button>
+            </div>
+
+        </section>
+
+        <!-- RIGHT PANEL: Preview Area -->
+        <section id="preview-area">
+            <div id="export-canvas">
+                <!-- Background Blur Layer -->
+                <div class="bg-layer" id="bg-layer"></div>
+                
+                <!-- Main Content Grid -->
+                <div class="card-content">
+                    
+                    <!-- Left Col: Poster -->
+                    <div class="poster-col">
+                        <div class="poster-frame">
+                            <img id="poster-img" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMzMzIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM2NjYiPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==" alt="Poster">
+                        </div>
+                    </div>
+
+                    <!-- Right Col: Metadata & Ratings -->
+                    <div class="info-col">
+                        <div class="header-info">
+                            <h1 id="title-text">عنوان العمل</h1>
+                            <div class="meta-tags">
+                                <span id="year-text">0000</span>
+                                <span class="separator">|</span>
+                                <span id="genre-text">تصنيف</span>
+                            </div>
+                        </div>
+
+                        <div class="synopsis-box">
+                            <p id="synopsis-text">نبذة عن العمل ستظهر هنا...</p>
+                        </div>
+
+                        <!-- Dynamic Sticker Grid -->
+                        <div class="stickers-container">
+                            <h3>التصنيفات:</h3>
+                            <div id="stickers-grid" class="stickers-grid">
+                                <!-- Active stickers appear here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Mustathniyat Badges -->
+                        <div id="badges-container" class="badges-container">
+                            <!-- Green badges for "Free of X" -->
+                        </div>
+
+                        <div class="user-comment-display">
+                            <strong>ملاحظة:</strong>
+                            <span id="comment-text-display">...</span>
+                        </div>
+                        
+                        <div class="watermark">
+                            CCCC - Conservative Classification
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="preview-hint">هذا نموذج للمخرجات النهائية</p>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
