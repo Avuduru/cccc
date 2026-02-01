@@ -25,12 +25,14 @@
         <!-- Search (Right - 33%) -->
         <div class="top-controls">
             <div class="control-row">
+                <span class="control-label">قالب التصنيف</span>
                 <div class="orientation-selector">
-                    <button class="orient-btn active" data-value="horizontal">Horizontal (16:9)</button>
-                    <button class="orient-btn" data-value="vertical">Vertical (2:3)</button>
+                    <button class="orient-btn active" data-value="horizontal">بالعرض</button>
+                    <button class="orient-btn" data-value="vertical">بالطول</button>
                 </div>
             </div>
             <div class="control-row">
+                <span class="control-label">نوع المحتوى</span>
                 <div class="type-selector">
                     <button class="type-btn active" data-value="anime">أنمي</button>
                     <button class="type-btn" data-value="manga">مانجا</button>
@@ -38,10 +40,12 @@
                     <button class="type-btn" data-value="tv">مسلسل</button>
                     <button class="type-btn" data-value="game">لعبة</button>
                     <button class="type-btn" data-value="book">كتاب</button>
+                    <button class="type-btn" data-value="manual" id="manual-btn">يدوي</button>
                 </div>
             </div>
             <div class="control-row">
                 <div class="search-wrapper">
+                    <span class="control-label">ابحث</span>
                     <input type="text" id="search-query" placeholder="...">
                     <div id="search-results" class="hidden"></div>
                 </div>
@@ -71,7 +75,8 @@
             </div>
 
             <div class="warning-text">
-                تنبيه: قبل تصنيف أي محتوى، يرجى قراءة <a href="#" id="open-info-modal">شرح التصانيف والدرجات</a>.
+                <span class="warn-prefix">تنبيه:</span> قبل تصنيف أي محتوى، يرجى قراءة <a href="#"
+                    id="open-info-modal">شرح التصانيف والدرجات</a>.
             </div>
         </section>
 
@@ -83,7 +88,11 @@
             </div>
             <div class="canvas-content">
                 <div class="poster-container">
-                    <div id="poster-img" class="poster-div"></div>
+                    <div id="poster-img" class="poster-div">
+                        <div class="upload-overlay hidden" id="upload-hint">
+                            <span>اضغط لرفع صورة</span>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="info-content-right">
@@ -111,6 +120,9 @@
         </div>
 
     </main>
+
+    <!-- Hidden File Input for Manual Mode -->
+    <input type="file" id="manual-cover-upload" accept="image/*" style="display: none;">
 
     <!-- Information Modal -->
     <div id="info-modal" class="modal-overlay hidden">

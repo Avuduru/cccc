@@ -4,6 +4,7 @@ import { handleExport } from './export.js';
 import { debounce } from './utils.js';
 import { state } from './state.js';
 import { config } from './config.js';
+import { setDragState } from './interact.js';
 
 function init() {
     setupDesignSettings();
@@ -58,6 +59,11 @@ function setupEventListeners() {
 
             state.orientation = btn.dataset.value;
             updatePreview();
+
+            // Enable/Disable Drag based on orientation
+            // User requested to remove ability to move elements in vertical mode (Step 721)
+            // But keep text adjusting (contentEditable) which is handled in Manual Mode logic.
+            setDragState(false);
         });
     });
 
@@ -102,6 +108,107 @@ function setupEventListeners() {
             sel.addRange(range);
         }
         state.meta.synopsis = e.target.innerText;
+    });
+
+    // Manual Title Resizing
+    const titleText = document.getElementById('title-text');
+    titleText.addEventListener('input', () => {
+        // Dynamic import or assume global access? 
+        // We need to import adjustTitleSize or reproduce logic.
+        // Since we missed importing it in initializing app.js (it was module based), 
+        // let's rely on logic reproduction or cleaner update.
+        // Actually best to re-trigger UI update logic or just handle class setting here.
+
+        const len = titleText.innerText.length;
+        titleText.removeAttribute('data-length');
+        if (len >= 20 && len < 40) titleText.dataset.length = 'medium';
+        else if (len >= 40 && len < 60) titleText.dataset.length = 'long';
+        else if (len >= 60) titleText.dataset.length = 'xl';
+
+        state.meta.title = titleText.innerText;
+    });
+
+    // Manual Mode - File Upload
+    const fileInput = document.getElementById('manual-cover-upload');
+    const posterImg = document.getElementById('poster-img');
+
+    // Trigger file input when clicking poster in manual mode
+    posterImg.addEventListener('click', () => {
+        if (state.type === 'manual') {
+            fileInput.click();
+        }
+    });
+
+    // Handle File Selection
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                state.meta.poster = event.target.result;
+                // Update UI directly here as it's specific to this action
+                const pImg = document.getElementById('poster-img');
+                pImg.style.backgroundImage = `url(${state.meta.poster})`;
+                pImg.classList.remove('empty-poster');
+                // Use import from ui.js if needed, or just rely on updatePreview if it used meta.poster
+                // But we need drawBlurredBackground which is exported from ui.js. 
+                // Since we didn't import it in the original file, let's rely on updatePreview calling it IF we properly update state.
+                // However, updatePreview calls drawBlurredBackground.
+                // We need to re-import it or use the one from ui.js if imported.
+                // Let's modify the top imports to include drawBlurredBackground if not present, OR just call updatePreview()
+                updatePreview();
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Modify Type Button Listener to handle 'manual' specific logic
+    el.typeButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            el.typeButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            state.type = btn.dataset.value;
+            renderControls();
+
+            // Manual Mode Logic
+            const uploadHint = document.getElementById('upload-hint');
+            const titleText = document.getElementById('title-text');
+            const genreText = document.getElementById('genre-text');
+
+            if (state.type === 'manual') {
+                // Clear Meta for manual entry
+                state.meta.title = 'اكتب العنوان هنا';
+                state.meta.genre = 'اكتب النوع';
+                state.meta.synopsis = 'اكتب النبذة هنا...';
+                state.meta.poster = ''; // User needs to upload
+                state.meta.year = '';
+
+                // UI Updates
+                el.searchResults.classList.add('hidden');
+                el.searchQuery.value = '';
+
+                posterImg.classList.add('manual-mode');
+                // Add empty-poster class initially since no image is uploaded
+                posterImg.classList.add('empty-poster');
+
+                uploadHint.classList.remove('hidden');
+
+                // Enable editing
+                titleText.contentEditable = "true";
+                genreText.contentEditable = "true";
+            } else {
+                posterImg.classList.remove('manual-mode');
+                posterImg.classList.remove('empty-poster'); // Clear empty state
+                uploadHint.classList.add('hidden');
+
+                // Disable editing
+                titleText.contentEditable = "false";
+                genreText.contentEditable = "false";
+            }
+
+            updatePreview();
+        });
     });
 }
 
