@@ -1,6 +1,6 @@
-# NeetPSRating (CCCC)
+# Conservative Classification Of Creative Content
 
-Conservative Classification For Creative Content (CCCC) is a web application designed to help users rate and review media (movies, games, anime, books) based on conservative moral standards.
+Conservative Classification Of Creative Content (CCCC) is a web application designed to help users rate and review media (movies, games, anime, books) based on conservative moral standards.
 
 ## API Keys Setup Guide
 
