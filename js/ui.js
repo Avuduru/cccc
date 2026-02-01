@@ -318,8 +318,11 @@ function selectItem(item, type) {
     state.meta.title = item.title || item.name || item.title_english || (item.volumeInfo ? item.volumeInfo.title : 'No Title');
 
     if (type === 'movie' || type === 'tv') {
-        state.meta.poster = `https://image.tmdb.org/t/p/w500${item.poster_path}`;
-        state.meta.genre = translateGenres('Movie/TV');
+        const rawPoster = `https://image.tmdb.org/t/p/w500${item.poster_path}`;
+        // Use proxy to ensure CORS headers for Canvas processing
+        state.meta.poster = `proxy.php?query=${encodeURIComponent(rawPoster)}&type=image_proxy`;
+
+        state.meta.genre = translateGenres(type === 'movie' ? 'Movie' : 'TV Series');
 
         // Translate synopsis asynchronously
         if (item.overview) {
