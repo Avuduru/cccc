@@ -237,7 +237,8 @@ body {
 }
 
 .info-panel.vertical {
-    aspect-ratio: 9 / 16;
+    aspect-ratio: 2 / 3;
+    /* Typical book/manga cover ratio */
     width: auto;
     height: 800px;
     margin: 0 auto;
@@ -302,6 +303,12 @@ body {
     background-position: center;
     background-repeat: no-repeat;
     display: block;
+}
+
+/* Vertical mode: show full poster without cropping */
+.vertical .poster-div {
+    background-size: cover;
+    background-position: center top;
 }
 
 .info-content-right {
@@ -421,10 +428,14 @@ body {
     position: absolute;
     inset: 0;
     background: linear-gradient(to bottom,
-            rgba(0, 0, 0, 0.9) 0%,
+            rgba(0, 0, 0, 0.6) 0%,
+            /* Reduced from 0.85 */
+            rgba(0, 0, 0, 0.2) 15%,
             rgba(0, 0, 0, 0) 30%,
             rgba(0, 0, 0, 0) 70%,
-            rgba(0, 0, 0, 0.9) 100%);
+            rgba(0, 0, 0, 0.2) 85%,
+            rgba(0, 0, 0, 0.6) 100%);
+    /* Reduced from 0.85 */
     z-index: 2;
 }
 
@@ -478,9 +489,11 @@ body {
 /* STICKERS GRID */
 .stickers-grid-canvas {
     display: grid;
-    gap: 1.5cqw;
+    gap: 0.8cqw;
+    /* Reduced from 1.5cqw */
     margin-top: auto;
-    padding: 1.5cqw;
+    padding: 1cqw;
+    /* Reduced padding too */
     /* Added 10px padding from all sides */
 }
 
@@ -517,14 +530,15 @@ body {
 }
 
 .classification-label {
-    position: absolute;
-    bottom: 5px;
-    left: 0;
-    right: 0;
-    text-align: center;
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.5);
-    z-index: 2;
+    /* Positioned relative to header now */
+    font-size: 1.5rem;
+    /* Much bigger size */
+    color: rgba(255, 255, 255, 0.9);
+    /* Brighter */
+    margin-bottom: 12px;
+    /* Increased fixed spacing */
+    /* letter-spacing: 1px; Removed - breaks Arabic text in html2canvas */
+    font-family: var(--font-ar);
 }
 
 

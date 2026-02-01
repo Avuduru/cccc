@@ -5,10 +5,10 @@ export const state = {
     ratings: {},   // { kufr: 2 }
     badges: {},    // { nomusic: true }
     meta: {
-        title: 'ANIME TITLE',
+        title: 'عنوان العمل',
         year: '2023',
         poster: null,
-        genre: 'Genre',
+        genre: 'نوع العمل',
         synopsis: ''
     }
 };

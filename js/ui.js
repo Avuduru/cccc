@@ -1,6 +1,10 @@
 import { CATEGORIES } from './constants.js';
 import { state, updateState } from './state.js';
 import { handleSearch } from './api.js';
+import { translateGenres, translateText } from './translations.js';
+
+// Cache for prefetched game covers
+const gameCoverCache = {};
 
 // DOM Elements
 const els = {
@@ -247,7 +251,7 @@ export function showSearchResults(data, type) {
     if (type === 'movie' || type === 'tv') results = data.results || [];
     else if (type === 'game') results = data.results || [];
     else if (type === 'anime' || type === 'manga') results = data.data || [];
-    else if (type === 'book') results = data.items || [];
+    else if (type === 'book') results = data.docs || []; // Open Library uses 'docs'
 
     const container = els.searchResults();
     container.innerHTML = '';
@@ -260,15 +264,35 @@ export function showSearchResults(data, type) {
             let poster = 'assets/placeholder.png';
 
             if (item.poster_path) poster = `https://image.tmdb.org/t/p/w92${item.poster_path}`;
-            else if (item.background_image) poster = item.background_image;
+            else if (item.background_image) poster = item.background_image; // RAWG
+            else if (item.thumbnail) poster = item.thumbnail; // FreeToGame (legacy)
             else if (item.images?.jpg?.small_image_url) poster = item.images.jpg.small_image_url;
             else if (item.volumeInfo?.imageLinks?.thumbnail) poster = item.volumeInfo.imageLinks.thumbnail;
+            else if (item.cover_i) poster = `https://covers.openlibrary.org/b/id/${item.cover_i}-S.jpg`; // Open Library covers
 
             const div = document.createElement('div');
             div.className = 'search-result-item';
             div.innerHTML = `<img src="${poster}"> <span>${title}</span>`;
             div.addEventListener('click', () => selectItem(item, type));
             container.appendChild(div);
+
+            // Prefetch game covers in background for instant selection
+            if (type === 'game') {
+                const searchName = item.name || item.title;
+                if (searchName && !gameCoverCache[searchName]) {
+                    fetch(`proxy.php?query=${encodeURIComponent(searchName)}&type=game_cover`)
+                        .then(resp => resp.json())
+                        .then(data => {
+                            if (data.success && data.data && data.data.length > 0) {
+                                const coverUrl = data.data[0].url;
+                                if (coverUrl) {
+                                    gameCoverCache[searchName] = `proxy.php?query=${encodeURIComponent(coverUrl)}&type=image_proxy`;
+                                }
+                            }
+                        })
+                        .catch(err => console.error('Failed to prefetch cover:', err));
+                }
+            }
         });
     }
     container.classList.remove('hidden');
@@ -279,22 +303,133 @@ function selectItem(item, type) {
 
     if (type === 'movie' || type === 'tv') {
         state.meta.poster = `https://image.tmdb.org/t/p/w500${item.poster_path}`;
-        state.meta.synopsis = item.overview;
-        state.meta.genre = item.genre_ids ? 'Movie/TV' : ''; // simplified or use a map
+        state.meta.genre = translateGenres('Movie/TV');
+
+        // Translate synopsis asynchronously
+        if (item.overview) {
+            state.meta.synopsis = 'جاري الترجمة...';
+            updateDisplayedInfo();
+            translateText(item.overview).then(translated => {
+                state.meta.synopsis = translated;
+                updateDisplayedInfo();
+            });
+        }
     } else if (type === 'game') {
-        state.meta.poster = item.background_image;
-        state.meta.synopsis = 'بيانات اللعبة...';
-        state.meta.genre = item.genres ? item.genres.map(g => g.name).join(', ') : 'Game';
+        // RAWG format - fetch full game details for description
+        state.meta.poster = ''; // Start empty, will be filled by SteamGridDB
+        const genreText = item.genres ? item.genres.map(g => g.name).join(', ') : 'Game';
+        state.meta.genre = translateGenres(genreText);
+
+        // Show loading message  
+        state.meta.synopsis = 'جاري التحميل...';
+        updateDisplayedInfo();
+
+        // Fetch full game details asynchronously
+        if (item.slug) {
+            fetch(`proxy.php?query=${item.slug}&type=game_details`)
+                .then(resp => resp.json())
+                .then(data => {
+                    let description = '';
+                    if (data.description_raw) {
+                        description = data.description_raw;
+                    } else if (data.description) {
+                        description = data.description.replace(/<[^>]*>/g, '');
+                    } else {
+                        const platform = item.platforms ? item.platforms.map(p => p.platform.name).slice(0, 3).join(', ') : '';
+                        const released = item.released ? `Released: ${item.released}` : '';
+                        description = [platform, released].filter(Boolean).join(' • ') || 'No description available';
+                    }
+
+                    // Translate description
+                    translateText(description).then(translated => {
+                        state.meta.synopsis = translated;
+                        updateDisplayedInfo();
+                    });
+                    updateDisplayedInfo();
+                })
+                .catch(err => {
+                    console.error('Failed to fetch game details:', err);
+                    const platform = item.platforms ? item.platforms.map(p => p.platform.name).slice(0, 3).join(', ') : '';
+                    const released = item.released ? `Released: ${item.released}` : '';
+                    state.meta.synopsis = [platform, released].filter(Boolean).join(' • ') || 'No description available';
+                    updateDisplayedInfo();
+                });
+        }
+
+        // 2. Fetch vertical cover asynchronously (SteamGridDB)
+        const searchName = item.name || item.title;
+        if (searchName) {
+            // Check cache first for instant display
+            if (gameCoverCache[searchName]) {
+                state.meta.poster = gameCoverCache[searchName];
+                updateDisplayedInfo();
+            } else {
+                // Fetch if not in cache
+                fetch(`proxy.php?query=${encodeURIComponent(searchName)}&type=game_cover`)
+                    .then(resp => resp.json())
+                    .then(data => {
+                        if (data.success && data.data && data.data.length > 0) {
+                            const coverUrl = data.data[0].url;
+                            if (coverUrl) {
+                                // Proxy the image to avoid CORS issues during export
+                                const proxiedUrl = `proxy.php?query=${encodeURIComponent(coverUrl)}&type=image_proxy`;
+                                gameCoverCache[searchName] = proxiedUrl; // Cache it
+                                state.meta.poster = proxiedUrl;
+                                updateDisplayedInfo();
+                            }
+                        }
+                    })
+                    .catch(err => console.error('Failed to fetch steamgriddb cover:', err));
+            }
+        }
+
+        // Update display immediately with what we have
+        updateDisplayedInfo();
+        els.searchResults().classList.add('hidden');
+        els.searchQuery().value = state.meta.title;
+        return; // Early return since we handle display updates in async callback
     } else if (type === 'anime' || type === 'manga') {
         state.meta.poster = item.images.jpg.large_image_url;
-        state.meta.synopsis = item.synopsis;
-        state.meta.genre = item.genres ? item.genres.map(g => g.name).join(', ') : '';
+
+        // Translate genre
+        const genreText = item.genres ? item.genres.map(g => g.name).join(', ') : '';
+        state.meta.genre = translateGenres(genreText);
+
+        // Translate synopsis
+        state.meta.synopsis = 'جاري الترجمة...';
+        updateDisplayedInfo();
+        if (item.synopsis) {
+            translateText(item.synopsis).then(translated => {
+                state.meta.synopsis = translated;
+                updateDisplayedInfo();
+            });
+        }
     } else if (type === 'book') {
-        state.meta.poster = item.volumeInfo?.imageLinks?.thumbnail || '';
-        state.meta.synopsis = item.volumeInfo?.description || '';
-        state.meta.genre = item.volumeInfo?.categories?.join(', ') || '';
+        // Open Library format
+        state.meta.poster = item.cover_i ? `https://covers.openlibrary.org/b/id/${item.cover_i}-L.jpg` : (item.volumeInfo?.imageLinks?.thumbnail || '');
+
+        // Get description
+        const description = item.first_sentence?.join(' ') || item.volumeInfo?.description || 'No description available';
+
+        // Get and translate genre
+        const genreText = item.volumeInfo?.categories?.join(', ') || (item.first_publish_year ? `Published: ${item.first_publish_year}` : 'Book');
+        state.meta.genre = translateGenres(genreText);
+
+        // Translate description
+        state.meta.synopsis = 'جاري الترجمة...';
+        updateDisplayedInfo();
+        translateText(description).then(translated => {
+            state.meta.synopsis = translated;
+            updateDisplayedInfo();
+        });
     }
 
+    updateDisplayedInfo();
+    els.searchResults().classList.add('hidden');
+    els.searchQuery().value = state.meta.title;
+}
+
+function updateDisplayedInfo() {
     els.titleText().innerText = state.meta.title;
     els.genreText().innerText = state.meta.genre || '';
 
@@ -306,7 +441,4 @@ function selectItem(item, type) {
         els.posterImg().style.backgroundImage = `url(${state.meta.poster})`;
         drawBlurredBackground(state.meta.poster);
     }
-
-    els.searchResults().classList.add('hidden');
-    els.searchQuery().value = state.meta.title;
 }
