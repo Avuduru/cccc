@@ -46,7 +46,7 @@ export function renderControls() {
     els.typeButtons().forEach(b => {
         if (b.dataset.value === state.type) {
             const title = document.querySelector('.ratings-title');
-            if (title) title.innerText = `محتوى ال${b.innerText}`;
+            if (title) title.innerHTML = `<span class="label-white">محتوى</span> <span class="label-green">ال${b.innerText}</span>`;
         }
     });
 
@@ -211,6 +211,22 @@ export function updatePreview() {
         }
     }
 
+    const canvasContent = document.querySelector('.canvas-content');
+    if (canvasContent) {
+        if (activeItems.length <= 5) {
+            canvasContent.classList.add('single-row');
+        } else {
+            canvasContent.classList.remove('single-row');
+        }
+    }
+
+    // Conditionally center icons if 4 or less
+    if (activeItems.length <= 4) {
+        stickerContainer.classList.add('few-icons');
+    } else {
+        stickerContainer.classList.remove('few-icons');
+    }
+
     // Render Stickers
     activeItems.forEach(item => {
         const div = document.createElement('div');
@@ -235,7 +251,7 @@ export function drawBlurredBackground(url) {
         canvas.width = canvas.offsetWidth * 1.2; // Slightly larger for better quality
         canvas.height = canvas.offsetHeight * 1.2;
 
-        ctx.filter = 'blur(20px)';
+        ctx.filter = 'blur(15px)';
 
         const scale = Math.max(canvas.width / img.width, canvas.height / img.height);
         const x = (canvas.width / 2) - (img.width / 2) * scale;
@@ -429,6 +445,25 @@ function selectItem(item, type) {
     els.searchQuery().value = state.meta.title;
 }
 
+// Export for use in app.js
+export function adjustTitleSize() {
+    const el = els.titleText();
+    if (!el) return;
+    const len = el.innerText.length;
+
+    // Categories: 
+    // < 20: normal
+    // 20-40: medium
+    // 40-60: long
+    // > 60: xl
+
+    el.removeAttribute('data-length'); // Reset to default (large)
+
+    if (len >= 20 && len < 40) el.dataset.length = 'medium';
+    else if (len >= 40 && len < 60) el.dataset.length = 'long';
+    else if (len >= 60) el.dataset.length = 'xl';
+}
+
 function updateDisplayedInfo() {
     els.titleText().innerText = state.meta.title;
     els.genreText().innerText = state.meta.genre || '';
@@ -441,4 +476,6 @@ function updateDisplayedInfo() {
         els.posterImg().style.backgroundImage = `url(${state.meta.poster})`;
         drawBlurredBackground(state.meta.poster);
     }
+
+    adjustTitleSize();
 }

@@ -2,7 +2,7 @@
     --bg-body: #dedede;
     --bg-card: #dcdcdc;
     /* Main gray background */
-    --accent-green: #2ecc71;
+    --accent-green: #7cb342;
     --accent-red: #c0392b;
     --accent-orange: #e67e22;
     --accent-yellow: #f1c40f;
@@ -82,8 +82,10 @@ body {
 .subtitle-ar {
     font-size: 1.3rem;
     margin: 5px 0 0 0;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
+/* --- 2. CONTROLS (Top Right) --- */
 /* --- 2. CONTROLS (Top Right) --- */
 .top-controls {
     grid-column: 1 / 2;
@@ -101,13 +103,28 @@ body {
 
 .control-row {
     display: flex;
+    justify-content: flex-start;
+    /* RTL: Start is Right side */
     align-items: center;
-    gap: 10px;
+    gap: 15px;
 }
 
-.control-row label {
-    font-size: 1.1rem;
+.control-label {
+    min-width: 80px;
+    color: white;
+    font-family: var(--font-ar);
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: right;
     white-space: nowrap;
+}
+
+.search-wrapper .control-label {
+    color: #333333;
+    /* Dark color for search label only */
+    min-width: auto;
+    /* Fit content */
+    margin-left: 10px;
 }
 
 /* Type Pills */
@@ -121,16 +138,17 @@ body {
     background: #333;
     border: 3px solid #000;
     color: #ccc;
-    padding: 5px 15px;
+    padding: 10px 20px;
     font-family: inherit;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
+    font-weight: bold;
     box-shadow: 3px 3px 0px #000;
 }
 
 .orient-btn.active {
-    background: var(--accent-yellow);
-    color: #000;
+    background: #2980b9;
+    color: #fff;
 }
 
 .type-btn {
@@ -138,10 +156,11 @@ body {
     border: 3px solid #000;
     color: #ccc;
     border-radius: 0;
-    padding: 5px 10px;
+    padding: 10px 15px;
     font-family: inherit;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
+    font-weight: bold;
     transition: 0.2s;
     box-shadow: 3px 3px 0px #000;
 }
@@ -256,8 +275,8 @@ body {
     inset: 0;
     width: 100%;
     height: 100%;
-    opacity: 0.6;
-    /* Reduced image opacity to darken */
+    opacity: 0.9;
+    /* Increased image opacity for better visibility */
     z-index: 1;
 }
 
@@ -265,7 +284,7 @@ body {
     position: absolute;
     inset: 0;
     background: rgba(0, 0, 0, 0.7);
-    /* Increased overlay darkness */
+    /* 70% overlay darkness */
     z-index: 2;
 }
 
@@ -279,11 +298,18 @@ body {
     display: flex;
     gap: 3cqw;
     box-sizing: border-box;
+    pointer-events: none;
+    /* FIX: Allow clicks to pass through to poster */
+}
+
+/* Re-enable clicks for content children */
+.canvas-content>* {
+    pointer-events: auto;
 }
 
 /* HORIZONTAL LAYOUT */
 .horizontal .canvas-content {
-    flex-direction: row-reverse;
+    flex-direction: row;
 }
 
 .horizontal .poster-container {
@@ -303,30 +329,88 @@ body {
     background-position: center;
     background-repeat: no-repeat;
     display: block;
+    position: relative;
+    cursor: default;
+}
+
+.poster-div.manual-mode {
+    cursor: pointer;
+}
+
+.upload-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+}
+
+.poster-div.manual-mode.empty-poster .upload-overlay {
+    opacity: 1;
+}
+
+/* Optional: Show on hover only if empty? Or never show if full?
+   User asked to "remove upload button... to not obstruct".
+   So if it has an image, we don't show overlay even on hover.
+   But we keep cursor pointer.
+*/
+.poster-div.manual-mode:not(.empty-poster):hover .upload-overlay {
+    opacity: 0;
+    /* Ensure it stays hidden */
 }
 
 /* Vertical mode: show full poster without cropping */
 .vertical .poster-div {
     background-size: cover;
     background-position: center top;
+    aspect-ratio: 2/3;
+    width: 100%;
+    height: auto;
 }
 
 .info-content-right {
     flex: 1;
     display: flex;
     flex-direction: column;
-    text-align: left;
+    text-align: right;
     color: white;
     container-type: inline-size;
 }
 
 .header-info {
-    text-align: left;
-    direction: ltr;
-    /* Ensure consistent left alignment for English content */
+    text-align: right;
+    /* Ensure consistent left alignment for English content -> REMOVED */
     margin: 0;
     padding: 0;
 }
+
+/* GRADUAL DARKNESS FROM TOP AND BOTTOM */
+.vertical .poster-container::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom,
+            rgba(0, 0, 0, 0.6) 0%,
+            /* Reduced from 0.85 */
+            rgba(0, 0, 0, 0.2) 15%,
+            rgba(0, 0, 0, 0) 30%,
+            rgba(0, 0, 0, 0) 70%,
+            rgba(0, 0, 0, 0.2) 85%,
+            rgba(0, 0, 0, 0.6) 100%);
+    /* Reduced from 0.85 */
+    z-index: 2;
+    pointer-events: none;
+    /* FIX: Allow clicks to pass through to poster */
+}
+
+/* ... */
 
 .header-info h2 {
     font-family: var(--font-ar);
@@ -337,8 +421,8 @@ body {
     margin: 0;
     padding: 0;
     line-height: 1.1;
-    letter-spacing: 6px;
-    text-transform: uppercase;
+    /* letter-spacing: 6px; REMOVED: Breaks Arabic text in export */
+    /* text-transform: uppercase; REMOVED per user request */
     display: -webkit-box;
     -webkit-line-clamp: 2;
     line-clamp: 2;
@@ -351,7 +435,7 @@ body {
     /* Relative size */
     color: var(--accent-yellow);
     margin-top: 1.5cqw;
-    letter-spacing: 1px;
+    /* letter-spacing: 1px; REMOVED: Breaks Arabic text */
     opacity: 1;
 }
 
@@ -378,7 +462,9 @@ body {
     /* Relative size */
     line-height: 1.5;
     outline: none;
-    unicode-bidi: plaintext;
+    direction: rtl;
+    text-align: right;
+    unicode-bidi: embed;
     padding: 1cqw 0;
     white-space: pre-wrap;
     word-wrap: break-word;
@@ -406,14 +492,39 @@ body {
     flex-direction: column;
     align-items: center;
     padding: 3cqw;
+    justify-content: center;
+    /* Center everything vertically */
+    gap: 2cqw;
+    /* Gap between Header, Poster, Icons */
+    transition: justify-content 0.3s ease;
+}
+
+/* Dynamic Space Optimization (1 Row of Icons) */
+.vertical .canvas-content.single-row {
+    justify-content: space-between;
+    /* Push Title Top, Icons Bottom */
+    padding-top: 4cqw;
+    padding-bottom: 4cqw;
+}
+
+.vertical .canvas-content.single-row .poster-container {
+    max-height: 65%;
+    /* Bigger poster when space permits */
+    width: 65%;
+    /* Slightly wider too */
 }
 
 .vertical .poster-container {
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    border: none;
+    position: relative;
+    width: 55%;
+    height: auto;
+    max-height: 55%;
+    z-index: 5;
+    border: 3px solid rgba(255, 255, 255, 0.3);
     overflow: hidden;
+    margin: 0 auto;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    order: 2;
 }
 
 .vertical #poster-img {
@@ -422,60 +533,61 @@ body {
     filter: none;
 }
 
-/* GRADUAL DARKNESS FROM TOP AND BOTTOM */
-.vertical .poster-container::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to bottom,
-            rgba(0, 0, 0, 0.6) 0%,
-            /* Reduced from 0.85 */
-            rgba(0, 0, 0, 0.2) 15%,
-            rgba(0, 0, 0, 0) 30%,
-            rgba(0, 0, 0, 0) 70%,
-            rgba(0, 0, 0, 0.2) 85%,
-            rgba(0, 0, 0, 0.6) 100%);
-    /* Reduced from 0.85 */
-    z-index: 2;
-}
+/* Removed gradient overlay - not needed with centered poster design */
 
-/* TOP BLUR EFFECT */
+/* FULL BLUR BACKGROUND */
 .vertical .canvas-bg {
-    height: 40%;
-    /* Only top portion is blurred */
+    height: 100%;
+    width: 100%;
     z-index: 1;
-    mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+    pointer-events: none;
 }
 
 .vertical .info-content-right {
-    height: 100%;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    align-items: center;
+    display: contents;
+    /* Allows children to be ordered with siblings */
+    pointer-events: none;
+}
+
+.vertical .info-content-right>* {
+    pointer-events: auto;
 }
 
 /* Show title at top in vertical mode */
 .vertical .header-info {
     display: flex !important;
     flex-direction: column;
-    position: absolute;
-    top: 5cqh;
-    left: 4cqw;
-    right: 4cqw;
+    position: relative;
+    width: 100%;
     text-align: center;
     z-index: 10;
+    order: 1;
+    margin-bottom: 0;
+    /* Let main gap handle spacing */
 }
 
 .vertical .header-info h2 {
     -webkit-line-clamp: unset !important;
     line-clamp: unset !important;
     overflow: visible !important;
-    font-size: var(--canvas-v-title-size);
+    font-size: calc(var(--canvas-v-title-size) * 1.3);
+    /* Made bigger as requested */
     /* Consistently large */
     text-shadow: 0.5cqw 0.5cqw 2cqw rgba(0, 0, 0, 1);
+    transition: font-size 0.2s ease;
+}
+
+/* Dynamic resizing for long titles */
+.vertical .header-info h2[data-length="medium"] {
+    font-size: calc(var(--canvas-v-title-size) * 1.1);
+}
+
+.vertical .header-info h2[data-length="long"] {
+    font-size: calc(var(--canvas-v-title-size) * 0.9);
+}
+
+.vertical .header-info h2[data-length="xl"] {
+    font-size: calc(var(--canvas-v-title-size) * 0.7);
 }
 
 .vertical .genre-label {
@@ -500,17 +612,37 @@ body {
 .horizontal .stickers-grid-canvas {
     grid-template-columns: repeat(5, 1fr);
     width: fit-content;
-    align-self: flex-end;
+    align-self: flex-start;
 }
 
 .vertical .stickers-grid-canvas {
     grid-template-columns: repeat(5, 1fr);
     width: 100%;
-    padding: 2cqw;
-    /* Consistent 10px padding */
+    max-width: 1000px;
+    padding: 1cqw;
     background: transparent;
-    /* No background for cleaner vertical look */
-    margin-top: auto;
+    margin-top: 0;
+    order: 3;
+}
+
+/* Logic for <= 4 icons: Center and make bigger */
+.vertical .stickers-grid-canvas.few-icons {
+    display: flex;
+    justify-content: center;
+    gap: 2cqw;
+}
+
+.vertical .stickers-grid-canvas.few-icons .sticker-item {
+    width: 18%;
+    /* Slightly bigger than 1/5 (20%) but with flexibility */
+    max-width: 200px;
+    /* Limit max size */
+    flex-shrink: 0;
+}
+
+.vertical .stickers-grid-canvas.few-icons .sticker-item img {
+    width: 100%;
+    height: auto;
 }
 
 .sticker-item {
@@ -539,6 +671,8 @@ body {
     /* Increased fixed spacing */
     /* letter-spacing: 1px; Removed - breaks Arabic text in html2canvas */
     font-family: var(--font-ar);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    /* Added slight drop shadow */
 }
 
 
@@ -566,6 +700,15 @@ body {
     font-family: var(--font-ar);
     /* Pixel shadow attempt */
     text-shadow: 4px 4px 0px #003300;
+}
+
+.label-white {
+    color: white;
+}
+
+.label-green {
+    color: #7cb342;
+    /* Requested green */
 }
 
 .ratings-grid {
@@ -735,14 +878,27 @@ body {
 
 .warning-text {
     margin-top: auto;
-    font-size: 0.8rem;
-    color: var(--accent-yellow);
+    font-size: 1.1rem;
+    color: #fff;
+    /* White body text */
     text-align: right;
     padding-top: 10px;
+    font-family: var(--font-ar);
+}
+
+.warn-prefix {
+    color: var(--accent-yellow);
+    font-weight: bold;
 }
 
 .warning-text a {
-    color: inherit;
+    color: #3498db;
+    /* Blue link */
+    text-decoration: none;
+}
+
+.warning-text a:hover {
+    text-decoration: underline;
 }
 
 /* --- 5. FOOTER (Export) --- */
