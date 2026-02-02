@@ -42,14 +42,16 @@ export function renderControls() {
     list.innerHTML = '';
     toggles.innerHTML = '';
 
-    const isGame = state.type === 'game';
-    els.typeButtons().forEach(b => {
-        if (b.dataset.value === state.type) {
+    // Update Title based on active dropdown item
+    const dropdownItems = document.querySelectorAll('.dropdown-item');
+    dropdownItems.forEach(item => {
+        if (item.dataset.value === state.type) {
             const title = document.querySelector('.ratings-title');
-            if (title) title.innerHTML = `<span class="label-white">محتوى</span> <span class="label-green">ال${b.innerText}</span>`;
+            if (title) title.innerHTML = `<span class="label-white">محتوى</span> <span class="label-green">ال${item.textContent}</span>`;
         }
     });
 
+    const isGame = state.type === 'game';
     // 1. Render Rating Bars (Mawjoodat)
     CATEGORIES.Mawjoodat.forEach(cat => {
         if (cat.type === 'game_only' && !isGame) return;
