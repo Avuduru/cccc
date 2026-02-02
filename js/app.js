@@ -39,12 +39,80 @@ function setupEventListeners() {
     };
 
     // Type Selectors
-    el.typeButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            el.typeButtons.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+    // Custom Dropdown Logic
+    const dropdown = document.getElementById('type-dropdown');
+    const currentTypeBtn = document.getElementById('current-type');
+    const dropdownMenu = dropdown.querySelector('.dropdown-menu');
+    const dropdownItems = dropdown.querySelectorAll('.dropdown-item');
 
-            state.type = btn.dataset.value;
+    // Toggle Menu
+    currentTypeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdownMenu.classList.toggle('show');
+    });
+
+    // Close on click outside
+    document.addEventListener('click', (e) => {
+        if (!dropdown.contains(e.target)) {
+            dropdownMenu.classList.remove('show');
+        }
+    });
+
+    // Handle Selection
+    dropdownItems.forEach(item => {
+        item.addEventListener('click', () => {
+            // Update Active State
+            dropdownItems.forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+
+            // Update Button Text
+            currentTypeBtn.textContent = item.textContent;
+
+            // Close Menu
+            dropdownMenu.classList.remove('show');
+
+            // Update State
+            state.type = item.dataset.value;
+
+            // Manual Mode Logic (Moved from old button handler)
+            const uploadHint = document.getElementById('upload-hint');
+            const titleText = document.getElementById('title-text');
+            const genreText = document.getElementById('genre-text');
+            const posterImg = document.getElementById('poster-img'); // Ensure this is defined
+
+            if (state.type === 'manual') {
+                // Clear Meta for manual entry
+                state.meta.title = 'اكتب العنوان هنا';
+                state.meta.genre = 'اكتب النوع';
+                state.meta.synopsis = 'اكتب النبذة هنا...';
+                state.meta.poster = ''; // User needs to upload
+                state.meta.year = '';
+
+                // UI Updates
+                const searchResults = document.getElementById('search-results');
+                const searchQuery = document.getElementById('search-query');
+                searchResults.classList.add('hidden');
+                searchQuery.value = '';
+
+                posterImg.classList.add('manual-mode');
+                // Add empty-poster class initially since no image is uploaded
+                posterImg.classList.add('empty-poster');
+
+                uploadHint.classList.remove('hidden');
+
+                // Enable editing
+                titleText.contentEditable = "true";
+                genreText.contentEditable = "true";
+            } else {
+                posterImg.classList.remove('manual-mode');
+                posterImg.classList.remove('empty-poster'); // Clear empty state
+                uploadHint.classList.add('hidden');
+
+                // Disable editing
+                titleText.contentEditable = "false";
+                genreText.contentEditable = "false";
+            }
+
             renderControls();
             updatePreview();
         });
@@ -162,54 +230,6 @@ function setupEventListeners() {
         }
     });
 
-    // Modify Type Button Listener to handle 'manual' specific logic
-    el.typeButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            el.typeButtons.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-
-            state.type = btn.dataset.value;
-            renderControls();
-
-            // Manual Mode Logic
-            const uploadHint = document.getElementById('upload-hint');
-            const titleText = document.getElementById('title-text');
-            const genreText = document.getElementById('genre-text');
-
-            if (state.type === 'manual') {
-                // Clear Meta for manual entry
-                state.meta.title = 'اكتب العنوان هنا';
-                state.meta.genre = 'اكتب النوع';
-                state.meta.synopsis = 'اكتب النبذة هنا...';
-                state.meta.poster = ''; // User needs to upload
-                state.meta.year = '';
-
-                // UI Updates
-                el.searchResults.classList.add('hidden');
-                el.searchQuery.value = '';
-
-                posterImg.classList.add('manual-mode');
-                // Add empty-poster class initially since no image is uploaded
-                posterImg.classList.add('empty-poster');
-
-                uploadHint.classList.remove('hidden');
-
-                // Enable editing
-                titleText.contentEditable = "true";
-                genreText.contentEditable = "true";
-            } else {
-                posterImg.classList.remove('manual-mode');
-                posterImg.classList.remove('empty-poster'); // Clear empty state
-                uploadHint.classList.add('hidden');
-
-                // Disable editing
-                titleText.contentEditable = "false";
-                genreText.contentEditable = "false";
-            }
-
-            updatePreview();
-        });
-    });
 }
 
 // Start

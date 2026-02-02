@@ -33,14 +33,17 @@
             </div>
             <div class="control-row">
                 <span class="control-label">نوع المحتوى</span>
-                <div class="type-selector">
-                    <button class="type-btn active" data-value="anime">أنمي</button>
-                    <button class="type-btn" data-value="manga">مانجا</button>
-                    <button class="type-btn" data-value="movie">فيلم</button>
-                    <button class="type-btn" data-value="tv">مسلسل</button>
-                    <button class="type-btn" data-value="game">لعبة</button>
-                    <button class="type-btn" data-value="book">كتاب</button>
-                    <button class="type-btn" data-value="manual" id="manual-btn">يدوي</button>
+                <div class="custom-dropdown" id="type-dropdown">
+                    <button class="dropdown-toggle" id="current-type">أنمي</button>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-item active" data-value="anime">أنمي</div>
+                        <div class="dropdown-item" data-value="manga">مانجا</div>
+                        <div class="dropdown-item" data-value="movie">فيلم</div>
+                        <div class="dropdown-item" data-value="tv">مسلسل</div>
+                        <div class="dropdown-item" data-value="game">لعبة</div>
+                        <div class="dropdown-item" data-value="book">كتاب</div>
+                        <div class="dropdown-item" data-value="manual">يدوي</div>
+                    </div>
                 </div>
             </div>
             <div class="control-row">
@@ -48,6 +51,24 @@
                     <span class="control-label">ابحث</span>
                     <input type="text" id="search-query" placeholder="...">
                     <div id="search-results" class="hidden"></div>
+                </div>
+            </div>
+
+            <!-- Ratings Section (Merged) -->
+            <div class="ratings-section">
+                <h2 class="ratings-title">محتوى الأنمي</h2>
+
+                <div id="ratings-list" class="ratings-grid">
+                    <!-- Rating Bars injected by JS -->
+                </div>
+
+                <div id="toggles-list" class="toggles-grid">
+                    <!-- Toggles injected by JS -->
+                </div>
+
+                <div class="warning-text">
+                    <span class="warn-prefix">تنبيه:</span> قبل تصنيف أي محتوى، يرجى قراءة <a href="#"
+                        id="open-info-modal">شرح التصانيف والدرجات</a>.
                 </div>
             </div>
         </div>
@@ -60,25 +81,6 @@
                 <p class="subtitle-ar">التصنيف المحافظ للمحتوى الإبداعي</p>
             </div>
         </header>
-
-        <!-- ROW 2 -->
-        <!-- Ratings Panel (Right - 33%) -->
-        <section class="ratings-panel">
-            <h2 class="ratings-title">تقييم محتوى الأنمي</h2>
-
-            <div id="ratings-list" class="ratings-grid">
-                <!-- Rating Bars injected by JS -->
-            </div>
-
-            <div id="toggles-list" class="toggles-grid">
-                <!-- Toggles injected by JS -->
-            </div>
-
-            <div class="warning-text">
-                <span class="warn-prefix">تنبيه:</span> قبل تصنيف أي محتوى، يرجى قراءة <a href="#"
-                    id="open-info-modal">شرح التصانيف والدرجات</a>.
-            </div>
-        </section>
 
         <!-- Info Panel / Canvas (Left - 66%) -->
         <section class="info-panel horizontal" id="preview-canvas">
@@ -116,7 +118,7 @@
 
         <!-- FOOTER / EXPORT -->
         <div class="card-footer">
-            <button id="export-btn">EXPORT</button>
+            <button id="export-btn">تصديـر</button>
         </div>
 
     </main>
