@@ -563,6 +563,30 @@ function updateDisplayedInfo() {
     if (state.meta.poster) {
         els.posterImg().style.backgroundImage = `url(${state.meta.poster})`;
         drawBlurredBackground(state.meta.poster);
+
+
+
+    }
+
+    // ROBUST Aspect Ratio Fix (Overrides previous logic)
+    if (state.meta.poster) {
+        const robustImg = new Image();
+        robustImg.src = state.meta.poster;
+        const applyRatio = () => {
+            if (!robustImg.width || !robustImg.height) return;
+            const ratio = `${robustImg.width} / ${robustImg.height}`;
+            // Force aspect-ratio with !important
+            const el = els.posterImg();
+            if (el) el.style.setProperty('aspect-ratio', ratio, 'important');
+
+            const container = el ? el.parentElement : null;
+            if (container) {
+                container.style.setProperty('aspect-ratio', ratio, 'important');
+                container.style.setProperty('height', 'auto', 'important');
+            }
+        };
+        if (robustImg.complete) applyRatio();
+        else robustImg.onload = applyRatio;
     }
 
     adjustTitleSize();
