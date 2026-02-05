@@ -1,4 +1,4 @@
-:root {
+﻿:root {
     --bg-body: #dedede;
     --bg-card: #5c5c5c;
     /* Main gray background */
@@ -100,7 +100,7 @@ body {
     /* Align content to top */
     gap: 15px;
     border: 6px solid #000;
-    overflow-y: auto;
+    overflow: visible;
     /* Allow scrolling if content is too tall */
 }
 
@@ -110,6 +110,8 @@ body {
     /* RTL: Start is Right side */
     align-items: center;
     gap: 15px;
+    flex-wrap: wrap;
+    /* Fix overlap on smaller screens */
 }
 
 .control-label {
@@ -260,16 +262,17 @@ body {
 
 #search-results {
     position: absolute;
-    top: 110%;
+    top: 100%;
     left: 0;
     right: 0;
     background: #222;
     border: 1px solid #444;
     border-radius: 10px;
     color: white;
-    z-index: 100;
-    max-height: 200px;
+    z-index: 99999;
+    max-height: 250px;
     overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .search-result-item {
@@ -279,6 +282,10 @@ body {
     align-items: center;
     gap: 10px;
     cursor: pointer;
+    background-color: #222;
+    overflow: hidden;
+    position: relative;
+    z-index: 100000;
 }
 
 .search-result-item:hover {
@@ -536,6 +543,23 @@ body {
 
 #synopsis-text:focus {
     outline: none;
+}
+
+/* Dynamic Synopsis Scaling - Based on Icon Count */
+#synopsis-text.scale-medium {
+    font-size: calc(var(--canvas-synopsis-size) * 0.85) !important;
+}
+
+#synopsis-text.scale-heavy {
+    font-size: calc(var(--canvas-synopsis-size) * 0.75) !important;
+}
+
+#synopsis-text.scale-extreme {
+    font-size: calc(var(--canvas-synopsis-size) * 0.65) !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 3 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
 }
 
 /* Placeholder for contenteditable div */
@@ -1138,7 +1162,7 @@ body {
 
 .modal-body {
     padding: 25px;
-    overflow-y: auto;
+    overflow: visible;
     flex: 1;
 }
 
@@ -1275,4 +1299,285 @@ body {
     .levels-info {
         flex-direction: column;
     }
+
+    @media (max-width: 900px) {
+        body {
+            padding: 10px;
+            align-items: flex-start;
+            height: auto;
+        }
+
+        .card-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 100%;
+            gap: 15px;
+            padding: 15px;
+            border-width: 4px;
+        }
+
+        /* 1. Header */
+        .card-header {
+            order: 1;
+            grid-column: auto;
+            grid-row: auto;
+            padding: 15px;
+            border-width: 4px;
+        }
+
+        .logo {
+            font-size: 3rem;
+        }
+
+        .subtitle-ar {
+            font-size: 1rem;
+        }
+
+        /* 2. Controls & Ratings */
+        .top-controls {
+            order: 2;
+            grid-column: auto;
+            grid-row: auto;
+            max-height: none;
+            overflow: visible;
+            padding: 15px;
+            border-width: 4px;
+            flex: 1 0 auto;
+        }
+
+        /* Stack controls */
+        .control-row {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .control-label {
+            text-align: right;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .orientation-selector,
+        .custom-dropdown,
+        .search-wrapper {
+            width: 100%;
+            display: flex;
+            box-sizing: border-box;
+        }
+
+        .orient-btn {
+            flex: 1;
+        }
+
+        .dropdown-toggle {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        /* Search Fixes */
+        .search-wrapper {
+            width: 100%;
+        }
+
+        /* Ratings */
+        .ratings-section {
+            margin-top: 20px;
+        }
+
+        .ratings-title {
+            font-size: 2rem;
+        }
+
+        .rating-row {
+            gap: 5px;
+        }
+
+        .rating-row-label {
+            font-size: 0.9rem;
+            width: 50px;
+        }
+
+        .rating-bar-container {
+            height: 25px;
+        }
+
+        /* 3. Preview Canvas */
+        .info-panel {
+            order: 3;
+            grid-column: auto;
+            grid-row: auto;
+            width: 100%;
+            border-width: 4px;
+            min-height: 300px;
+        }
+
+        /* Fix Vertical Panel fixed height */
+        .info-panel.vertical {
+            height: auto;
+            aspect-ratio: 2/3;
+            max-height: none;
+            margin: 0;
+        }
+
+        /* 4. Footer */
+        .card-footer {
+            order: 4;
+            grid-column: auto;
+            grid-row: auto;
+            margin-top: 10px;
+            padding-bottom: 20px;
+        }
+
+        #export-btn {
+            width: 100%;
+            font-size: 1.2rem;
+            padding: 10px;
+        }
+
+        /* Modal adjustments */
+        .modal-content {
+            max-width: 95vw;
+            max-height: 90vh;
+            border-width: 3px;
+            margin: 10px;
+        }
+    }
+}
+
+/* Tablet/Constrained Desktop Tweaks */
+@media (max-width: 1200px) {
+    .rating-row {
+        flex-direction: column;
+        align-items: stretch;
+        margin-bottom: 5px;
+    }
+
+    .rating-row-label {
+        width: 100%;
+        text-align: right;
+        font-size: 1rem;
+        margin-bottom: 2px;
+    }
+
+    .rating-bar-container {
+        width: 100%;
+        height: 30px;
+    }
+}
+
+/* Export Mode Overrides */
+.export-mode {
+    --canvas-title-size: 106px;
+    --canvas-genre-size: 54px;
+    --canvas-synopsis-size: 40px;
+    --canvas-v-title-size: 192px;
+    width: 1920px !important;
+    min-width: 1920px !important;
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    aspect-ratio: 16 / 9 !important;
+}
+
+.export-mode #synopsis-text {
+    line-height: 1.3 !important;
+}
+
+.export-mode.vertical {
+    width: 1200px !important;
+    min-width: 1200px !important;
+    max-width: none !important;
+    height: 1800px !important;
+    aspect-ratio: 2 / 3 !important;
+}
+
+/* FIX SEARCH OVERFLOW */
+#search-results {
+    position: absolute !important;
+    top: 100% !important;
+    left: auto !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
+    max-height: 250px !important;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5) !important;
+    border-radius: 0 0 10px 10px !important;
+    z-index: 99999 !important;
+    background-color: #222 !important;
+}
+
+.search-result-item {
+    overflow: hidden !important;
+}
+
+.search-result-item span {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    min-width: 0 !important;
+    flex: 1 !important;
+}
+
+/* WATERMARK STYLING - REFINED & LIGATURE FRIENDLY */
+#watermark-display {
+    margin-top: auto;
+    font-family: var(--font-ar);
+    /* Use Arabic Pixel Font */
+    color: #ffffff;
+    border: 3px dashed #ffffff;
+    padding: 5px 25px;
+    font-size: 2cqw;
+    text-shadow: 0 0 5px #ffffff;
+    box-shadow: 0 0 8px #ffffff;
+    align-self: center;
+    direction: rtl;
+    opacity: 1;
+    background: transparent;
+    font-weight: bold;
+    letter-spacing: normal !important;
+    /* CRITICAL: Fixed disconnected Arabic letters */
+}
+
+.vertical #watermark-display {
+    font-size: 3cqw;
+    order: 10;
+    margin-top: 4cqw;
+    /* Lowered from 2cqw */
+}
+
+#watermark-display.hidden {
+    display: none !important;
+}
+
+/* EXPORT MODE - MATCH SCREEN STYLE SAFER */
+.export-mode #watermark-display {
+    box-shadow: none !important;
+    /* Disabled to fix white block */
+    text-shadow: 0 0 8px #ffffff !important;
+    background-color: rgba(0, 0, 0, 0.6) !important;
+    border: 4px dashed #ffffff !important;
+    opacity: 1 !important;
+    padding: 5px 20px !important;
+    /* Tiny */
+    font-size: 18px !important;
+    /* Tiny */
+    letter-spacing: normal !important;
+    margin-bottom: -30px !important;
+    /* 30px gap */
+    margin-top: 10px !important;
+}
+
+/* FIX: Restored padding for poster */
+
+.export-mode.vertical #watermark-display {
+    font-size: 24px !important;
+    padding: 8px 25px !important;
+    margin-bottom: -30px !important;
 }

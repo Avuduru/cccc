@@ -87,20 +87,68 @@ export function renderControls() {
 }
 
 function attachControlListeners() {
-    // Rating Bars Interaction
+    // Rating Bars Interaction (Draggable)
     document.querySelectorAll('.rating-bar-container').forEach(container => {
         const id = container.dataset.id;
         const knob = container.querySelector('.rating-knob');
-        const segments = container.querySelectorAll('.bar-segment');
 
-        segments.forEach(seg => {
-            seg.addEventListener('click', (e) => {
-                const val = parseInt(e.target.dataset.val);
-                state.ratings[id] = val;
+        const handleMove = (clientX) => {
+            const rect = container.getBoundingClientRect();
+            let x = clientX - rect.left;
+            // Clamp
+            if (x < 0) x = 0;
+            if (x > rect.width) x = rect.width;
 
-                updateRatingUI(container, knob, val);
+            // RTL Calculation: 0 is Right, 100% is Left
+            // percentFromLeft = x / width
+            // percentFromRight = 1 - (x / width)
+            const percentFromRight = 1 - (x / rect.width);
+
+            let level = 1; // Default Red (Left)
+            if (percentFromRight < 0.25) level = 0; // Right (Gray)
+            else if (percentFromRight < 0.50) level = 3; // Mid-Right (Yellow)
+            else if (percentFromRight < 0.75) level = 2; // Mid-Left (Orange)
+
+            // Only update if changed
+            if (parseInt(state.ratings[id]) !== level) {
+                state.ratings[id] = level;
+                updateRatingUI(container, knob, level);
                 updatePreview();
-            });
+            }
+        };
+
+        // Mouse Events
+        container.addEventListener('mousedown', (e) => {
+            e.preventDefault(); // Prevent text selection
+            handleMove(e.clientX); // Jump to click position immediately
+
+            const onMouseMove = (moveEvent) => handleMove(moveEvent.clientX);
+            const onMouseUp = () => {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            };
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        });
+
+        // Touch Events
+        container.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevent scrolling while dragging slider
+            const touch = e.touches[0];
+            handleMove(touch.clientX);
+
+            const onTouchMove = (moveEvent) => {
+                moveEvent.preventDefault();
+                handleMove(moveEvent.touches[0].clientX);
+            };
+            const onTouchEnd = () => {
+                document.removeEventListener('touchmove', onTouchMove);
+                document.removeEventListener('touchend', onTouchEnd);
+            };
+
+            document.addEventListener('touchmove', onTouchMove, { passive: false });
+            document.addEventListener('touchend', onTouchEnd);
         });
     });
 
@@ -117,6 +165,23 @@ function attachControlListeners() {
             updatePreview();
         });
     });
+
+    // --- Watermark Logic ---
+    const reviewerInput = document.getElementById('reviewer-name-input');
+    const watermarkDisplay = document.getElementById('watermark-display');
+
+    if (reviewerInput && watermarkDisplay) {
+        const nameSpan = watermarkDisplay.querySelector('.name-span');
+        reviewerInput.addEventListener('input', (e) => {
+            const text = e.target.value.trim();
+            if (text) {
+                nameSpan.innerText = text;
+                watermarkDisplay.classList.remove('hidden');
+            } else {
+                watermarkDisplay.classList.add('hidden');
+            }
+        });
+    }
 }
 
 function setupModal() {
@@ -236,6 +301,24 @@ export function updatePreview() {
         div.innerHTML = `<img src="assets/icons/${item.icon}.png" alt="${item.label}" onerror="if(this.dataset.fallback) this.src='assets/icons/'+this.dataset.fallback+'.png'" data-fallback="${item.fallback || ''}">`;
         stickerContainer.appendChild(div);
     });
+
+    // Dynamic Synopsis Scaling based on icon count
+    const synopsisEl = document.getElementById('synopsis-text');
+    if (synopsisEl) {
+        const activeIconCount = activeItems.length;
+
+        // Remove all scaling classes first
+        synopsisEl.classList.remove('scale-medium', 'scale-heavy', 'scale-extreme');
+
+        // Apply appropriate scaling class
+        if (activeIconCount >= 10) {
+            synopsisEl.classList.add('scale-extreme');
+        } else if (activeIconCount >= 8) {
+            synopsisEl.classList.add('scale-heavy');
+        } else if (activeIconCount >= 6) {
+            synopsisEl.classList.add('scale-medium');
+        }
+    }
 
     if (state.meta.poster) {
         drawBlurredBackground(state.meta.poster);

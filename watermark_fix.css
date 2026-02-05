@@ -1,0 +1,16 @@
+/* FIX WATERMARK EXPORT BLOCK */
+.export-mode #watermark-display {
+    box-shadow: none !important;
+    /* Remove glow affecting export */
+    text-shadow: none !important;
+    /* Clean text */
+    background: #000 !important;
+    /* Force Black background */
+    border: 3px solid #7cb342 !important;
+    /* Solid border */
+    opacity: 1 !important;
+    padding: 10px 40px !important;
+    width: fit-content !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
