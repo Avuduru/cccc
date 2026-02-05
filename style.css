@@ -251,7 +251,8 @@ body {
     box-shadow: 3px 3px 0px #000;
 }
 
-#search-query {
+#search-query,
+#reviewer-name-input {
     width: 100%;
     background: transparent;
     border: none;
@@ -383,7 +384,8 @@ body {
     aspect-ratio: 1 / 1.414;
     /* A4 Ratio */
     flex-shrink: 0;
-    border: 4px solid #000;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    /* Match vertical style */
     box-shadow: 10px 10px 0px rgba(0, 0, 0, 0.5);
     overflow: hidden;
 }
@@ -1473,14 +1475,30 @@ body {
     --canvas-title-size: 106px;
     --canvas-genre-size: 54px;
     --canvas-synopsis-size: 40px;
-    --canvas-v-title-size: 192px;
+    --canvas-v-title-size: 114px;
+    /* Reduced to 114px */
     width: 1920px !important;
     min-width: 1920px !important;
     max-width: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    border: none !important;
-    aspect-ratio: 16 / 9 !important;
+}
+
+/* Fix Vertical Export Poster: "Contain" to always show full image without cropping */
+.export-mode.vertical .poster-div {
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    background-position: center bottom !important;
+    background-position: center bottom !important;
+}
+
+.export-mode.vertical .poster-container {
+    max-height: none !important;
+    /* Allow it to grow/shrink freely */
+    width: auto !important;
+    /* Let aspect ratio drive width */
+    flex: 1 1 auto !important;
+    /* Flexibly fill available vertical space */
+    aspect-ratio: var(--poster-aspect-ratio, 2/3) !important;
+    /* Adapt to image shape */
 }
 
 .export-mode #synopsis-text {
@@ -1534,7 +1552,7 @@ body {
     border: 3px dashed #ffffff;
     padding: 5px 25px;
     font-size: 2cqw;
-    text-shadow: 0 0 5px #ffffff;
+    text-shadow: none;
     box-shadow: 0 0 8px #ffffff;
     align-self: center;
     direction: rtl;
@@ -1556,11 +1574,18 @@ body {
     display: none !important;
 }
 
+/* HORIZONTAL VIEW - MATCH EXPORT POSITION */
+.horizontal #watermark-display {
+    padding: 5px 20px !important;
+    margin-top: 10px !important;
+    /* Match export top gap */
+}
+
 /* EXPORT MODE - MATCH SCREEN STYLE SAFER */
 .export-mode #watermark-display {
     box-shadow: none !important;
     /* Disabled to fix white block */
-    text-shadow: 0 0 8px #ffffff !important;
+    text-shadow: none !important;
     background-color: rgba(0, 0, 0, 0.6) !important;
     border: 4px dashed #ffffff !important;
     opacity: 1 !important;
@@ -1580,4 +1605,27 @@ body {
     font-size: 24px !important;
     padding: 8px 25px !important;
     margin-bottom: -30px !important;
+}
+
+/* RESPONSIVE HIGH-QUALITY VERTICAL PREVIEW */
+/* Trigger "Export Style" layout when screen is vertical (Mobile/Portrait) */
+@media (orientation: portrait),
+(max-width: 600px) {
+
+    /* Unlock the container to fill space dynamically */
+    .vertical .poster-container {
+        max-height: none !important;
+        width: auto !important;
+        flex: 1 1 auto;
+        /* Use the JS-calculated aspect ratio, fallback to 2/3 */
+        aspect-ratio: var(--poster-aspect-ratio, 2/3);
+        min-height: 0;
+    }
+
+    /* Force full image visibility (Contain) instead of cropping (Cover) */
+    .vertical .poster-div {
+        background-size: contain !important;
+        background-repeat: no-repeat !important;
+        background-position: center bottom !important;
+    }
 }
