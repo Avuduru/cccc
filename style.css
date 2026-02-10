@@ -507,6 +507,13 @@ body {
     opacity: 1;
 }
 
+/* HORIZONTAL TWEAKS: Smaller Genre, closer to title */
+.horizontal .genre-label {
+    font-size: calc(var(--canvas-genre-size) * 0.7) !important;
+    margin-top: 5px !important;
+    /* Tighter spacing */
+}
+
 .synopsis-wrapper {
     margin-top: 2cqw;
     flex: 1;
@@ -515,8 +522,14 @@ body {
 }
 
 .horizontal .synopsis-wrapper {
-    /* Height = Font Size (var) * Line Height (1.5) * 4 Lines */
-    max-height: calc(var(--canvas-synopsis-size) * 1.5 * 4);
+    /* Allow full height based on flex availability */
+    max-height: none !important;
+    overflow: hidden;
+}
+
+.horizontal #synopsis-text {
+    -webkit-line-clamp: 8 !important;
+    max-height: none !important;
 }
 
 #synopsis-text {

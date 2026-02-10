@@ -302,28 +302,44 @@ export function updatePreview() {
         stickerContainer.appendChild(div);
     });
 
-    // Dynamic Synopsis Scaling based on icon count
-    const synopsisEl = document.getElementById('synopsis-text');
-    if (synopsisEl) {
-        const activeIconCount = activeItems.length;
+    // DYNAMIC SYNOPSIS SCALING (Overflow/Fit-to-Box)
+    // We defer this slightly to allow DOM reflow
+    requestAnimationFrame(() => {
+        fitSynopsisToContainer();
+    });
+}
 
-        // Remove all scaling classes first
-        synopsisEl.classList.remove('scale-medium', 'scale-heavy', 'scale-extreme');
+// New Helper: Shrink text until it fits container
+function fitSynopsisToContainer() {
+    const el = els.synopsisText();
+    const wrapper = el ? el.parentElement : null;
+    if (!el || !wrapper) return;
 
-        // Apply appropriate scaling class
-        if (activeIconCount >= 10) {
-            synopsisEl.classList.add('scale-extreme');
-        } else if (activeIconCount >= 8) {
-            synopsisEl.classList.add('scale-heavy');
-        } else if (activeIconCount >= 6) {
-            synopsisEl.classList.add('scale-medium');
+    // 1. Reset to base size
+    el.classList.remove('scale-medium', 'scale-heavy', 'scale-extreme');
+
+    // 2. Check Overflow & Apply Scaling iteratively
+    // We check if content height > container height
+
+    // Check 1: Base size overflow? -> Try Medium
+    if (el.scrollHeight > wrapper.clientHeight) {
+        el.classList.add('scale-medium');
+
+        // Check 2: Medium size overflow? -> Try Heavy
+        if (el.scrollHeight > wrapper.clientHeight) {
+            el.classList.remove('scale-medium');
+            el.classList.add('scale-heavy');
+
+            // Check 3: Heavy size overflow? -> Try Extreme
+            if (el.scrollHeight > wrapper.clientHeight) {
+                el.classList.remove('scale-heavy');
+                el.classList.add('scale-extreme');
+            }
         }
     }
-
-    if (state.meta.poster) {
-        drawBlurredBackground(state.meta.poster);
-    }
 }
+
+
 
 export function drawBlurredBackground(url) {
     const canvas = els.posterBg();
@@ -557,8 +573,12 @@ function updateDisplayedInfo() {
     els.genreText().innerText = state.meta.genre || '';
 
     // Clip synopsis to 4 lines
-    const clippedSynopsis = (state.meta.synopsis || '').split('\n').slice(0, 4).join('\n');
+    // Clip synopsis to 8 lines (allow more for horizontal/flex)
+    const clippedSynopsis = (state.meta.synopsis || '').split('\n').slice(0, 8).join('\n');
     els.synopsisText().innerText = clippedSynopsis;
+
+    // Trigger Fit-to-Box Scaling
+    requestAnimationFrame(() => fitSynopsisToContainer());
 
     if (state.meta.poster) {
         els.posterImg().style.backgroundImage = `url(${state.meta.poster})`;
