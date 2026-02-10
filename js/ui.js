@@ -2,6 +2,7 @@ import { CATEGORIES } from './constants.js';
 import { state, updateState } from './state.js';
 import { handleSearch } from './api.js';
 import { translateGenres, translateText } from './translations.js';
+import { debounce } from './utils.js';
 
 // Cache for prefetched game covers
 const gameCoverCache = {};
@@ -30,6 +31,16 @@ export function initUI() {
     renderControls();
     updatePreview();
     setupModal();
+
+    // Auto-scale synopsis on input (debounced)
+    const synText = els.synopsisText();
+    if (synText) {
+        synText.addEventListener('input', debounce(() => {
+            if (state.synopsisSize === 'auto') {
+                fitSynopsisToContainer();
+            }
+        }, 300));
+    }
 }
 
 export function renderControls() {
@@ -37,6 +48,13 @@ export function renderControls() {
     const toggles = els.togglesList();
 
     if (!list || !toggles) return;
+
+    // Toggle Synopsis Controls Visibility
+    const synControls = document.getElementById('synopsis-controls');
+    if (synControls) {
+        if (state.orientation === 'vertical') synControls.classList.add('hidden');
+        else synControls.classList.remove('hidden');
+    }
 
     // Clear lists
     list.innerHTML = '';
@@ -176,6 +194,16 @@ function attachControlListeners() {
             const text = e.target.value.trim();
             if (text) {
                 nameSpan.innerText = text;
+
+                // Fix Direction for English Names (e.g. @ikureiji)
+                if (/^[A-Za-z\u00C0-\u00FF@]/.test(text)) {
+                    nameSpan.style.direction = 'ltr';
+                    nameSpan.style.unicodeBidi = 'isolate';
+                } else {
+                    nameSpan.style.direction = 'rtl';
+                    nameSpan.style.unicodeBidi = 'normal';
+                }
+
                 watermarkDisplay.classList.remove('hidden');
             } else {
                 watermarkDisplay.classList.add('hidden');
@@ -310,15 +338,24 @@ export function updatePreview() {
 }
 
 // New Helper: Shrink text until it fits container
+// New Helper: Shrink text until it fits container
 function fitSynopsisToContainer() {
     const el = els.synopsisText();
     const wrapper = el ? el.parentElement : null;
     if (!el || !wrapper) return;
 
-    // 1. Reset to base size
-    el.classList.remove('scale-medium', 'scale-heavy', 'scale-extreme');
+    // 1. Reset all size classes
+    el.classList.remove('scale-medium', 'scale-heavy', 'scale-extreme', 'manual-size-sm', 'manual-size-md', 'manual-size-lg');
 
-    // 2. Check Overflow & Apply Scaling iteratively
+    // 2. Check Manual Mode
+    if (state.synopsisSize && state.synopsisSize !== 'auto') {
+        if (state.synopsisSize === 'small') el.classList.add('manual-size-sm');
+        else if (state.synopsisSize === 'medium') el.classList.add('manual-size-md');
+        else if (state.synopsisSize === 'large') el.classList.add('manual-size-lg');
+        return;
+    }
+
+    // 3. Auto Mode: Check Overflow & Apply Scaling iteratively
     // We check if content height > container height
 
     // Check 1: Base size overflow? -> Try Medium
@@ -555,21 +592,33 @@ export function adjustTitleSize() {
     if (!el) return;
     const len = el.innerText.length;
 
-    // Categories: 
-    // < 20: normal
-    // 20-40: medium
-    // 40-60: long
-    // > 60: xl
+    // Orientation-specific thresholds
+    // Vertical layout is narrower (~55%), so we scale sooner.
+    const isVertical = state.orientation === 'vertical';
+    const t = isVertical
+        ? { med: 12, long: 25, xl: 40 }
+        : { med: 20, long: 40, xl: 60 };
 
-    el.removeAttribute('data-length'); // Reset to default (large)
+    el.removeAttribute('data-length');
 
-    if (len >= 20 && len < 40) el.dataset.length = 'medium';
-    else if (len >= 40 && len < 60) el.dataset.length = 'long';
-    else if (len >= 60) el.dataset.length = 'xl';
+    if (len >= t.med && len < t.long) el.dataset.length = 'medium';
+    else if (len >= t.long && len < t.xl) el.dataset.length = 'long';
+    else if (len >= t.xl) el.dataset.length = 'xl';
 }
 
-function updateDisplayedInfo() {
-    els.titleText().innerText = state.meta.title;
+export function updateDisplayedInfo() {
+    const title = state.meta.title || '';
+    els.titleText().innerText = title;
+
+    // Fix Title Direction for English Text (e.g. Haikyuu!!)
+    // If starts with Latin character, force LTR
+    if (/^[A-Za-z\u00C0-\u00FF]/.test(title)) {
+        els.titleText().style.direction = 'ltr';
+        els.titleText().style.unicodeBidi = 'isolate';
+    } else {
+        els.titleText().style.direction = 'rtl';
+        els.titleText().style.unicodeBidi = 'normal';
+    }
     els.genreText().innerText = state.meta.genre || '';
 
     // Clip synopsis to 4 lines
@@ -583,31 +632,17 @@ function updateDisplayedInfo() {
     if (state.meta.poster) {
         els.posterImg().style.backgroundImage = `url(${state.meta.poster})`;
         drawBlurredBackground(state.meta.poster);
-
-
-
+    } else {
+        els.posterImg().style.backgroundImage = 'none';
+        const canvas = els.posterBg();
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
     }
 
-    // ROBUST Aspect Ratio Fix (Overrides previous logic)
-    if (state.meta.poster) {
-        const robustImg = new Image();
-        robustImg.src = state.meta.poster;
-        const applyRatio = () => {
-            if (!robustImg.width || !robustImg.height) return;
-            const ratio = `${robustImg.width} / ${robustImg.height}`;
-            // Force aspect-ratio with !important
-            const el = els.posterImg();
-            if (el) el.style.setProperty('aspect-ratio', ratio, 'important');
-
-            const container = el ? el.parentElement : null;
-            if (container) {
-                container.style.setProperty('aspect-ratio', ratio, 'important');
-                container.style.setProperty('height', 'auto', 'important');
-            }
-        };
-        if (robustImg.complete) applyRatio();
-        else robustImg.onload = applyRatio;
-    }
+    // ROBUST Aspect Ratio Fix REMOVED to lock aspect ratio (per user request)
+    // This allows CSS (A4 or 2:3) to control the container size, cropping images if needed.
 
     adjustTitleSize();
 }

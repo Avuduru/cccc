@@ -10,7 +10,8 @@ export const state = {
         poster: null,
         genre: 'نوع العمل',
         synopsis: ''
-    }
+    },
+    synopsisSize: 'auto' // 'auto' | 'small' | 'medium' | 'large'
 };
 
 export function updateState(u) {

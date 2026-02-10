@@ -54,6 +54,17 @@
                 </div>
             </div>
 
+            <!-- Synopsis Size Controls (Horizontal Only) -->
+            <div class="control-row horizontal-only" id="synopsis-controls">
+                <span class="control-label">حجم النبذة</span>
+                <div class="size-controls">
+                    <button class="size-btn active" data-size="auto">تلقائي</button>
+                    <button class="size-btn" data-size="small">ص</button>
+                    <button class="size-btn" data-size="medium">م</button>
+                    <button class="size-btn" data-size="large">ك</button>
+                </div>
+            </div>
+
             <!-- Ratings Section (Merged) -->
             <div class="control-row">
                 <div class="search-wrapper">
@@ -116,13 +127,14 @@
                             placeholder="اكتب نبذة عن العمل أو تعليقك الخاص..."></div>
                     </div>
 
-                    <div id="active-stickers" class="stickers-grid-canvas">
-                        <!-- Icons injected here -->
-                    </div>
-
-                    <div id="watermark-display" class="hidden">
-                        <span>المُصنّف: </span>
-                        <span class="name-span"></span>
+                    <div class="stickers-container">
+                        <div id="watermark-display" class="hidden">
+                            <span>المُصنّف: </span>
+                            <span class="name-span"></span>
+                        </div>
+                        <div id="active-stickers" class="stickers-grid-canvas">
+                            <!-- Icons injected here -->
+                        </div>
                     </div>
                 </div>
             </div>
