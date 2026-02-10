@@ -1,4 +1,4 @@
-import { initUI, updatePreview, renderControls } from './ui.js';
+import { initUI, updatePreview, renderControls, drawBlurredBackground, updateDisplayedInfo } from './ui.js';
 import { handleSearch } from './api.js';
 import { handleExport } from './export.js';
 import { debounce } from './utils.js';
@@ -74,20 +74,36 @@ function setupEventListeners() {
             // Update State
             state.type = item.dataset.value;
 
-            // Manual Mode Logic (Moved from old button handler)
+            // RESET STATE GLOBALLY
+            state.ratings = {};
+            state.badges = {};
+
+            // Allow manual mode specific text, otherwise defaults
+            if (state.type === 'manual') {
+                state.meta = {
+                    title: 'اكتب العنوان هنا',
+                    year: '',
+                    poster: '',
+                    genre: 'اكتب النوع',
+                    synopsis: 'اكتب النبذة هنا...'
+                };
+            } else {
+                state.meta = {
+                    title: 'عنوان العمل',
+                    year: '2023',
+                    poster: null,
+                    genre: 'نوع العمل',
+                    synopsis: ''
+                };
+            }
+
+            // Manual Mode UI Toggles
             const uploadHint = document.getElementById('upload-hint');
             const titleText = document.getElementById('title-text');
             const genreText = document.getElementById('genre-text');
-            const posterImg = document.getElementById('poster-img'); // Ensure this is defined
+            const posterImg = document.getElementById('poster-img');
 
             if (state.type === 'manual') {
-                // Clear Meta for manual entry
-                state.meta.title = 'اكتب العنوان هنا';
-                state.meta.genre = 'اكتب النوع';
-                state.meta.synopsis = 'اكتب النبذة هنا...';
-                state.meta.poster = ''; // User needs to upload
-                state.meta.year = '';
-
                 // UI Updates
                 const searchResults = document.getElementById('search-results');
                 const searchQuery = document.getElementById('search-query');
@@ -95,7 +111,6 @@ function setupEventListeners() {
                 searchQuery.value = '';
 
                 posterImg.classList.add('manual-mode');
-                // Add empty-poster class initially since no image is uploaded
                 posterImg.classList.add('empty-poster');
 
                 uploadHint.classList.remove('hidden');
@@ -115,6 +130,7 @@ function setupEventListeners() {
 
             renderControls();
             updatePreview();
+            updateDisplayedInfo();
         });
     });
 
@@ -126,12 +142,24 @@ function setupEventListeners() {
             btn.classList.add('active');
 
             state.orientation = btn.dataset.value;
+            renderControls();
             updatePreview();
 
             // Enable/Disable Drag based on orientation
             // User requested to remove ability to move elements in vertical mode (Step 721)
             // But keep text adjusting (contentEditable) which is handled in Manual Mode logic.
             setDragState(false);
+        });
+    });
+
+    // Synopsis Size Controls
+    const sizeButtons = document.querySelectorAll('.size-btn');
+    sizeButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            sizeButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            state.synopsisSize = btn.dataset.size;
+            updatePreview();
         });
     });
 
@@ -219,11 +247,8 @@ function setupEventListeners() {
                 pImg.style.backgroundImage = `url(${state.meta.poster})`;
                 pImg.classList.remove('empty-poster');
                 // Use import from ui.js if needed, or just rely on updatePreview if it used meta.poster
-                // But we need drawBlurredBackground which is exported from ui.js. 
-                // Since we didn't import it in the original file, let's rely on updatePreview calling it IF we properly update state.
-                // However, updatePreview calls drawBlurredBackground.
-                // We need to re-import it or use the one from ui.js if imported.
-                // Let's modify the top imports to include drawBlurredBackground if not present, OR just call updatePreview()
+                // Update blurred background
+                drawBlurredBackground(state.meta.poster);
                 updatePreview();
             };
             reader.readAsDataURL(file);
