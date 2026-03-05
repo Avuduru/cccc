@@ -70,19 +70,39 @@ export function handleExport() {
                 if (!blob) {
                     console.error('Canvas to Blob failed');
                     exportBtn.innerText = 'ERROR';
+                    document.body.removeChild(exportContainer);
                     return;
                 }
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.download = filename;
-                link.href = url;
-                link.click();
-                URL.revokeObjectURL(url); // Clean up the object URL
-            }, 'image/png');
 
-            // Cleanup
-            document.body.removeChild(exportContainer);
-            exportBtn.innerText = 'تصديـر';
+                // Create a File object with the desired filename baked in
+                const file = new File([blob], filename, { type: 'image/png' });
+                const url = URL.createObjectURL(file);
+
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+
+                // Debug logs
+                console.log('Export URL:', url);
+                console.log('Export filename:', filename);
+                console.log('Blob size (bytes):', blob.size);
+
+                link.click();
+
+                // Cleanup after a short delay to ensure the download has started
+                setTimeout(() => {
+                    if (document.body.contains(link)) {
+                        document.body.removeChild(link);
+                    }
+                    URL.revokeObjectURL(url);
+                    if (document.body.contains(exportContainer)) {
+                        document.body.removeChild(exportContainer);
+                    }
+                    exportBtn.innerText = 'تصديـر';
+                }, 2000);
+            }, 'image/png');
         }).catch(err => {
             console.error('Export failed:', err);
             exportBtn.innerText = 'ERROR';
