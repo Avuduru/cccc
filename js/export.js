@@ -59,10 +59,26 @@ export function handleExport() {
 
         html2canvas(clone, options).then(canvas => {
             const link = document.createElement('a');
-            const filename = state.meta.title ? `CCCC-${state.meta.title}.png` : 'CCCC-Card.png';
-            link.download = filename;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
+            // 1. Sanitize the filename to prevent corrupt file generation
+            let cleanTitle = state.meta.title ? state.meta.title : 'Card';
+            // Replace invalid Windows/Unix filename characters with a hyphen
+            cleanTitle = cleanTitle.replace(/[\/\\?%*:|"<>]/g, '-');
+            const filename = `CCCC-${cleanTitle}.png`;
+
+            // 2. Use toBlob for more robust download of large images
+            canvas.toBlob((blob) => {
+                if (!blob) {
+                    console.error('Canvas to Blob failed');
+                    exportBtn.innerText = 'ERROR';
+                    return;
+                }
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = url;
+                link.click();
+                URL.revokeObjectURL(url); // Clean up the object URL
+            }, 'image/png');
 
             // Cleanup
             document.body.removeChild(exportContainer);
