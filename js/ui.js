@@ -546,7 +546,8 @@ function selectItem(item, type) {
         els.searchQuery().value = state.meta.title;
         return; // Early return since we handle display updates in async callback
     } else if (type === 'anime' || type === 'manga') {
-        state.meta.poster = item.images.jpg.large_image_url;
+        const rawPoster = item.images.jpg.large_image_url;
+        state.meta.poster = `proxy.php?query=${encodeURIComponent(rawPoster)}&type=image_proxy`;
 
         // Translate genre
         const genreText = item.genres ? item.genres.map(g => g.name).join(', ') : '';
@@ -563,7 +564,8 @@ function selectItem(item, type) {
         }
     } else if (type === 'book') {
         // Open Library format
-        state.meta.poster = item.cover_i ? `https://covers.openlibrary.org/b/id/${item.cover_i}-L.jpg` : (item.volumeInfo?.imageLinks?.thumbnail || '');
+        const rawPoster = item.cover_i ? `https://covers.openlibrary.org/b/id/${item.cover_i}-L.jpg` : (item.volumeInfo?.imageLinks?.thumbnail || '');
+        state.meta.poster = rawPoster ? `proxy.php?query=${encodeURIComponent(rawPoster)}&type=image_proxy` : '';
 
         // Get description
         const description = item.first_sentence?.join(' ') || item.volumeInfo?.description || 'No description available';

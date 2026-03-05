@@ -944,19 +944,19 @@ body {
     border-left: none;
 }
 
-/* Inactive Colors (Dimmed) */
+/* Default Colors (Bright) */
 .seg-red {
-    background: #521818;
+    background: var(--accent-red);
     order: 4;
 }
 
 .seg-orange {
-    background: #66380f;
+    background: var(--accent-orange);
     order: 3;
 }
 
 .seg-yellow {
-    background: #6b5706;
+    background: var(--accent-yellow);
     order: 2;
 }
 
@@ -1397,6 +1397,27 @@ body {
     border-left: none;
 }
 
+/* Tablet/Constrained Desktop Tweaks */
+@media (max-width: 1200px) {
+    .rating-row {
+        flex-direction: column;
+        align-items: stretch;
+        margin-bottom: 5px;
+    }
+
+    .rating-row-label {
+        width: 100%;
+        text-align: right;
+        font-size: 1rem;
+        margin-bottom: 2px;
+    }
+
+    .rating-bar-container {
+        width: 100%;
+        height: 30px;
+    }
+}
+
 /* Responsive fixes for modal */
 @media (max-width: 768px) {
     .modal-grid {
@@ -1504,12 +1525,16 @@ body {
         }
 
         .rating-row {
+            flex-direction: row;
+            align-items: center;
             gap: 5px;
+            margin-bottom: 10px;
         }
 
         .rating-row-label {
             font-size: 0.9rem;
             width: 50px;
+            margin-bottom: 0;
         }
 
         .rating-bar-container {
@@ -1559,26 +1584,6 @@ body {
     }
 }
 
-/* Tablet/Constrained Desktop Tweaks */
-@media (max-width: 1200px) {
-    .rating-row {
-        flex-direction: column;
-        align-items: stretch;
-        margin-bottom: 5px;
-    }
-
-    .rating-row-label {
-        width: 100%;
-        text-align: right;
-        font-size: 1rem;
-        margin-bottom: 2px;
-    }
-
-    .rating-bar-container {
-        width: 100%;
-        height: 30px;
-    }
-}
 
 /* Export Mode Overrides */
 .export-mode {
@@ -1653,58 +1658,59 @@ body {
     flex: 1 !important;
 }
 
-/* WATERMARK STYLING - REFINED & LIGATURE FRIENDLY */
+/* WATERMARK STYLING - FROSTED PILL */
 #watermark-display {
     font-family: var(--font-ar);
-    /* Use Arabic Pixel Font */
-    color: #ffffff;
-    border: 3px dashed #ffffff;
-    padding: 5px 25px;
-    font-size: 2cqw;
-    text-shadow: none;
-    box-shadow: 0 0 8px #ffffff;
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    padding: 4px 18px;
+    font-size: 1.6cqw;
+    font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
     align-self: center;
     direction: rtl;
     opacity: 1;
-    background: transparent;
-    font-weight: bold;
     letter-spacing: normal !important;
-    /* CRITICAL: Fixed disconnected Arabic letters */
+    transition: opacity 0.3s ease;
 }
 
 .vertical #watermark-display {
-    font-size: 3cqw;
+    font-size: 2.4cqw;
+    padding: 5px 22px;
 }
 
 #watermark-display.hidden {
     display: none !important;
 }
 
-/* HORIZONTAL VIEW - MATCH EXPORT POSITION */
+/* HORIZONTAL VIEW */
 .horizontal #watermark-display {
-    padding: 5px 20px !important;
+    padding: 4px 18px;
 }
 
-/* EXPORT MODE - MATCH SCREEN STYLE SAFER */
+/* EXPORT MODE */
 .export-mode #watermark-display {
-    box-shadow: none !important;
-    /* Disabled to fix white block */
-    text-shadow: none !important;
-    background-color: rgba(0, 0, 0, 0.6) !important;
-    border: 4px dashed #ffffff !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
     opacity: 1 !important;
-    padding: 5px 20px !important;
-    /* Tiny */
-    font-size: 18px !important;
-    /* Tiny */
+    padding: 4px 18px !important;
+    font-size: 16px !important;
     letter-spacing: normal !important;
 }
 
-/* FIX: Restored padding for poster */
-
 .export-mode.vertical #watermark-display {
-    font-size: 24px !important;
-    padding: 8px 25px !important;
+    font-size: 20px !important;
+    padding: 6px 22px !important;
 }
 
 /* RESPONSIVE HIGH-QUALITY VERTICAL PREVIEW */

@@ -59,7 +59,10 @@ RAWG_KEY=your_rawg_key_here
     ```bash
     php -S localhost:8080
     ```
+    **then use this for the search function**
+    php -c php.ini -S localhost:8080
 2.  **Open the Application**:
     Navigate to `http://localhost:8080` in your browser.
 
 The application is configured to use `proxy.php` as the `WORKER_URL` in `js/config.js` by default.
+ 
