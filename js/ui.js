@@ -186,28 +186,30 @@ function attachControlListeners() {
 
     // --- Watermark Logic ---
     const reviewerInput = document.getElementById('reviewer-name-input');
-    const watermarkDisplay = document.getElementById('watermark-display');
+    const watermarks = document.querySelectorAll('.modern-watermark');
 
-    if (reviewerInput && watermarkDisplay) {
-        const nameSpan = watermarkDisplay.querySelector('.name-span');
+    if (reviewerInput && watermarks.length > 0) {
         reviewerInput.addEventListener('input', (e) => {
             const text = e.target.value.trim();
-            if (text) {
-                nameSpan.innerText = text;
+            watermarks.forEach(watermark => {
+                const nameSpan = watermark.querySelector('.name-span');
+                if (text) {
+                    nameSpan.innerText = text;
 
-                // Fix Direction for English Names (e.g. @ikureiji)
-                if (/^[A-Za-z\u00C0-\u00FF@]/.test(text)) {
-                    nameSpan.style.direction = 'ltr';
-                    nameSpan.style.unicodeBidi = 'isolate';
+                    // Fix Direction for English Names (e.g. @ikureiji)
+                    if (/^[A-Za-z\u00C0-\u00FF@]/.test(text)) {
+                        nameSpan.style.direction = 'ltr';
+                        nameSpan.style.unicodeBidi = 'isolate';
+                    } else {
+                        nameSpan.style.direction = 'rtl';
+                        nameSpan.style.unicodeBidi = 'normal';
+                    }
+
+                    watermark.classList.remove('hidden');
                 } else {
-                    nameSpan.style.direction = 'rtl';
-                    nameSpan.style.unicodeBidi = 'normal';
+                    watermark.classList.add('hidden');
                 }
-
-                watermarkDisplay.classList.remove('hidden');
-            } else {
-                watermarkDisplay.classList.add('hidden');
-            }
+            });
         });
     }
 }
