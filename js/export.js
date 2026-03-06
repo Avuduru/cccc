@@ -74,22 +74,29 @@ export function handleExport() {
                     return;
                 }
 
-                // Create a File object with the desired filename baked in
-                const file = new File([blob], filename, { type: 'image/png' });
-                const url = URL.createObjectURL(file);
+                // 1. Ensure filename is ASCII-safe for the download attribute (some browsers fail with Arabic)
+                let asciiTitle = filename.replace(/[^\x00-\x7F]/g, '-').replace(/\s+/g, '-');
+                if (!asciiTitle.endsWith('.png')) asciiTitle += '.png';
 
+                const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.href = url;
-                link.download = filename;
+                link.download = asciiTitle;
                 link.style.display = 'none';
                 document.body.appendChild(link);
 
                 // Debug logs
                 console.log('Export URL:', url);
-                console.log('Export filename:', filename);
-                console.log('Blob size (bytes):', blob.size);
+                console.log('Final ASCII Filename:', asciiTitle);
+                console.log('Blob size:', blob.size);
 
-                link.click();
+                // Trigger download using a proper MouseEvent
+                const event = new MouseEvent('click', {
+                    bubbles: true,
+                    cancelable: true,
+                    view: window
+                });
+                link.dispatchEvent(event);
 
                 // Cleanup after a short delay to ensure the download has started
                 setTimeout(() => {
