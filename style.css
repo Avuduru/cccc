@@ -374,16 +374,27 @@ body {
     pointer-events: auto;
 }
 
-/* HORIZONTAL LAYOUT */
 .horizontal .canvas-content {
     flex-direction: row;
 }
 
-.horizontal .poster-container {
+.horizontal .poster-column {
     height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    gap: 15px;
+}
+
+.horizontal .poster-container {
+    height: calc(100% - 50px);
+    max-height: 100%;
     aspect-ratio: 1 / 1.414;
     /* A4 Ratio */
-    flex-shrink: 0;
+    flex-shrink: 1;
+    min-height: 0;
     border: 3px solid rgba(255, 255, 255, 0.3);
     /* Match vertical style */
     box-shadow: 10px 10px 0px rgba(0, 0, 0, 0.5);
@@ -672,6 +683,10 @@ body {
     /* Bigger poster when space permits */
     width: 65%;
     /* Slightly wider too */
+}
+
+.vertical .poster-column {
+    display: contents;
 }
 
 .vertical .poster-container {
@@ -1659,7 +1674,7 @@ body {
 }
 
 /* WATERMARK STYLING - FROSTED PILL */
-#watermark-display {
+.modern-watermark {
     font-family: var(--font-ar);
     color: rgba(255, 255, 255, 0.9);
     background: rgba(0, 0, 0, 0.4);
@@ -1679,22 +1694,33 @@ body {
     transition: opacity 0.3s ease;
 }
 
-.vertical #watermark-display {
+.vertical .modern-watermark {
     font-size: 2.4cqw;
     padding: 5px 22px;
 }
 
-#watermark-display.hidden {
+.modern-watermark .watermark-label {
+    color: #2980b9;
+    font-weight: 800;
+    font-size: calc(100% + 1px);
+    margin-left: 4px;
+}
+
+.modern-watermark.hidden {
     display: none !important;
 }
 
-/* HORIZONTAL VIEW */
-.horizontal #watermark-display {
-    padding: 4px 18px;
+/* DUPLICATE WATERMARK TOGGLES */
+.horizontal .modern-watermark.vertical-only {
+    display: none !important;
+}
+
+.vertical .modern-watermark.horizontal-only {
+    display: none !important;
 }
 
 /* EXPORT MODE */
-.export-mode #watermark-display {
+.export-mode .modern-watermark {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     background-color: rgba(0, 0, 0, 0.5) !important;
@@ -1708,7 +1734,7 @@ body {
     letter-spacing: normal !important;
 }
 
-.export-mode.vertical #watermark-display {
+.export-mode.vertical .modern-watermark {
     font-size: 20px !important;
     padding: 6px 22px !important;
 }
