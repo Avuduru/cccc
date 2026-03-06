@@ -1636,6 +1636,35 @@ body {
     max-width: none !important;
     height: 1800px !important;
     aspect-ratio: 2 / 3 !important;
+    position: relative !important;
+}
+
+/* Fix flex layout gaps in vertical export due to absolute-positioned icons */
+.export-mode.vertical .canvas-content {
+    justify-content: flex-start !important;
+    /* Push title and poster to the top */
+}
+
+.export-mode.vertical .poster-container {
+    margin-bottom: auto !important;
+    /* Forces the poster to push empty space down, removing the floating square */
+}
+
+/* Vertical Export Icons tweaks */
+.export-mode.vertical .stickers-container {
+    position: absolute !important;
+    bottom: 20px !important;
+    left: 0;
+    right: 0;
+    margin: 0 auto !important;
+}
+
+.export-mode.vertical .sticker-item,
+.export-mode.vertical .stickers-grid-canvas.few-icons .sticker-item {
+    width: 21.6% !important;
+    /* 20% larger than 18% base */
+    max-width: 250px !important;
+    /* Override vh constraints for export */
 }
 
 /* FIX SEARCH OVERFLOW */
