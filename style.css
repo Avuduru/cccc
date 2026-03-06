@@ -1677,8 +1677,8 @@ body {
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 20px;
-    padding: 5px 23px;
-    font-size: 2.1cqw;
+    padding: 4px 18px;
+    font-size: 1.6cqw;
     font-weight: 600;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
@@ -1689,13 +1689,9 @@ body {
     transition: opacity 0.3s ease;
 }
 
-.horizontal .modern-watermark {
-    transform: translateY(20%);
-}
-
 .vertical .modern-watermark {
-    font-size: 3.1cqw;
-    padding: 7px 29px;
+    font-size: 2.4cqw;
+    padding: 5px 22px;
 }
 
 .modern-watermark .watermark-label {
@@ -1733,9 +1729,14 @@ body {
     letter-spacing: normal !important;
 }
 
+.export-mode:not(.vertical) .modern-watermark {
+    transform: translateY(20%) !important;
+}
+
 .export-mode.vertical .modern-watermark {
     font-size: 26px !important;
     padding: 8px 29px !important;
+    transform: none !important;
 }
 
 /* RESPONSIVE HIGH-QUALITY VERTICAL PREVIEW */
