@@ -1612,23 +1612,18 @@ body {
     max-width: none !important;
 }
 
-/* Fix Vertical Export Poster: "Contain" to always show full image without cropping */
+/* Force poster to cover the entire space, overriding any leaked mobile media queries */
 .export-mode.vertical .poster-div {
-    background-size: contain !important;
-    background-repeat: no-repeat !important;
-    background-position: center bottom !important;
-    background-position: center bottom !important;
+    background-size: cover !important;
+    background-position: center !important;
 }
 
+/* Allow natural scaling without forced 'contain' */
 .export-mode.vertical .poster-container {
     max-height: none !important;
-    /* Allow it to grow/shrink freely */
-    width: auto !important;
-    /* Let aspect ratio drive width */
-    flex: 1 1 auto !important;
-    /* Flexibly fill available vertical space */
+    height: auto !important;
+    width: 75% !important;
     aspect-ratio: var(--poster-aspect-ratio, 2/3) !important;
-    /* Adapt to image shape */
 }
 
 .export-mode #synopsis-text {
