@@ -1639,24 +1639,20 @@ body {
     position: relative !important;
 }
 
-/* Fix flex layout gaps in vertical export due to absolute-positioned icons */
+/* Resolve cutoff by using natural flex distribution instead of absolute positioning */
 .export-mode.vertical .canvas-content {
-    justify-content: flex-start !important;
-    /* Push title and poster to the top */
+    justify-content: space-between !important;
 }
 
 .export-mode.vertical .poster-container {
-    margin-bottom: auto !important;
-    /* Forces the poster to push empty space down, removing the floating square */
+    /* Poster takes its natural centered position between top title and bottom icons */
+    margin-bottom: 0 !important;
 }
 
 /* Vertical Export Icons tweaks */
 .export-mode.vertical .stickers-container {
-    position: absolute !important;
-    bottom: 20px !important;
-    left: 0;
-    right: 0;
-    margin: 0 auto !important;
+    /* No absolute positioning to avoid html2canvas clipping */
+    margin-top: 0 !important;
 }
 
 .export-mode.vertical .sticker-item,
