@@ -1455,19 +1455,43 @@ body {
     gap: 20px;
 }
 
+/* ===== EXCEPTIONS CARD ===== */
+.exceptions-card {
+    background: rgba(46, 204, 113, 0.08);
+    border: 1px solid rgba(46, 204, 113, 0.2);
+    border-left: 5px solid #2ecc71;
+    border-radius: 12px;
+    padding: 20px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.exceptions-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 24px rgba(46, 204, 113, 0.15);
+}
+
+.exceptions-desc {
+    margin: 0 0 16px 0;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: #ddd;
+}
+
 .exceptions-icons {
     display: flex;
-    justify-content: center;
-    gap: 20px;
-    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 12px;
+    flex-wrap: nowrap;
 }
 
 .exceptions-icons img {
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 120px;
     object-fit: contain;
     background: transparent;
     border: none;
+    flex-shrink: 1;
+    min-width: 0;
 }
 
 .modal-item img {
