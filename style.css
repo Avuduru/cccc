@@ -1252,21 +1252,22 @@ body {
 .comparison-table {
     display: flex;
     flex-direction: column;
-    border: 4px solid #000;
     margin-top: 20px;
-    background: #333;
-    /* Dark table bg */
+    background: rgba(255, 255, 255, 0.03);
+    /* Frosted table bg */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
 }
 
 .desc-cell {
-    padding: 10px;
+    padding: 15px 20px;
     font-size: 0.95rem;
-    line-height: 1.4;
-    border-left: 2px solid #000;
-    background: #2a2a2a;
-    /* Dark cell bg */
+    line-height: 1.6;
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+    background: transparent;
+    /* Transparent to show frosted card */
     color: #eee;
-    /* Light cell text */
 }
 
 @keyframes modalSlide {
@@ -1382,49 +1383,42 @@ body {
     padding: 10px;
     text-align: center;
     font-weight: bold;
-    border: 3px solid #000;
-    box-shadow: 4px 4px 0px #000;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .level-box.yellow {
-    background: var(--accent-yellow);
+    background: rgba(241, 196, 15, 0.85);
     color: #000;
 }
 
 .level-box.orange {
-    background: var(--accent-orange);
+    background: rgba(230, 126, 34, 0.85);
     color: #fff;
 }
 
 .level-box.red {
-    background: var(--accent-red);
+    background: rgba(231, 76, 60, 0.85);
     color: #fff;
-}
-
-.comparison-table {
-    display: flex;
-    flex-direction: column;
-    border: 4px solid #000;
-    margin-top: 20px;
 }
 
 .table-header {
     display: grid;
     grid-template-columns: 80px 1fr 1fr;
-    background: #111;
-    color: white;
+    background: rgba(0, 0, 0, 0.4);
+    color: #ddd;
     font-weight: bold;
 }
 
 .table-header div {
-    padding: 10px;
-    border-left: 2px solid #333;
+    padding: 15px 20px;
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .table-row {
     display: grid;
     grid-template-columns: 80px 1fr 1fr;
-    border-bottom: 2px solid #000;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .table-row:last-child {
@@ -1435,22 +1429,31 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 1.5rem;
-    font-weight: bold;
-    border-left: 2px solid #000;
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.level-cell.yellow {
+.level-cell span {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    font-size: 1.3rem;
+    font-weight: bold;
+}
+
+.level-cell.yellow span {
     background: var(--accent-yellow);
     color: #000;
 }
 
-.level-cell.orange {
+.level-cell.orange span {
     background: var(--accent-orange);
     color: #fff;
 }
 
-.level-cell.red {
+.level-cell.red span {
     background: var(--accent-red);
     color: #fff;
 }
