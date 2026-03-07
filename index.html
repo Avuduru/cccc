@@ -292,36 +292,62 @@
 
                 <section class="modal-section">
                     <h3 class="section-title">القيم والدرجات</h3>
-                    <div class="levels-info">
-                        <div class="level-box red">المستوى الأول: أحمر</div>
-                        <div class="level-box orange">المستوى الثاني: برتقالي</div>
-                        <div class="level-box yellow">المستوى الثالث: أصفر</div>
-                    </div>
 
-                    <div class="comparison-table">
-                        <div class="table-header">
-                            <div>الدرجة</div>
-                            <div>في القصصيّات</div>
-                            <div>في الألعاب</div>
+                    <div class="grades-container">
+                        <!-- Level 1: Red (Most Severe) -->
+                        <div class="grade-card grade-red">
+                            <div class="grade-header">
+                                <div class="grade-badge red">1</div>
+                                <div class="grade-title">المستوى الأول: أحمر</div>
+                            </div>
+                            <div class="grade-body">
+                                <div class="grade-desc">
+                                    <div class="grade-desc-label">في القصصيّات</div>
+                                    <p>لا يمكن تخطي المحتوى دون التأثير على القصة. عدد مرات ظهور كثير، يفقد الفهم العام
+                                        للقصة حين التخطي.</p>
+                                </div>
+                                <div class="grade-desc">
+                                    <div class="grade-desc-label">في الألعاب</div>
+                                    <p>يستحيل إتمام اللعبة دون المرور عليه.</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="table-row">
-                            <div class="level-cell red"><span>1</span></div>
-                            <div class="desc-cell">لا يمكن تخطي المحتوى دون التأثير على القصة. عدد مرات ظهور كثير، يفقد
-                                الفهم العام للقصة حين التخطي.</div>
-                            <div class="desc-cell">يستحيل إتمام اللعبة دون المرور عليه.</div>
+
+                        <!-- Level 2: Orange (Moderate) -->
+                        <div class="grade-card grade-orange">
+                            <div class="grade-header">
+                                <div class="grade-badge orange">2</div>
+                                <div class="grade-title">المستوى الثاني: برتقالي</div>
+                            </div>
+                            <div class="grade-body">
+                                <div class="grade-desc">
+                                    <div class="grade-desc-label">في القصصيّات</div>
+                                    <p>يمكن تخطي المحتوى دون التأثير على القصة. عدد مرّات ظهور كثير، يسبب انقطاعات
+                                        متكررة في تسلسل العرض. الفهم العام للقصة محفوظ رغم التخطي.</p>
+                                </div>
+                                <div class="grade-desc">
+                                    <div class="grade-desc-label">في الألعاب</div>
+                                    <p>يصعّب إتمام اللعبة ويغيّر من تجربتها، لكن يمكن إتمامها بالكامل مع تخطّيه.</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="table-row">
-                            <div class="level-cell orange"><span>2</span></div>
-                            <div class="desc-cell">يمكن تخطي المحتوى دون التأثير على القصة. عدد مرّات ظهور كثير، يسبب
-                                انقطاعات متكررة في تسلسل العرض. الفهم العام للقصة محفوظ رغم التخطي.</div>
-                            <div class="desc-cell">يصعّب إتمام اللعبة ويغيّر من تجربتها، لكن يمكن إتمامها بالكامل مع
-                                تخطّيه.</div>
-                        </div>
-                        <div class="table-row">
-                            <div class="level-cell yellow"><span>3</span></div>
-                            <div class="desc-cell">يمكن تخطّي المحتوى دون التأثير على القصّة. ظهور قليل يمكن تخطيه
-                                بسهولة.</div>
-                            <div class="desc-cell">يمكن تجاهله أو استخدام طرق بديلة لإتمام اللعبة.</div>
+
+                        <!-- Level 3: Yellow (Lightest) -->
+                        <div class="grade-card grade-yellow">
+                            <div class="grade-header">
+                                <div class="grade-badge yellow">3</div>
+                                <div class="grade-title">المستوى الثالث: أصفر</div>
+                            </div>
+                            <div class="grade-body">
+                                <div class="grade-desc">
+                                    <div class="grade-desc-label">في القصصيّات</div>
+                                    <p>يمكن تخطّي المحتوى دون التأثير على القصّة. ظهور قليل يمكن تخطيه بسهولة.</p>
+                                </div>
+                                <div class="grade-desc">
+                                    <div class="grade-desc-label">في الألعاب</div>
+                                    <p>يمكن تجاهله أو استخدام طرق بديلة لإتمام اللعبة.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>

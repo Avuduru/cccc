@@ -1375,27 +1375,6 @@ body {
 
 /* Level info styles ... */
 
-.comparison-table {
-    display: flex;
-    flex-direction: column;
-    margin-top: 20px;
-    background: rgba(255, 255, 255, 0.03);
-    /* Frosted table bg */
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    overflow: hidden;
-}
-
-.desc-cell {
-    padding: 15px 20px;
-    font-size: 0.95rem;
-    line-height: 1.6;
-    border-left: 1px solid rgba(255, 255, 255, 0.05);
-    background: transparent;
-    /* Transparent to show frosted card */
-    color: #eee;
-}
-
 @keyframes modalSlide {
     from {
         transform: translateY(20px);
@@ -1469,8 +1448,6 @@ body {
     background: rgba(255, 255, 255, 0.3);
 }
 
-
-
 /* Restored Layout Rules */
 .modal-grid {
     display: grid;
@@ -1492,103 +1469,167 @@ body {
     height: 100px;
     object-fit: contain;
     flex-shrink: 0;
-    /* Background & Border handled in .modal-item rule above */
     background: #000;
     padding: 8px;
     border: none;
 }
 
-.levels-info {
+/* ===== GRADE CARDS ===== */
+.grades-container {
     display: flex;
-    gap: 15px;
-    margin-bottom: 20px;
+    flex-direction: column;
+    gap: 16px;
 }
 
-.level-box {
-    flex: 1;
-    padding: 10px;
-    text-align: center;
-    font-weight: bold;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+.grade-card {
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.level-box.yellow {
-    background: rgba(241, 196, 15, 0.85);
-    color: #000;
+.grade-card:hover {
+    transform: translateY(-2px);
 }
 
-.level-box.orange {
-    background: rgba(230, 126, 34, 0.85);
-    color: #fff;
-}
-
-.level-box.red {
-    background: rgba(231, 76, 60, 0.85);
-    color: #fff;
-}
-
-.table-header {
-    display: grid;
-    grid-template-columns: 80px 1fr 1fr;
-    background: rgba(0, 0, 0, 0.4);
-    color: #ddd;
-    font-weight: bold;
-}
-
-.table-header div {
-    padding: 15px 20px;
-    border-left: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.table-row {
-    display: grid;
-    grid-template-columns: 80px 1fr 1fr;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.table-row:last-child {
-    border-bottom: none;
-}
-
-.level-cell {
+/* --- Header (Badge + Title) --- */
+.grade-header {
     display: flex;
-    justify-content: center;
     align-items: center;
-    border-left: 1px solid rgba(255, 255, 255, 0.05);
+    gap: 16px;
+    padding: 16px 20px;
 }
 
-.level-cell span {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 38px;
-    height: 38px;
+.grade-badge {
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
-    font-size: 1.3rem;
-    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: 900;
+    flex-shrink: 0;
 }
 
-.level-cell.yellow span {
-    background: var(--accent-yellow);
-    color: #000;
-}
-
-.level-cell.orange span {
-    background: var(--accent-orange);
-    color: #fff;
-}
-
-.level-cell.red span {
+.grade-badge.red {
     background: var(--accent-red);
     color: #fff;
+    box-shadow: 0 0 18px rgba(231, 76, 60, 0.6), 0 0 40px rgba(231, 76, 60, 0.2);
 }
 
-
-
-.desc-cell:last-child {
-    border-left: none;
+.grade-badge.orange {
+    background: var(--accent-orange);
+    color: #fff;
+    box-shadow: 0 0 18px rgba(230, 126, 34, 0.6), 0 0 40px rgba(230, 126, 34, 0.2);
 }
+
+.grade-badge.yellow {
+    background: var(--accent-yellow);
+    color: #000;
+    box-shadow: 0 0 18px rgba(241, 196, 15, 0.6), 0 0 40px rgba(241, 196, 15, 0.2);
+}
+
+.grade-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    font-family: var(--font-ar);
+}
+
+/* --- Color Tint Variants --- */
+.grade-red {
+    background: rgba(231, 76, 60, 0.08);
+    border-left: 5px solid var(--accent-red);
+}
+
+.grade-red .grade-title {
+    color: #f87171;
+}
+
+.grade-red:hover {
+    box-shadow: 0 4px 24px rgba(231, 76, 60, 0.15);
+}
+
+.grade-orange {
+    background: rgba(230, 126, 34, 0.08);
+    border-left: 5px solid var(--accent-orange);
+}
+
+.grade-orange .grade-title {
+    color: #fb923c;
+}
+
+.grade-orange:hover {
+    box-shadow: 0 4px 24px rgba(230, 126, 34, 0.15);
+}
+
+.grade-yellow {
+    background: rgba(241, 196, 15, 0.08);
+    border-left: 5px solid var(--accent-yellow);
+}
+
+.grade-yellow .grade-title {
+    color: #facc15;
+}
+
+.grade-yellow:hover {
+    box-shadow: 0 4px 24px rgba(241, 196, 15, 0.15);
+}
+
+/* --- Body (Dual Descriptions) --- */
+.grade-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: rgba(255, 255, 255, 0.04);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.grade-desc {
+    padding: 14px 20px;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.grade-desc-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: rgba(255, 255, 255, 0.45);
+    margin-bottom: 8px;
+    font-family: var(--font-ar);
+}
+
+.grade-desc p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: #ddd;
+}
+
+/* --- Mobile: Stack descriptions vertically --- */
+@media (max-width: 768px) {
+    .grade-body {
+        grid-template-columns: 1fr;
+    }
+
+    .grade-header {
+        padding: 14px 16px;
+    }
+
+    .grade-badge {
+        width: 40px;
+        height: 40px;
+        font-size: 1.25rem;
+    }
+
+    .grade-title {
+        font-size: 1.05rem;
+    }
+}
+
+/* ===== OLD TABLE (deprecated, kept for reference) ===== */
+/* .comparison-table, .level-box, .table-header, .table-row, .level-cell, .desc-cell — now replaced by grade cards */
 
 /* Tablet/Constrained Desktop Tweaks */
 @media (max-width: 1200px) {
@@ -1617,15 +1658,6 @@ body {
     .modal-grid,
     .modal-grid.small-grid {
         grid-template-columns: 1fr;
-    }
-
-    .table-header,
-    .table-row {
-        grid-template-columns: 50px 1fr 1fr;
-    }
-
-    .levels-info {
-        flex-direction: column;
     }
 
     @media (max-width: 900px) {
