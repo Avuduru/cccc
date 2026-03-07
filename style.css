@@ -1591,7 +1591,7 @@ body {
 }
 
 .grade-desc-label {
-    font-size: 0.8rem;
+    font-size: 1.05rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -1602,7 +1602,7 @@ body {
 
 .grade-desc p {
     margin: 0;
-    font-size: 0.95rem;
+    font-size: 1.08rem;
     line-height: 1.65;
     color: #ddd;
 }
