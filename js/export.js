@@ -58,9 +58,9 @@ export function handleExport() {
         };
 
         html2canvas(clone, options).then(canvas => {
-            const link = document.createElement('a');
             // 1. Sanitize the filename to prevent corrupt file generation
-            let cleanTitle = state.meta.title ? state.meta.title : 'Card';
+            let cleanTitle = state.meta.title ? state.meta.title.trim() : 'Card';
+            if (!cleanTitle) cleanTitle = 'Card';
             // Replace invalid Windows/Unix filename characters with a hyphen
             cleanTitle = cleanTitle.replace(/[\/\\?%*:|"<>]/g, '-');
             const filename = `CCCC-${cleanTitle}.png`;
@@ -74,29 +74,20 @@ export function handleExport() {
                     return;
                 }
 
-                // 1. Ensure filename is ASCII-safe for the download attribute (some browsers fail with Arabic)
-                let asciiTitle = filename.replace(/[^\x00-\x7F]/g, '-').replace(/\s+/g, '-');
-                if (!asciiTitle.endsWith('.png')) asciiTitle += '.png';
-
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.href = url;
-                link.download = asciiTitle;
+                link.download = filename; // Use the original UTF-8 filename
                 link.style.display = 'none';
                 document.body.appendChild(link);
 
                 // Debug logs
                 console.log('Export URL:', url);
-                console.log('Final ASCII Filename:', asciiTitle);
+                console.log('Final Filename:', filename);
                 console.log('Blob size:', blob.size);
 
-                // Trigger download using a proper MouseEvent
-                const event = new MouseEvent('click', {
-                    bubbles: true,
-                    cancelable: true,
-                    view: window
-                });
-                link.dispatchEvent(event);
+                // Trigger download safely
+                link.click();
 
                 // Cleanup after a short delay to ensure the download has started
                 setTimeout(() => {
