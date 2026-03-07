@@ -58,12 +58,11 @@ export function handleExport() {
         };
 
         html2canvas(clone, options).then(canvas => {
-            // 1. Sanitize the filename to prevent corrupt file generation
-            let cleanTitle = state.meta.title ? state.meta.title.trim() : 'Card';
-            if (!cleanTitle) cleanTitle = 'Card';
-            // Replace invalid Windows/Unix filename characters with a hyphen
-            cleanTitle = cleanTitle.replace(/[\/\\?%*:|"<>]/g, '-');
-            const filename = `CCCC-${cleanTitle}.png`;
+            // 1. Sanitize the filename down to safe alphanumeric/dash string to prevent corrupt file generation
+            let filenameBase = state.meta.id ? String(state.meta.id) : (state.meta.title ? state.meta.title.trim() : 'Card');
+            // Hard stip all invisible newlines and OS-restricted characters just to be safe
+            filenameBase = filenameBase.replace(/[\n\r]/g, ' ').replace(/[\/\\?%*:|"<>]/g, '-');
+            const filename = `CCCC-${filenameBase}.png`;
 
             // 2. Use toBlob for more robust download of large images
             canvas.toBlob((blob) => {
@@ -77,7 +76,7 @@ export function handleExport() {
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.href = url;
-                link.download = filename; // Use the original UTF-8 filename
+                link.download = filename;
                 link.style.display = 'none';
                 document.body.appendChild(link);
 
@@ -87,7 +86,12 @@ export function handleExport() {
                 console.log('Blob size:', blob.size);
 
                 // Trigger download safely
-                link.click();
+                const event = new MouseEvent('click', {
+                    bubbles: true,
+                    cancelable: true,
+                    view: window
+                });
+                link.dispatchEvent(event);
 
                 // Cleanup after a short delay to ensure the download has started
                 setTimeout(() => {
