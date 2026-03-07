@@ -1190,6 +1190,15 @@ body {
     display: inline-block;
 }
 
+.section-subtitle {
+    font-size: 1.15rem;
+    color: #bbb;
+    line-height: 1.6;
+    margin-bottom: 25px;
+    margin-top: 5px;
+    max-width: 90%;
+}
+
 .semantic-legend {
     display: flex;
     gap: 15px;
