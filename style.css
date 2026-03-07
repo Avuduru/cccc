@@ -921,6 +921,43 @@ body {
     /* Requested green */
 }
 
+.tags-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 25px;
+    justify-content: center;
+    padding: 0 10px;
+}
+
+.category-tag {
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    color: #bbb;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.category-tag:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+.category-tag .plus-icon {
+    color: var(--accent-green);
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
 .ratings-grid {
     display: flex;
     flex-direction: column;
@@ -931,12 +968,43 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
+    animation: fadeInRow 0.3s ease-out;
+}
+
+@keyframes fadeInRow {
+    from {
+        opacity: 0;
+        transform: translateX(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 .rating-row-label {
-    width: 70px;
-    text-align: left;
+    width: 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: right;
     font-size: 1.1rem;
+}
+
+.remove-slider-btn {
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0 5px;
+    transition: color 0.2s;
+    line-height: 1;
+}
+
+.remove-slider-btn:hover {
+    color: var(--accent-red);
 }
 
 /* Bars: Red | Orange | Yellow | White */

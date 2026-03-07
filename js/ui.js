@@ -70,23 +70,51 @@ export function renderControls() {
     });
 
     const isGame = state.type === 'game';
-    // 1. Render Rating Bars (Mawjoodat)
+    const availableCloud = document.getElementById('available-categories');
+    if (availableCloud) availableCloud.innerHTML = '';
+
+    // 1. Render Rating Bars or Category Tags (Mawjoodat)
     CATEGORIES.Mawjoodat.forEach(cat => {
         if (cat.type === 'game_only' && !isGame) return;
 
-        const row = document.createElement('div');
-        row.className = 'rating-row';
-        row.innerHTML = `
-            <div class="rating-row-label">${cat.label}</div>
-            <div class="rating-bar-container" data-id="${cat.id}" data-level="0">
-                <div class="bar-segment seg-gray" data-val="0"></div>
-                <div class="bar-segment seg-yellow" data-val="3"></div>
-                <div class="bar-segment seg-orange" data-val="2"></div>
-                <div class="bar-segment seg-red" data-val="1"></div>
-                <div class="rating-knob"></div>
-            </div>
-        `;
-        list.appendChild(row);
+        const currentLevel = state.ratings[cat.id] ? parseInt(state.ratings[cat.id]) : 0;
+
+        if (currentLevel > 0) {
+            // Render Slider Row
+            const row = document.createElement('div');
+            row.className = 'rating-row';
+            row.innerHTML = `
+                <div class="rating-row-label">
+                    <span>${cat.label}</span>
+                    <button class="remove-slider-btn" data-id="${cat.id}">&times;</button>
+                </div>
+                <div class="rating-bar-container" data-id="${cat.id}" data-level="${currentLevel}">
+                    <div class="bar-segment seg-gray" data-val="0"></div>
+                    <div class="bar-segment seg-yellow" data-val="3"></div>
+                    <div class="bar-segment seg-orange" data-val="2"></div>
+                    <div class="bar-segment seg-red" data-val="1"></div>
+                    <div class="rating-knob"></div>
+                </div>
+            `;
+            list.appendChild(row);
+
+            // Apply correct initial UI state manually so knob is aligned
+            setTimeout(() => {
+                const container = row.querySelector('.rating-bar-container');
+                const knob = container.querySelector('.rating-knob');
+                updateRatingUI(container, knob, currentLevel);
+            }, 0);
+
+        } else {
+            // Render Tag Cloud Pill
+            if (availableCloud) {
+                const tag = document.createElement('button');
+                tag.className = 'category-tag';
+                tag.dataset.id = cat.id;
+                tag.innerHTML = `<span class="plus-icon">+</span> ${cat.label}`;
+                availableCloud.appendChild(tag);
+            }
+        }
     });
 
     // 2. Render Toggles (Mustathniyat)
@@ -105,7 +133,28 @@ export function renderControls() {
 }
 
 function attachControlListeners() {
-    // Rating Bars Interaction (Draggable)
+    // 1. Tag Cloud Addition Logic
+    document.querySelectorAll('.category-tag').forEach(tag => {
+        tag.addEventListener('click', () => {
+            const id = tag.dataset.id;
+            // Set entirely new active base level
+            state.ratings[id] = 1; // Default to highest severity (Red)
+            renderControls();     // Re-run builder
+            updatePreview();
+        });
+    });
+
+    // 2. Slider Removal Logic
+    document.querySelectorAll('.remove-slider-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+            state.ratings[id] = 0; // Reset
+            renderControls();      // Re-run builder
+            updatePreview();
+        });
+    });
+
+    // 3. Rating Bars Interaction (Draggable)
     document.querySelectorAll('.rating-bar-container').forEach(container => {
         const id = container.dataset.id;
         const knob = container.querySelector('.rating-knob');
