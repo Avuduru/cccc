@@ -81,6 +81,7 @@ function setupEventListeners() {
             // Allow manual mode specific text, otherwise defaults
             if (state.type === 'manual') {
                 state.meta = {
+                    id: '',
                     title: 'اكتب العنوان هنا',
                     year: '',
                     poster: '',
@@ -89,6 +90,7 @@ function setupEventListeners() {
                 };
             } else {
                 state.meta = {
+                    id: '',
                     title: 'عنوان العمل',
                     year: '2023',
                     poster: null,

@@ -504,6 +504,7 @@ export function showSearchResults(data, type) {
 }
 
 function selectItem(item, type) {
+    state.meta.id = item.slug || item.mal_id || item.id || '';
     state.meta.title = item.title || item.name || item.title_english || (item.volumeInfo ? item.volumeInfo.title : 'No Title');
 
     if (type === 'movie' || type === 'tv') {
