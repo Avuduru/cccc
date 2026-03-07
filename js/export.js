@@ -1,5 +1,27 @@
 import { state } from './state.js';
 
+function logClassification(action) {
+    try {
+        const reviewerInput = document.getElementById('reviewer-name-input');
+        fetch('proxy.php?type=log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                content_id: state.meta.id || null,
+                content_type: state.type,
+                title: state.meta.title,
+                ratings: state.ratings,
+                badges: state.badges,
+                classifier: reviewerInput ? reviewerInput.value : '',
+                orientation: state.orientation,
+                action: action
+            })
+        }).catch(() => { });
+    } catch (e) {
+        // Never block export
+    }
+}
+
 export function handleExport() {
     const originalCanvas = document.getElementById('preview-canvas');
     const exportBtn = document.getElementById('export-btn');
@@ -93,6 +115,8 @@ export function handleExport() {
                 });
                 link.dispatchEvent(event);
 
+                logClassification('export');
+
                 // Cleanup after a short delay to ensure the download has started
                 setTimeout(() => {
                     if (document.body.contains(link)) {
@@ -114,4 +138,85 @@ export function handleExport() {
             }
         });
     }, 100); // 100ms delay to ensure rendering
+}
+
+export function handleCopyToClipboard() {
+    const originalCanvas = document.getElementById('preview-canvas');
+    const copyBtn = document.getElementById('copy-btn');
+
+    if (!copyBtn) return;
+
+    // Store original text
+    const originalText = copyBtn.innerText;
+    copyBtn.innerText = 'جاري النسخ...';
+
+    const isVertical = originalCanvas.classList.contains('vertical');
+    const exportWidth = isVertical ? 1200 : 1920;
+
+    const clone = originalCanvas.cloneNode(true);
+    const exportContainer = document.createElement('div');
+    exportContainer.style.position = 'fixed';
+    exportContainer.style.left = '-9999px';
+    exportContainer.style.top = '0';
+    exportContainer.style.zIndex = '-1';
+    exportContainer.style.width = `${exportWidth}px`;
+
+    clone.classList.add('export-mode');
+    exportContainer.appendChild(clone);
+    document.body.appendChild(exportContainer);
+
+    const originalBg = originalCanvas.querySelector('#poster-bg');
+    const clonedBg = clone.querySelector('#poster-bg');
+    if (originalBg && clonedBg) {
+        clonedBg.width = originalBg.width;
+        clonedBg.height = originalBg.height;
+        const ctx = clonedBg.getContext('2d');
+        ctx.drawImage(originalBg, 0, 0);
+    }
+
+    setTimeout(() => {
+        const options = {
+            backgroundColor: null,
+            scale: 1,
+            useCORS: true,
+            allowTaint: true,
+            logging: false,
+            width: exportWidth,
+            height: clone.offsetHeight,
+            windowWidth: exportWidth
+        };
+
+        html2canvas(clone, options).then(canvas => {
+            canvas.toBlob(async (blob) => {
+                if (!blob) {
+                    console.error('Canvas to Blob failed');
+                    copyBtn.innerText = 'ERROR';
+                    setTimeout(() => copyBtn.innerText = originalText, 2000);
+                    document.body.removeChild(exportContainer);
+                    return;
+                }
+
+                try {
+                    await navigator.clipboard.write([
+                        new ClipboardItem({ 'image/png': blob })
+                    ]);
+                    logClassification('copy');
+                    copyBtn.innerText = 'تم النسخ ✓';
+                } catch (err) {
+                    console.error('Clipboard write failed:', err);
+                    copyBtn.innerText = 'فشل النسخ';
+                }
+
+                setTimeout(() => copyBtn.innerText = originalText, 2000);
+                document.body.removeChild(exportContainer);
+            }, 'image/png');
+        }).catch(err => {
+            console.error('Copy failed:', err);
+            copyBtn.innerText = 'ERROR';
+            setTimeout(() => copyBtn.innerText = originalText, 2000);
+            if (document.body.contains(exportContainer)) {
+                document.body.removeChild(exportContainer);
+            }
+        });
+    }, 100);
 }
