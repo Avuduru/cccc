@@ -90,6 +90,7 @@ body {
     grid-column: 1 / 2;
     grid-row: 1 / 3;
     /* Span both rows */
+    align-self: start;
     background-color: #111;
     color: white;
     border-radius: 20px;
