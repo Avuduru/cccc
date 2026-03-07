@@ -1613,7 +1613,9 @@ body {
 
 /* Responsive fixes for modal */
 @media (max-width: 768px) {
-    .modal-grid {
+
+    .modal-grid,
+    .modal-grid.small-grid {
         grid-template-columns: 1fr;
     }
 
