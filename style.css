@@ -1479,7 +1479,7 @@ body {
 
 .exceptions-icons {
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
     gap: 12px;
     flex-wrap: nowrap;
 }
