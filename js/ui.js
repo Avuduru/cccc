@@ -328,7 +328,7 @@ export function updatePreview() {
     activeItems.forEach(item => {
         const div = document.createElement('div');
         div.className = 'sticker-item';
-        div.innerHTML = `<img src="assets/icons/${item.icon}.png" alt="${item.label}" onerror="if(this.dataset.fallback) this.src='assets/icons/'+this.dataset.fallback+'.png'" data-fallback="${item.fallback || ''}">`;
+        div.innerHTML = `<img src="assets/icons/${item.icon}.png?v=2" alt="${item.label}" onerror="if(this.dataset.fallback) this.src='assets/icons/'+this.dataset.fallback+'.png?v=2'" data-fallback="${item.fallback || ''}">`;
         stickerContainer.appendChild(div);
     });
 
