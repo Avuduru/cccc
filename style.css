@@ -1185,9 +1185,50 @@ body {
     /* White title */
     border-bottom: 3px solid rgba(255, 255, 255, 0.2);
     /* Softer underline */
-    margin-bottom: 25px;
+    margin-bottom: 15px;
     padding-bottom: 8px;
     display: inline-block;
+}
+
+.semantic-legend {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+.legend-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 8px 15px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 1rem;
+    color: #e0e0e0;
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.theme-badge .legend-dot {
+    background-color: #9b59b6;
+    box-shadow: 0 0 8px rgba(155, 89, 182, 0.5);
+}
+
+.warning-badge .legend-dot {
+    background-color: var(--accent-red);
+    box-shadow: 0 0 8px rgba(231, 76, 60, 0.5);
+}
+
+.mechanic-badge .legend-dot {
+    background-color: #1abc9c;
+    box-shadow: 0 0 8px rgba(26, 188, 156, 0.5);
 }
 
 /* Grid styles ... */
