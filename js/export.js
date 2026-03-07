@@ -64,39 +64,47 @@ export function handleExport() {
             filenameBase = filenameBase.replace(/[\n\r]/g, ' ').replace(/[\/\\?%*:|"<>]/g, '-');
             const filename = `CCCC-${filenameBase}.png`;
 
-            // 2. Use Base64 Data URI string to bypass Chromium Blob URL sanitization
-            // Tainted cross-origin Canvas Blobs cause Chrome/Edge to discard the 'download' attribute
-            // Data URIs force the browser to treat it as a standard file link and respect the filename.
-            try {
-                const base64Data = canvas.toDataURL('image/png', 1.0);
+            // 2. Use toBlob for more robust download of large images
+            canvas.toBlob((blob) => {
+                if (!blob) {
+                    console.error('Canvas to Blob failed');
+                    exportBtn.innerText = 'ERROR';
+                    document.body.removeChild(exportContainer);
+                    return;
+                }
 
+                const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
-                link.href = base64Data;
+                link.href = url;
                 link.download = filename;
                 link.style.display = 'none';
                 document.body.appendChild(link);
 
                 // Debug logs
-                console.log('Export Data URI String Length:', base64Data.length);
+                console.log('Export URL:', url);
                 console.log('Final Filename:', filename);
+                console.log('Blob size:', blob.size);
 
-                // Trigger download natively so browsers respect the 'download' attribute
-                link.click();
+                // Trigger download safely
+                const event = new MouseEvent('click', {
+                    bubbles: true,
+                    cancelable: true,
+                    view: window
+                });
+                link.dispatchEvent(event);
 
-                // Cleanup immediately
-                document.body.removeChild(link);
-                if (document.body.contains(exportContainer)) {
-                    document.body.removeChild(exportContainer);
-                }
-                exportBtn.innerText = 'تصديـر';
-
-            } catch (e) {
-                console.error('Canvas to Base64 DataURI failed:', e);
-                exportBtn.innerText = 'ERROR';
-                if (document.body.contains(exportContainer)) {
-                    document.body.removeChild(exportContainer);
-                }
-            }
+                // Cleanup after a short delay to ensure the download has started
+                setTimeout(() => {
+                    if (document.body.contains(link)) {
+                        document.body.removeChild(link);
+                    }
+                    URL.revokeObjectURL(url);
+                    if (document.body.contains(exportContainer)) {
+                        document.body.removeChild(exportContainer);
+                    }
+                    exportBtn.innerText = 'تصديـر';
+                }, 2000);
+            }, 'image/png');
         }).catch(err => {
             console.error('Export failed:', err);
             exportBtn.innerText = 'ERROR';
