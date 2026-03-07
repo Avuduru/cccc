@@ -1,6 +1,6 @@
 import { initUI, updatePreview, renderControls, drawBlurredBackground, updateDisplayedInfo } from './ui.js';
 import { handleSearch } from './api.js';
-import { handleExport } from './export.js';
+import { handleExport, handleCopyToClipboard } from './export.js';
 import { debounce } from './utils.js';
 import { state } from './state.js';
 import { config } from './config.js';
@@ -35,6 +35,7 @@ function setupEventListeners() {
         searchQuery: document.getElementById('search-query'),
         searchResults: document.getElementById('search-results'),
         exportBtn: document.getElementById('export-btn'),
+        copyBtn: document.getElementById('copy-btn'),
         synopsisText: document.getElementById('synopsis-text')
     };
 
@@ -181,8 +182,11 @@ function setupEventListeners() {
         }
     });
 
-    // Export
+    // Export & Copy
     el.exportBtn.addEventListener('click', handleExport);
+    if (el.copyBtn) {
+        el.copyBtn.addEventListener('click', handleCopyToClipboard);
+    }
 
     // Synopsis
     el.synopsisText.addEventListener('input', (e) => {

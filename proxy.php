@@ -114,12 +114,27 @@ $GOOGLE_BOOKS_KEY = getenv('GOOGLE_BOOKS_KEY') ?: ''; // Optional, works without
 
 // --- Main Logic ---
 
+// --- Initialize Data Storage ---
+$dataDir = __DIR__ . '/data';
+if (!is_dir($dataDir)) {
+    mkdir($dataDir, 0755, true);
+}
+$logFile = $dataDir . '/classifications.jsonl';
+
 $query = isset($_GET['query']) ? $_GET['query'] : '';
 $type = isset($_GET['type']) ? $_GET['type'] : '';
 
-if (!$query || !$type) {
+if (!$type) {
     http_response_code(400);
-    echo json_encode(['error' => 'Missing query or type parameters']);
+    echo json_encode(['error' => 'Missing type parameter']);
+    exit;
+}
+
+// Ensure query is present for API searches
+$needsQuery = !in_array($type, ['log', 'stats']);
+if ($needsQuery && empty($query)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Missing query parameter']);
     exit;
 }
 
@@ -238,7 +253,72 @@ switch ($type) {
         $url = "https://openlibrary.org/search.json?q=" . urlencode($query) . "&limit=5";
         break;
 
+    case 'log':
+        // Log classification data
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['error' => 'Method not allowed']);
+            exit;
+        }
 
+        $raw = file_get_contents('php://input');
+        $input = json_decode($raw, true);
+        if (!$input || !isset($input['content_type']) || !isset($input['ratings'])) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid payload', 'raw' => $raw, 'json_error' => json_last_error_msg()]);
+            exit;
+        }
+
+        $logEntry = [
+            'id' => uniqid(),
+            'content_id' => $input['content_id'] ?? null,
+            'content_type' => $input['content_type'],
+            'title' => $input['title'] ?? '',
+            'ratings' => $input['ratings'],
+            'badges' => $input['badges'] ?? [],
+            'classifier' => $input['classifier'] ?? '',
+            'orientation' => $input['orientation'] ?? 'horizontal',
+            'action' => $input['action'] ?? 'export',
+            'created_at' => date('c')
+        ];
+
+        if (file_put_contents($logFile, json_encode($logEntry, JSON_UNESCAPED_UNICODE) . "\n", FILE_APPEND | LOCK_EX) !== false) {
+            echo json_encode(['status' => 'ok']);
+        } else {
+            http_response_code(500);
+            echo json_encode(['error' => 'Failed to write to log file']);
+        }
+        exit;
+
+    case 'stats':
+        // Return anonymous aggregate stats from JSONL
+        if (!file_exists($logFile)) {
+            echo json_encode(['total' => 0, 'by_type' => [], 'by_action' => []]);
+            exit;
+        }
+
+        $lines = file($logFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        $total = count($lines);
+        $byType = [];
+        $byAction = [];
+
+        foreach ($lines as $line) {
+            $entry = json_decode($line, true);
+            if ($entry) {
+                $type = $entry['content_type'] ?? 'unknown';
+                $action = $entry['action'] ?? 'export';
+
+                $byType[$type] = ($byType[$type] ?? 0) + 1;
+                $byAction[$action] = ($byAction[$action] ?? 0) + 1;
+            }
+        }
+
+        echo json_encode([
+            'total' => $total,
+            'by_type' => $byType,
+            'by_action' => $byAction
+        ]);
+        exit;
     default:
         http_response_code(400);
         echo json_encode(['error' => 'Invalid type']);
