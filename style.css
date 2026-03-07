@@ -1455,11 +1455,17 @@ body {
     gap: 20px;
 }
 
-.modal-grid.small-grid {
-    grid-template-columns: repeat(3, 1fr);
+.exceptions-icons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
 }
 
-.modal-grid.small-grid .modal-item img {
+.exceptions-icons img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
     background: transparent;
     border: none;
 }
@@ -1655,8 +1661,7 @@ body {
 /* Responsive fixes for modal */
 @media (max-width: 768px) {
 
-    .modal-grid,
-    .modal-grid.small-grid {
+    .modal-grid {
         grid-template-columns: 1fr;
     }
 
