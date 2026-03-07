@@ -1148,28 +1148,31 @@ body {
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.85);
+    background: rgba(10, 10, 10, 0.75);
     z-index: 1000;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 20px;
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .modal-content {
-    background-color: #222;
-    /* Darker background */
-    border: 6px solid #000;
+    background-color: rgba(26, 26, 26, 0.95);
+    /* Frosted dark background */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    /* Subtle inner glow border */
+    border-radius: 12px;
     width: 100%;
-    max-width: 80vw;
+    max-width: 85vw;
     max-height: 90vh;
     display: flex;
     flex-direction: column;
-    box-shadow: 20px 20px 0px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     animation: modalSlide 0.3s ease-out;
     color: #eee;
-    /* Light text default */
+    overflow: hidden;
 }
 
 /* ... existing keyframes ... */
@@ -1180,10 +1183,10 @@ body {
     font-size: 2rem;
     color: #fff;
     /* White title */
-    border-bottom: 4px solid #fff;
-    /* White underline */
-    margin-bottom: 20px;
-    padding-bottom: 5px;
+    border-bottom: 3px solid rgba(255, 255, 255, 0.2);
+    /* Softer underline */
+    margin-bottom: 25px;
+    padding-bottom: 8px;
     display: inline-block;
 }
 
@@ -1193,28 +1196,55 @@ body {
     display: flex;
     align-items: flex-start;
     gap: 15px;
-    background: rgba(255, 255, 255, 0.05);
-    /* Light transparency */
-    padding: 15px;
-    border: 3px solid #000;
+    background: #252525;
+    /* Elevated card background */
+    padding: 20px 15px;
+    /* More breathing room */
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    cursor: default;
+}
+
+.modal-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    background: #2a2a2a;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Semantic Colored Borders (RTL right-side accents) */
+.modal-item.warning-card {
+    border-right: 4px solid var(--accent-red);
+}
+
+.modal-item.theme-card {
+    border-right: 4px solid #9b59b6;
+    /* Purple for Magic/Kufriyat */
+}
+
+.modal-item.mechanic-card {
+    border-right: 4px solid #1abc9c;
+    /* Teal for Game Mechanics */
 }
 
 /* Image styles ... */
 
 .item-text strong {
     display: block;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     color: #fff;
     /* White strong text */
-    margin-bottom: 5px;
+    margin-bottom: 6px;
 }
 
 .item-text p {
     margin: 0;
-    font-size: 1.2rem;
-    line-height: 1.4;
-    color: #ccc;
-    /* Light gray paragraph */
+    font-size: 1.15rem;
+    line-height: 1.6;
+    /* Improved readability for Arabic */
+    color: #bbb;
+    /* Softer gray body text */
 }
 
 /* Level info styles ... */
