@@ -1472,7 +1472,7 @@ body {
 
 .exceptions-desc {
     margin: 0 0 16px 0;
-    font-size: 1.15rem;
+    font-size: 1.25rem;
     line-height: 1.7;
     color: #ddd;
 }
@@ -1561,7 +1561,7 @@ body {
 }
 
 .grade-title {
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     font-weight: 700;
     font-family: var(--font-ar);
 }
@@ -1621,7 +1621,7 @@ body {
 }
 
 .grade-desc-label {
-    font-size: 1.15rem;
+    font-size: 1.25rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -1632,7 +1632,7 @@ body {
 
 .grade-desc p {
     margin: 0;
-    font-size: 1.15rem;
+    font-size: 1.22rem;
     line-height: 1.65;
     color: #ddd;
 }
