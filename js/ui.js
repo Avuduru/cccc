@@ -108,16 +108,10 @@ export function renderControls() {
         } else {
             // Render Tag Cloud Pill
             if (availableCloud) {
-                // Determine Semantic Color Dot
-                let dotClass = 'dot-red'; // Default to red
-                if (['kufr', 'magic'].includes(cat.id)) dotClass = 'dot-purple';
-                else if (['vices', 'addiction'].includes(cat.id)) dotClass = 'dot-orange';
-                else if (['lootbox', 'p2w'].includes(cat.id)) dotClass = 'dot-cyan';
-
                 const tag = document.createElement('button');
                 tag.className = 'category-tag';
                 tag.dataset.id = cat.id;
-                tag.innerHTML = `<span class="tag-dot ${dotClass}"></span> ${cat.label}`;
+                tag.innerHTML = `<span class="plus-icon">+</span> ${cat.label}`;
                 availableCloud.appendChild(tag);
             }
         }

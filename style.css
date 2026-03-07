@@ -942,6 +942,7 @@ body {
     border-radius: 20px;
     font-family: inherit;
     font-size: 1.1rem;
+    font-weight: bold;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     display: flex;
@@ -958,45 +959,10 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
-/* Semantic Dots */
-.tag-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    display: inline-block;
-    transition: box-shadow 0.3s;
-}
-
-.category-tag:hover .tag-dot.dot-red {
-    box-shadow: 0 0 8px rgba(231, 76, 60, 0.8);
-}
-
-.category-tag:hover .tag-dot.dot-purple {
-    box-shadow: 0 0 8px rgba(155, 89, 182, 0.8);
-}
-
-.category-tag:hover .tag-dot.dot-orange {
-    box-shadow: 0 0 8px rgba(230, 126, 34, 0.8);
-}
-
-.category-tag:hover .tag-dot.dot-cyan {
-    box-shadow: 0 0 8px rgba(0, 206, 209, 0.8);
-}
-
-.dot-red {
-    background: #e74c3c;
-}
-
-.dot-purple {
-    background: #9b59b6;
-}
-
-.dot-orange {
-    background: #e67e22;
-}
-
-.dot-cyan {
-    background: #00ced1;
+.category-tag .plus-icon {
+    color: var(--accent-green);
+    font-weight: bold;
+    font-size: 1.2rem;
 }
 
 .ratings-grid {
