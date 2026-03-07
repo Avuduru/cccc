@@ -85,13 +85,8 @@ export function handleExport() {
                 console.log('Final Filename:', filename);
                 console.log('Blob size:', blob.size);
 
-                // Trigger download safely
-                const event = new MouseEvent('click', {
-                    bubbles: true,
-                    cancelable: true,
-                    view: window
-                });
-                link.dispatchEvent(event);
+                // Trigger download natively so browsers respect the 'download' attribute
+                link.click();
 
                 // Cleanup after a short delay to ensure the download has started
                 setTimeout(() => {
