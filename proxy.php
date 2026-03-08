@@ -64,6 +64,38 @@ function filterAnimeFromTMDB($data)
     return $data;
 }
 
+/**
+ * Filter out games with NSFW tags from RAWG results
+ */
+function filterNSFWFromRAWG($data)
+{
+    if (!isset($data['results']) || !is_array($data['results'])) {
+        return $data;
+    }
+
+    $nsfwTags = ['nsfw', 'nudity', 'sexual-content', 'eroge', 'hentai'];
+    $filtered = [];
+
+    foreach ($data['results'] as $item) {
+        $isNsfw = false;
+        if (isset($item['tags']) && is_array($item['tags'])) {
+            foreach ($item['tags'] as $tag) {
+                if (isset($tag['slug']) && in_array(strtolower($tag['slug']), $nsfwTags)) {
+                    $isNsfw = true;
+                    break;
+                }
+            }
+        }
+        if (!$isNsfw) {
+            $filtered[] = $item;
+        }
+    }
+
+    // Ensure we don't return more than 5 after filtering
+    $data['results'] = array_slice($filtered, 0, 5);
+    return $data;
+}
+
 function fetchUrl($url, $headers = [])
 {
     if (empty($url))
@@ -149,7 +181,8 @@ switch ($type) {
 
     case 'game':
         // RAWG API - comprehensive game database (free and paid games)
-        $url = "https://api.rawg.io/api/games?key=$RAWG_KEY&search=" . urlencode($query) . "&page_size=5";
+        // Fetch 10 to give room for NSFW filtering
+        $url = "https://api.rawg.io/api/games?key=$RAWG_KEY&search=" . urlencode($query) . "&page_size=10";
         break;
 
     case 'game_details':
@@ -333,6 +366,12 @@ if ($url) {
         $data = json_decode($response, true);
         if ($data && !isset($data['error'])) {
             $data = filterAnimeFromTMDB($data);
+            $response = json_encode($data);
+        }
+    } else if ($type === 'game') {
+        $data = json_decode($response, true);
+        if ($data && !isset($data['error'])) {
+            $data = filterNSFWFromRAWG($data);
             $response = json_encode($data);
         }
     }
