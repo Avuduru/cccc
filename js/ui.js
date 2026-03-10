@@ -396,13 +396,14 @@ function fitSynopsisToContainer() {
     if (!el || !wrapper) return;
 
     // 1. Reset all size classes
-    el.classList.remove('scale-medium', 'scale-heavy', 'scale-extreme', 'manual-size-sm', 'manual-size-md', 'manual-size-lg');
+    el.classList.remove('scale-medium', 'scale-heavy', 'scale-extreme', 'manual-size-sm', 'manual-size-md', 'manual-size-lg', 'manual-size-xl');
 
     // 2. Check Manual Mode
     if (state.synopsisSize && state.synopsisSize !== 'auto') {
         if (state.synopsisSize === 'small') el.classList.add('manual-size-sm');
         else if (state.synopsisSize === 'medium') el.classList.add('manual-size-md');
         else if (state.synopsisSize === 'large') el.classList.add('manual-size-lg');
+        else if (state.synopsisSize === 'xlarge') el.classList.add('manual-size-xl');
         return;
     }
 
