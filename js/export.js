@@ -69,7 +69,7 @@ export function handleExport() {
         // html2canvas options
         const options = {
             backgroundColor: null,
-            scale: 1, // We are already at target pixels
+            scale: 3, // Increased scale for pristine high-res social media export
             useCORS: true,
             allowTaint: true,
             logging: false,
@@ -177,7 +177,7 @@ export function handleCopyToClipboard() {
     setTimeout(() => {
         const options = {
             backgroundColor: null,
-            scale: 1,
+            scale: 3,
             useCORS: true,
             allowTaint: true,
             logging: false,

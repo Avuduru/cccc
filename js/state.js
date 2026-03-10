@@ -11,7 +11,7 @@ export const state = {
         genre: 'نوع العمل',
         synopsis: ''
     },
-    synopsisSize: 'auto' // 'auto' | 'small' | 'medium' | 'large'
+    synopsisSize: 'auto' // 'auto' | 'small' | 'medium' | 'large' | 'xlarge'
 };
 
 export function updateState(u) {

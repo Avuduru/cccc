@@ -360,10 +360,11 @@ body {
     z-index: 5;
     width: 100%;
     height: 100%;
-    padding: 3cqw;
-    /* Relative padding */
+    padding: 2cqw;
+    /* Tighter padding for social media */
     display: flex;
-    gap: 3cqw;
+    gap: 2cqw;
+    /* Reduced gap to pull columns closer together */
     box-sizing: border-box;
     pointer-events: none;
     /* FIX: Allow clicks to pass through to poster */
@@ -499,7 +500,8 @@ body {
     font-size: var(--canvas-title-size);
     margin: 0;
     padding: 0;
-    line-height: 1.1;
+    line-height: 1.05;
+    /* Tighter line-height for bold Arabic titles */
     /* letter-spacing: 6px; REMOVED: Breaks Arabic text in export */
     /* text-transform: uppercase; REMOVED per user request */
     display: -webkit-box;
@@ -542,7 +544,8 @@ body {
 }
 
 .synopsis-wrapper {
-    margin-top: 2cqw;
+    margin-top: 1cqw;
+    /* Tighter top margin for synopsis */
     flex: 1;
     overflow: hidden;
     /* Strict clipping for html2canvas */
@@ -568,7 +571,8 @@ body {
     font-family: var(--font-ar);
     font-size: var(--canvas-synopsis-size);
     /* Relative size */
-    line-height: 1.5;
+    line-height: 1.15;
+    /* Reduced line spacing to minimum without overlap */
     outline: none;
     direction: rtl;
     text-align: right;
@@ -648,6 +652,10 @@ body {
     font-size: var(--canvas-synopsis-size) !important;
 }
 
+#synopsis-text.manual-size-xl {
+    font-size: calc(var(--canvas-synopsis-size) * 1.15) !important;
+}
+
 /* Placeholder for contenteditable div */
 [contenteditable]:empty:before {
     content: attr(placeholder);
@@ -660,11 +668,12 @@ body {
 .vertical .canvas-content {
     flex-direction: column;
     align-items: center;
-    padding: 3cqw;
+    padding: 2cqw;
+    /* Top/Bottom padding for vertical - made tighter */
     justify-content: center;
     /* Center everything vertically */
-    gap: 2cqw;
-    /* Gap between Header, Poster, Icons */
+    gap: 1.5cqw;
+    /* Gap between Header, Poster, Icons - reduced to compress vertical length */
     transition: justify-content 0.3s ease;
 }
 
@@ -825,7 +834,8 @@ body {
 /* Logic for <= 4 icons: Center + larger gap */
 .vertical .stickers-grid-canvas.few-icons {
     /* Flex alignment handles centering naturally */
-    gap: 2cqw;
+    gap: 1.5cqw;
+    /* Slightly pulled together */
 }
 
 .vertical .stickers-grid-canvas.few-icons .sticker-item {
@@ -1892,7 +1902,7 @@ body {
 }
 
 .export-mode #synopsis-text {
-    line-height: 1.3 !important;
+    line-height: 1.15 !important;
 }
 
 .export-mode.vertical {
