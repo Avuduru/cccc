@@ -86,8 +86,10 @@ function setupEventListeners() {
                     title: 'اكتب العنوان هنا',
                     year: '',
                     poster: '',
-                    genre: 'اكتب النوع',
-                    synopsis: 'اكتب النبذة هنا...'
+                    genre: 'التصنيف 1، التصنيف 2، التصنيف 3',
+                    synopsis: 'اكتب النبذة هنا...',
+                    score: '0.0',
+                    stats: 'المدة/عدد الحلقات'
                 };
             } else {
                 state.meta = {
@@ -96,7 +98,9 @@ function setupEventListeners() {
                     year: '2023',
                     poster: null,
                     genre: 'نوع العمل',
-                    synopsis: ''
+                    synopsis: '',
+                    score: '',
+                    stats: ''
                 };
             }
 
@@ -104,6 +108,7 @@ function setupEventListeners() {
             const uploadHint = document.getElementById('upload-hint');
             const titleText = document.getElementById('title-text');
             const genreText = document.getElementById('genre-text');
+            const scoreText = document.getElementById('score-text');
             const posterImg = document.getElementById('poster-img');
 
             if (state.type === 'manual') {
@@ -121,6 +126,7 @@ function setupEventListeners() {
                 // Enable editing
                 titleText.contentEditable = "true";
                 genreText.contentEditable = "true";
+                if (scoreText) scoreText.contentEditable = "true";
             } else {
                 posterImg.classList.remove('manual-mode');
                 posterImg.classList.remove('empty-poster'); // Clear empty state
@@ -129,6 +135,7 @@ function setupEventListeners() {
                 // Disable editing
                 titleText.contentEditable = "false";
                 genreText.contentEditable = "false";
+                if (scoreText) scoreText.contentEditable = "false";
             }
 
             renderControls();

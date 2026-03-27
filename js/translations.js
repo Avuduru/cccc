@@ -12,7 +12,10 @@ export const genreTranslations = {
     'Sci-Fi': 'خيال علمي',
     'Science Fiction': 'خيال علمي',
     'Thriller': 'إثارة',
+    'Suspense': 'تشويق',
     'Supernatural': 'خارق للطبيعة',
+    'Gore': 'دموي',
+    'Mythology': 'أساطير',
 
     // Anime/Manga Specific
     'Seinen': 'سينين',
@@ -33,6 +36,12 @@ export const genreTranslations = {
     'Demons': 'شياطين',
     'Vampire': 'مصاص دماء',
     'Magic': 'سحر',
+    'Police': 'شرطة',
+    'Detective': 'تحقيق',
+    'Martial Arts': 'فنون قتالية',
+    'Samurai': 'ساموراي',
+    'Space': 'فضاء',
+    'Super Power': 'قوى خارقة',
 
     // Games
     'RPG': 'آر بي جي',
@@ -70,6 +79,8 @@ export const genreTranslations = {
     'Biography': 'سيرة ذاتية',
     'History': 'تاريخ',
     'Family': 'عائلي',
+    'Movie': 'فيلم',
+    'TV Series': 'مسلسل',
     'Game': 'لعبة'
 };
 

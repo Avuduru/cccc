@@ -9,7 +9,9 @@ export const state = {
         year: '2023',
         poster: null,
         genre: 'نوع العمل',
-        synopsis: ''
+        synopsis: '',
+        score: '',
+        stats: ''
     },
     synopsisSize: 'auto' // 'auto' | 'small' | 'medium' | 'large' | 'xlarge'
 };
