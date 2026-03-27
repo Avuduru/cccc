@@ -179,6 +179,14 @@ switch ($type) {
         $url = "https://api.themoviedb.org/3/search/$type?api_key=$TMDB_KEY&language=en-US&query=" . urlencode($query) . "&page=1";
         break;
 
+    case 'movie_details':
+        $url = "https://api.themoviedb.org/3/movie/$query?api_key=$TMDB_KEY&language=en-US";
+        break;
+
+    case 'tv_details':
+        $url = "https://api.themoviedb.org/3/tv/$query?api_key=$TMDB_KEY&language=en-US";
+        break;
+
     case 'game':
         // RAWG API - comprehensive game database (free and paid games)
         // Fetch 10 to give room for NSFW filtering

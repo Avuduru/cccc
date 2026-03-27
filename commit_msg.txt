@@ -1,0 +1,21 @@
+Comprehensive Vertical Layout Redesign & 4:5 HTML2Canvas Hotfixes
+
+Metadata & Translations Polish:
+- Introduced the 'Pill' system standardizing genres, stats, and scores into green, blue, and yellow boxes universally.
+- Rewrote metadata arrangement perfectly into RTL logic flow (Left: Genres, Center: Stats, Right: Score).
+- Built a massive formatArabicPlural parser to natively map Arabic grammar rules for quantities like minutes, hours, episodes, chapters.
+- Populated deeper fallback descriptors locally for "Suspense", "Gore", and "Police" genres.
+
+Manual Editor Evolution:
+- Loaded the full empty stats/genres/score descriptor layout universally into Manual selection mode.
+- Standardized Arabic placeholder definitions enabling 100% custom metadata manipulation.
+
+Strict Vertical 4:5 Architecture:
+- Discarded the floating 2:3 layout, restructuring the core .vertical canvas into a native mathematically balanced 4:5 grid.
+- Anchored elements rigidly down a centered column grid matching wireframes exactly. 
+- Integrated precise sequence flow: Clean 2:3 isolated artwork block (Top), Watermark (White solid), Title & Tags, Synopsis, Icon layout flush to the bottom.
+
+Ironclad HTMLCanvas Bypass Fixes:
+- HTML2Canvas failed processing percentage flex logic in complex nested hierarchies, stretching the poster boundaries during export generation.
+- Injected fixed-pixel .export-mode.vertical overrides (strictly locking the poster size to 420x630 pixels) to bypass export engine calculation failures natively.
+- Patched -webkit-box line-clamp crashes horizontally in HTML2Canvas by appending .export-mode physical line-height block constraints, permanently killing text overlaps.

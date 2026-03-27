@@ -17,6 +17,8 @@ const els = {
     posterBg: () => document.getElementById('poster-bg'),
     titleText: () => document.getElementById('title-text'),
     genreText: () => document.getElementById('genre-text'),
+    scoreBadge: () => document.getElementById('score-badge'),
+    scoreText: () => document.getElementById('score-text'),
     synopsisText: () => document.getElementById('synopsis-text'),
     searchQuery: () => document.getElementById('search-query'),
     searchResults: () => document.getElementById('search-results'),
@@ -69,13 +71,13 @@ export function renderControls() {
         }
     });
 
-    const isGame = state.type === 'game';
+    const isGameOrManual = state.type === 'game' || state.type === 'manual';
     const availableCloud = document.getElementById('available-categories');
     if (availableCloud) availableCloud.innerHTML = '';
 
     // 1. Render Rating Bars or Category Tags (Mawjoodat)
     CATEGORIES.Mawjoodat.forEach(cat => {
-        if (cat.type === 'game_only' && !isGame) return;
+        if (cat.type === 'game_only' && !isGameOrManual) return;
 
         const currentLevel = state.ratings[cat.id] ? parseInt(state.ratings[cat.id]) : 0;
 
@@ -507,13 +509,36 @@ export function showSearchResults(data, type) {
 function selectItem(item, type) {
     state.meta.id = item.slug || item.mal_id || item.id || '';
     state.meta.title = item.title || item.name || item.title_english || (item.volumeInfo ? item.volumeInfo.title : 'No Title');
+    state.meta.score = '';
+    state.meta.stats = '';
+
 
     if (type === 'movie' || type === 'tv') {
+        if (item.vote_average) state.meta.score = parseFloat(item.vote_average).toFixed(1);
         const rawPoster = `https://image.tmdb.org/t/p/w500${item.poster_path}`;
         // Use proxy to ensure CORS headers for Canvas processing
         state.meta.poster = `proxy.php?query=${encodeURIComponent(rawPoster)}&type=image_proxy`;
 
+        // Default fallback genre while fetching
         state.meta.genre = translateGenres(type === 'movie' ? 'Movie' : 'TV Series');
+
+        // Fetch details for runtime/episodes and genres
+        const detailType = type === 'movie' ? 'movie_details' : 'tv_details';
+        fetch(`proxy.php?query=${item.id}&type=${detailType}`)
+            .then(resp => resp.json())
+            .then(data => {
+                if (data.genres && data.genres.length > 0) {
+                    const genreText = data.genres.map(g => g.name).join(', ');
+                    state.meta.genre = translateGenres(genreText);
+                }
+
+                if (type === 'movie' && data.runtime) {
+                    state.meta.stats = formatArabicPlural(data.runtime, 'minute');
+                } else if (type === 'tv' && data.number_of_episodes) {
+                    state.meta.stats = formatArabicPlural(data.number_of_episodes, 'episode');
+                }
+                updateDisplayedInfo();
+            }).catch(e => console.error(e));
 
         // Translate synopsis asynchronously
         if (item.overview) {
@@ -525,6 +550,7 @@ function selectItem(item, type) {
             });
         }
     } else if (type === 'game') {
+        if (item.metacritic) state.meta.score = item.metacritic;
         // RAWG format - fetch full game details for description
         state.meta.poster = ''; // Start empty, will be filled by SteamGridDB
         const genreText = item.genres ? item.genres.map(g => g.name).join(', ') : 'Game';
@@ -549,6 +575,8 @@ function selectItem(item, type) {
                         const released = item.released ? `Released: ${item.released}` : '';
                         description = [platform, released].filter(Boolean).join(' • ') || 'No description available';
                     }
+                    if (data.metacritic) state.meta.score = data.metacritic;
+                    if (data.playtime) state.meta.stats = formatArabicPlural(data.playtime, 'hour');
 
                     // Translate description
                     translateText(description).then(translated => {
@@ -599,6 +627,17 @@ function selectItem(item, type) {
         els.searchQuery().value = state.meta.title;
         return; // Early return since we handle display updates in async callback
     } else if (type === 'anime' || type === 'manga') {
+        if (item.score) state.meta.score = parseFloat(item.score).toFixed(2);
+        
+        if (type === 'anime' && item.episodes) {
+            state.meta.stats = formatArabicPlural(item.episodes, 'episode');
+        } else if (type === 'manga') {
+            let statsParts = [];
+            if (item.chapters) statsParts.push(formatArabicPlural(item.chapters, 'chapter'));
+            if (item.volumes) statsParts.push(formatArabicPlural(item.volumes, 'volume'));
+            if (statsParts.length > 0) state.meta.stats = statsParts.join(' • ');
+        }
+        
         const rawPoster = item.images.jpg.large_image_url;
         state.meta.poster = `proxy.php?query=${encodeURIComponent(rawPoster)}&type=image_proxy`;
 
@@ -616,6 +655,8 @@ function selectItem(item, type) {
             });
         }
     } else if (type === 'book') {
+        if (item.ratings_average) state.meta.score = parseFloat(item.ratings_average).toFixed(1);
+        if (item.number_of_pages_median) state.meta.stats = formatArabicPlural(item.number_of_pages_median, 'page');
         // Open Library format
         const rawPoster = item.cover_i ? `https://covers.openlibrary.org/b/id/${item.cover_i}-L.jpg` : (item.volumeInfo?.imageLinks?.thumbnail || '');
         state.meta.poster = rawPoster ? `proxy.php?query=${encodeURIComponent(rawPoster)}&type=image_proxy` : '';
@@ -674,7 +715,42 @@ export function updateDisplayedInfo() {
         els.titleText().style.direction = 'rtl';
         els.titleText().style.unicodeBidi = 'normal';
     }
-    els.genreText().innerText = state.meta.genre || '';
+
+    const genreContainer = els.genreText();
+    genreContainer.innerHTML = '';
+
+    if (state.meta.stats) {
+        const statsParts = state.meta.stats.split(' • ');
+        statsParts.forEach(stat => {
+            if (stat.trim()) {
+                const statPill = document.createElement('span');
+                statPill.className = 'genre-pill stats-pill';
+                statPill.innerText = stat.trim();
+                genreContainer.appendChild(statPill);
+            }
+        });
+    }
+
+    let rawGenres = state.meta.genre || '';
+    if (rawGenres) {
+        const parts = rawGenres.split(/،|,/);
+        parts.forEach(g => {
+            const text = g.trim();
+            if (text) {
+                const pill = document.createElement('span');
+                pill.className = 'genre-pill';
+                pill.innerText = text;
+                genreContainer.appendChild(pill);
+            }
+        });
+    }
+
+    if (state.meta.score) {
+        els.scoreText().innerText = state.meta.score;
+        els.scoreBadge().classList.remove('hidden');
+    } else {
+        els.scoreBadge().classList.add('hidden');
+    }
 
     // Clip synopsis to 4 lines
     // Clip synopsis to 8 lines (allow more for horizontal/flex)
@@ -700,4 +776,30 @@ export function updateDisplayedInfo() {
     // This allows CSS (A4 or 2:3) to control the container size, cropping images if needed.
 
     adjustTitleSize();
+}
+
+// Arabic Plural Rules Helper
+export function formatArabicPlural(count, type) {
+    const num = parseFloat(count);
+    if (!num || isNaN(num) || num === 0) return '';
+    
+    const words = {
+        episode: { s1: 'حلقة واحدة', s2: 'حلقتان', p3_10: 'حلقات', p11: 'حلقة' },
+        chapter: { s1: 'فصل واحد', s2: 'فصلان', p3_10: 'فصول', p11: 'فصل' },
+        volume:  { s1: 'مجلد واحد', s2: 'مجلدان', p3_10: 'مجلدات', p11: 'مجلد' },
+        minute:  { s1: 'دقيقة واحدة', s2: 'دقيقتان', p3_10: 'دقائق', p11: 'دقيقة' },
+        hour:    { s1: 'ساعة واحدة', s2: 'ساعتان', p3_10: 'ساعات', p11: 'ساعة' },
+        page:    { s1: 'صفحة واحدة', s2: 'صفحتان', p3_10: 'صفحات', p11: 'صفحة' }  
+    };
+
+    const w = words[type];
+    if (!w) return `${num}`;
+
+    if (num % 1 !== 0) return `${num} ${w.p11}`;
+    if (num === 1) return w.s1;
+    if (num === 2) return w.s2;
+
+    const lastTwo = num % 100;
+    if (lastTwo >= 3 && lastTwo <= 10) return `${num} ${w.p3_10}`;
+    return `${num} ${w.p11}`;
 }
