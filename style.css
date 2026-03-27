@@ -734,11 +734,10 @@ body {
 
 /* VERTICAL LAYOUT */
 .vertical .canvas-content {
-    flex-direction: column;
-    align-items: center; /* Center everything perfectly */
-    padding: 3cqw; 
-    justify-content: flex-start; /* Stack from top to bottom */
-    gap: 1.5cqw;
+    display: block !important; /* Strip flex completely */
+    position: relative;
+    padding: 0 !important; /* Managed natively by internal absolute coordinates */
+    width: 100%; height: 100%;
 }
 
 /* Dynamic Space Optimization (1 Row of Icons) */
@@ -749,13 +748,15 @@ body {
 }
 
 .vertical .poster-container {
-    position: relative;
-    height: 42%; 
-    width: 35%; /* Fixed strict 2:3 equivalent mapping for 4:5 canvas */
-    flex-shrink: 0; /* STOPS HTML2CANVAS SQUISH BUGS */
+    position: absolute !important;
+    top: 26%; right: 5%;
+    width: 44% !important;
+    height: 52.8% !important; /* Maps rigidly to perfect 2:3 dynamically natively */
+    max-height: 52.8% !important;
+    flex-shrink: 0;
     z-index: 5;
     border: 3px solid rgba(255, 255, 255, 0.3);
-    margin: 0;
+    margin: 0 !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
 }
 
@@ -783,7 +784,9 @@ body {
 }
 
 .vertical .info-content-right {
-    display: contents; /* Strip wrappers, let items flow strictly in flex column */
+    display: block !important; /* Neutralize display:contents parsing bug */
+    width: 100%; height: 100%;
+    position: static;
     pointer-events: none;
 }
 
@@ -792,14 +795,14 @@ body {
 }
 
 .vertical .header-info {
+    position: absolute !important;
+    top: 3%; left: 0; right: 0; width: 100%;
     display: flex !important;
     flex-direction: column;
-    position: relative;
     align-items: center; /* Center elements in header info */
     text-align: center; /* Center title */
-    width: 100%;
     z-index: 10;
-    margin-bottom: 0px;
+    margin: 0 !important;
 }
 
 .vertical .classification-label {
@@ -838,18 +841,24 @@ body {
 }
 
 .vertical .synopsis-wrapper {
-    display: block !important; /* Re-enable synopsis */
-    max-height: 120px; /* Cap height to prevent spilling */
-    width: 85%;
-    margin: 0 auto;
+    position: absolute !important;
+    top: 26%; left: 5%;
+    width: 41% !important;
+    height: 52.8% !important;
+    max-height: 52.8% !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    display: block !important;
 }
 
 .vertical #synopsis-text {
     font-size: calc(var(--canvas-synopsis-size) * 0.8) !important;
-    -webkit-line-clamp: 4 !important; /* Allow max 4 lines */
-    line-clamp: 4 !important;
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 24 !important; /* Absolute height safely natively stops visual overflowing */
+    overflow: hidden !important;
     text-shadow: 0px 2px 8px rgba(0,0,0,0.8);
-    text-align: center;
+    text-align: start !important; /* Respect LTR/RTL perfectly */
 }
 
 .vertical .genre-row {
@@ -868,16 +877,31 @@ body {
     width: 100%;
 }
 
-.vertical .stickers-grid-canvas { /* Bind targeting directly to the DOM child since container was removed */
+.vertical .stickers-grid-canvas { 
+    position: absolute !important; 
+    bottom: 1.5% !important; left: 0 !important; right: 0 !important; width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-wrap: nowrap !important;
     z-index: 10;
-    margin-top: auto; /* Pushes to absolute bottom */
+    margin: 0 !important; 
+    pointer-events: auto;
 }
 
 /* Classifier Box below Poster */
 .vertical .modern-watermark.vertical-only {
-    /* DO NOT use display: flex !important to let the JS .hidden class work! */
-    margin-bottom: 2cqw;
-    /* Removed white background; inherits same premium styling as horizontal */
+    position: absolute !important;
+    top: 80%; 
+    right: 27%; /* Central right-axis coordinate perfectly under 44% width poster (5% offset + 22% half-width) */
+    width: auto !important; /* Fixes horrible stretching from previous 44% metric */
+    transform: translateX(50%) !important; /* Centers natively */
+    display: flex;
+    justify-content: center;
+    box-sizing: border-box;
+    margin: 0 !important; 
+    white-space: nowrap;
+    pointer-events: auto;
 }
 
 
@@ -913,8 +937,8 @@ body {
 }
 
 .vertical .stickers-grid-canvas {
-    width: 100%;
-    max-width: 1000px;
+    width: 100% !important;
+    max-width: 100% !important; /* FIXED LAYOUT BUG! Eliminated old 1000px restriction */
     padding: 1cqw;
     background: transparent;
     margin-top: 0;
@@ -2019,13 +2043,7 @@ body {
     margin-top: 0 !important;
 }
 
-.export-mode.vertical .sticker-item,
-.export-mode.vertical .stickers-grid-canvas.few-icons .sticker-item {
-    width: 21.6% !important;
-    /* 20% larger than 18% base */
-    max-width: 250px !important;
-    /* Override vh constraints for export */
-}
+
 
 /* FIX SEARCH OVERFLOW */
 #search-results {
@@ -2120,34 +2138,43 @@ body {
     margin: 0 !important;
 }
 
-/* IRONCLAD HTML2CANVAS PIXEL OVERRIDES */
+/* IRONCLAD HTML2CANVAS PIXEL COORDINATES */
 .export-mode.vertical .canvas-content {
-    padding: 36px !important; /* Hardcode 3cqw */
-    gap: 18px !important; /* Hardcode 1.5cqw */
+    padding: 0 !important; 
 }
+
+.export-mode.vertical .header-info { top: 45px !important; }
 
 .export-mode.vertical .poster-container {
-    height: 630px !important; /* 42% of 1500px explicitly */
-    width: 420px !important;  /* 35% of 1200px explicitly (2:3 aspect) */
-    max-height: 630px !important;
-    max-width: 420px !important;
-    flex: 0 0 630px !important; /* Kill flex stretching entirely */
-    overflow: hidden !important; /* Hard constraint crop */
+    top: 390px !important; right: 60px !important;
+    width: 528px !important; height: 792px !important;
+    max-height: 792px !important; max-width: 528px !important;
 }
 
+.export-mode.vertical .synopsis-wrapper {
+    top: 390px !important; left: 60px !important;
+    width: 492px !important; height: 792px !important;
+    max-height: 792px !important;
+}
+
+
+.export-mode.vertical .genre-row {
+    margin: 12px 0 0 0 !important; /* Condense tag boxes strongly against the title */
+    justify-content: center !important;
+}
 
 /* HTML2CANVAS FONT & LAYOUT COMPATIBILITY FIXES */
 .export-mode .header-info h2 {
     display: block !important;     /* html2canvas completely fails computing bounds on -webkit-box */
     overflow: hidden !important;
     max-height: 2.2em !important;  /* Hardcap to exactly 2 lines (1.1 line-height * 2) */
-    margin-bottom: 20px !important; /* Force spacing above tags */
+    margin-bottom: 8px !important; /* Condensed clustering down from 20px */
 }
 
 .export-mode #synopsis-text {
     display: block !important;
     overflow: hidden !important;
-    max-height: 4.6em !important; /* Hardcap to 4 lines */
+    max-height: 870px !important; /* Hardcap Story cleanly alongside 891px Poster */
 }
 
 /* EXPORT MODE COMPONENT OVERRIDES */
@@ -2172,7 +2199,7 @@ body {
 .export-mode.vertical .modern-watermark {
     font-size: 26px !important;
     padding: 8px 29px !important;
-    transform: none !important;
+    /* Stripped trailing transform override destroying native centering */
 }
 
 /* Removed conflicting "@media portrait" export queries that crashed the html2canvas engine */
