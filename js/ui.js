@@ -687,19 +687,50 @@ export function adjustTitleSize() {
     const el = els.titleText();
     if (!el) return;
     const len = el.innerText.length;
-
-    // Orientation-specific thresholds
-    // Vertical layout is narrower (~55%), so we scale sooner.
     const isVertical = state.orientation === 'vertical';
-    const t = isVertical
-        ? { med: 12, long: 25, xl: 40 }
-        : { med: 20, long: 40, xl: 60 };
 
+    // Reset all scaling
     el.removeAttribute('data-length');
+    el.classList.remove('title-scale-1', 'title-scale-2', 'title-scale-3', 'single-line-clamp');
 
-    if (len >= t.med && len < t.long) el.dataset.length = 'medium';
-    else if (len >= t.long && len < t.xl) el.dataset.length = 'long';
-    else if (len >= t.xl) el.dataset.length = 'xl';
+    if (isVertical) {
+        // Vertical: auto-fit to single line, ellipsis fallback for >5 words
+        const wordCount = el.innerText.trim().split(/\s+/).length;
+        fitVerticalTitle(el, wordCount);
+    } else {
+        // Horizontal: character-count based scaling (unchanged)
+        const t = { med: 20, long: 40, xl: 60 };
+        if (len >= t.med && len < t.long) el.dataset.length = 'medium';
+        else if (len >= t.long && len < t.xl) el.dataset.length = 'long';
+        else if (len >= t.xl) el.dataset.length = 'xl';
+    }
+}
+
+function fitVerticalTitle(el, wordCount) {
+    const scales = ['title-scale-1', 'title-scale-2', 'title-scale-3'];
+
+    function fitsOneLine() {
+        const fontSize = parseFloat(getComputedStyle(el).fontSize);
+        return el.scrollHeight <= fontSize * 1.5; // ~1 line with tolerance
+    }
+
+    // Check at base size
+    if (fitsOneLine()) return;
+
+    // Try each progressively smaller scale
+    for (const scale of scales) {
+        el.classList.add(scale);
+        if (fitsOneLine()) return;
+        el.classList.remove(scale);
+    }
+
+    // Still doesn't fit — keep smallest scale
+    el.classList.add(scales[scales.length - 1]);
+
+    // If >5 words, clamp to 1 line with ellipsis
+    if (wordCount > 5) {
+        el.classList.add('single-line-clamp');
+    }
 }
 
 export function updateDisplayedInfo() {

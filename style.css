@@ -836,6 +836,34 @@ body {
     font-size: calc(var(--canvas-v-title-size) * 0.7);
 }
 
+/* Vertical Title Auto-Scaling (JS-driven, progressively smaller) */
+.vertical .header-info h2.title-scale-1 {
+    font-size: calc(var(--canvas-v-title-size) * 0.75) !important;
+}
+.vertical .header-info h2.title-scale-2 {
+    font-size: calc(var(--canvas-v-title-size) * 0.6) !important;
+}
+.vertical .header-info h2.title-scale-3 {
+    font-size: calc(var(--canvas-v-title-size) * 0.5) !important;
+}
+
+/* Single-line clamp for titles >5 words that still overflow (vertical only) */
+.vertical .header-info h2.single-line-clamp {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: block !important;
+    -webkit-line-clamp: unset !important;
+    line-clamp: unset !important;
+    -webkit-box-orient: unset !important;
+}
+
+/* Export compatibility for single-line title clamp */
+.export-mode .header-info h2.single-line-clamp {
+    white-space: nowrap !important;
+    max-height: 1.1em !important;
+}
+
 .vertical .genre-label {
     display: flex !important; /* Re-enable genre label in vertical mode */
 }
@@ -843,7 +871,7 @@ body {
 .vertical .synopsis-wrapper {
     position: absolute !important;
     top: 26%; left: 5%;
-    width: 41% !important;
+    width: 42% !important;
     height: 52.8% !important;
     max-height: 52.8% !important;
     overflow: hidden !important;
@@ -2146,14 +2174,14 @@ body {
 .export-mode.vertical .header-info { top: 45px !important; }
 
 .export-mode.vertical .poster-container {
-    top: 390px !important; right: 60px !important;
+    top: 330px !important; right: 60px !important;
     width: 528px !important; height: 792px !important;
     max-height: 792px !important; max-width: 528px !important;
 }
 
 .export-mode.vertical .synopsis-wrapper {
-    top: 390px !important; left: 60px !important;
-    width: 492px !important; height: 792px !important;
+    top: 330px !important; left: 60px !important;
+    width: 504px !important; height: 792px !important;
     max-height: 792px !important;
 }
 
@@ -2199,7 +2227,18 @@ body {
 .export-mode.vertical .modern-watermark {
     font-size: 26px !important;
     padding: 8px 29px !important;
-    /* Stripped trailing transform override destroying native centering */
+    top: 76% !important; /* Poster bottom at 74.8% — maintain 1.2% gap */
+    /* Center under poster without transform (html2canvas breaks translateX%) */
+    left: 51% !important;  /* Poster left edge: 100% - 5% - 44% */
+    right: 5% !important;  /* Poster right edge */
+    width: fit-content !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    transform: none !important;
+}
+
+.export-mode.vertical .stickers-grid-canvas {
+    bottom: 4% !important; /* Lowered from 6.5% — more space below watermark */
 }
 
 /* Removed conflicting "@media portrait" export queries that crashed the html2canvas engine */

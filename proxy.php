@@ -73,7 +73,7 @@ function filterNSFWFromRAWG($data)
         return $data;
     }
 
-    $nsfwTags = ['nsfw', 'nudity', 'sexual-content', 'eroge', 'hentai'];
+    $nsfwTags = ['eroge', 'hentai']; // Only block actual porn games — mainstream games with mature tags should be classifiable
     $filtered = [];
 
     foreach ($data['results'] as $item) {
