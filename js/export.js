@@ -1,5 +1,57 @@
 import { state } from './state.js';
 
+const MAX_EXPORT_BYTES = 2 * 1024 * 1024; // 2MB hard cap
+
+// Re-run synopsis auto-scaling on a clone at export resolution
+function rescaleSynopsisInClone(clone) {
+    if (state.synopsisSize && state.synopsisSize !== 'auto') return;
+    const el = clone.querySelector('#synopsis-text');
+    const wrapper = el ? el.parentElement : null;
+    if (!el || !wrapper) return;
+
+    el.classList.remove('scale-medium', 'scale-heavy', 'scale-extreme');
+    if (el.scrollHeight > wrapper.clientHeight) {
+        el.classList.add('scale-medium');
+        if (el.scrollHeight > wrapper.clientHeight) {
+            el.classList.remove('scale-medium');
+            el.classList.add('scale-heavy');
+            if (el.scrollHeight > wrapper.clientHeight) {
+                el.classList.remove('scale-heavy');
+                el.classList.add('scale-extreme');
+            }
+        }
+    }
+}
+
+async function compressToMaxSize(canvas, maxBytes = MAX_EXPORT_BYTES) {
+    let scale = 1.0;
+    while (scale > 0.3) {
+        const w = Math.round(canvas.width * scale);
+        const h = Math.round(canvas.height * scale);
+        const tmp = document.createElement('canvas');
+        tmp.width = w;
+        tmp.height = h;
+        tmp.getContext('2d').drawImage(canvas, 0, 0, w, h);
+
+        const blob = await new Promise(r => tmp.toBlob(r, 'image/png'));
+        if (blob.size <= maxBytes) {
+            console.log(`Export compressed: ${w}x${h}, ${(blob.size / 1024 / 1024).toFixed(2)}MB (scale ${scale.toFixed(1)})`);
+            return blob;
+        }
+        scale -= 0.1;
+    }
+    // Fallback at minimum scale
+    const w = Math.round(canvas.width * 0.3);
+    const h = Math.round(canvas.height * 0.3);
+    const tmp = document.createElement('canvas');
+    tmp.width = w;
+    tmp.height = h;
+    tmp.getContext('2d').drawImage(canvas, 0, 0, w, h);
+    const blob = await new Promise(r => tmp.toBlob(r, 'image/png'));
+    console.log(`Export fallback: ${w}x${h}, ${(blob.size / 1024 / 1024).toFixed(2)}MB`);
+    return blob;
+}
+
 function logClassification(action) {
     try {
         const reviewerInput = document.getElementById('reviewer-name-input');
@@ -66,10 +118,13 @@ export function handleExport() {
 
     // Wait a moment for layout/images to settle in the new container
     setTimeout(() => {
+        // Re-scale synopsis for export resolution (preview classes are wrong size)
+        rescaleSynopsisInClone(clone);
+
         // html2canvas options
         const options = {
             backgroundColor: null,
-            scale: 3, // Increased scale for pristine high-res social media export
+            scale: 1, // 1x scale — container is already full social media resolution
             useCORS: true,
             allowTaint: true,
             logging: false,
@@ -79,56 +134,50 @@ export function handleExport() {
             windowWidth: exportWidth
         };
 
-        html2canvas(clone, options).then(canvas => {
-            // 1. Sanitize the filename down to safe alphanumeric/dash string to prevent corrupt file generation
+        html2canvas(clone, options).then(async canvas => {
+            // 1. Sanitize the filename
             let filenameBase = state.meta.id ? String(state.meta.id) : (state.meta.title ? state.meta.title.trim() : 'Card');
-            // Hard stip all invisible newlines and OS-restricted characters just to be safe
             filenameBase = filenameBase.replace(/[\n\r]/g, ' ').replace(/[\/\\?%*:|"<>]/g, '-');
             const filename = `CCCC-${filenameBase}.png`;
 
-            // 2. Use toBlob for more robust download of large images
-            canvas.toBlob((blob) => {
-                if (!blob) {
-                    console.error('Canvas to Blob failed');
-                    exportBtn.innerText = 'ERROR';
-                    document.body.removeChild(exportContainer);
-                    return;
+            // 2. Compress PNG to ≤ 2MB
+            const blob = await compressToMaxSize(canvas);
+            if (!blob) {
+                console.error('Canvas to Blob failed');
+                exportBtn.innerText = 'ERROR';
+                document.body.removeChild(exportContainer);
+                return;
+            }
+
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+
+            console.log('Final Filename:', filename);
+            console.log('Blob size:', (blob.size / 1024 / 1024).toFixed(2), 'MB');
+
+            const event = new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                view: window
+            });
+            link.dispatchEvent(event);
+
+            logClassification('export');
+
+            setTimeout(() => {
+                if (document.body.contains(link)) {
+                    document.body.removeChild(link);
                 }
-
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = filename;
-                link.style.display = 'none';
-                document.body.appendChild(link);
-
-                // Debug logs
-                console.log('Export URL:', url);
-                console.log('Final Filename:', filename);
-                console.log('Blob size:', blob.size);
-
-                // Trigger download safely
-                const event = new MouseEvent('click', {
-                    bubbles: true,
-                    cancelable: true,
-                    view: window
-                });
-                link.dispatchEvent(event);
-
-                logClassification('export');
-
-                // Cleanup after a short delay to ensure the download has started
-                setTimeout(() => {
-                    if (document.body.contains(link)) {
-                        document.body.removeChild(link);
-                    }
-                    URL.revokeObjectURL(url);
-                    if (document.body.contains(exportContainer)) {
-                        document.body.removeChild(exportContainer);
-                    }
-                    exportBtn.innerText = 'تصديـر';
-                }, 2000);
-            }, 'image/png');
+                URL.revokeObjectURL(url);
+                if (document.body.contains(exportContainer)) {
+                    document.body.removeChild(exportContainer);
+                }
+                exportBtn.innerText = 'تصديـر';
+            }, 2000);
         }).catch(err => {
             console.error('Export failed:', err);
             exportBtn.innerText = 'ERROR';
@@ -175,9 +224,12 @@ export function handleCopyToClipboard() {
     }
 
     setTimeout(() => {
+        // Re-scale synopsis for export resolution (preview classes are wrong size)
+        rescaleSynopsisInClone(clone);
+
         const options = {
             backgroundColor: null,
-            scale: 3,
+            scale: 1,
             useCORS: true,
             allowTaint: true,
             logging: false,
@@ -186,30 +238,29 @@ export function handleCopyToClipboard() {
             windowWidth: exportWidth
         };
 
-        html2canvas(clone, options).then(canvas => {
-            canvas.toBlob(async (blob) => {
-                if (!blob) {
-                    console.error('Canvas to Blob failed');
-                    copyBtn.innerText = 'ERROR';
-                    setTimeout(() => copyBtn.innerText = originalText, 2000);
-                    document.body.removeChild(exportContainer);
-                    return;
-                }
-
-                try {
-                    await navigator.clipboard.write([
-                        new ClipboardItem({ 'image/png': blob })
-                    ]);
-                    logClassification('copy');
-                    copyBtn.innerText = 'تم النسخ ✓';
-                } catch (err) {
-                    console.error('Clipboard write failed:', err);
-                    copyBtn.innerText = 'فشل النسخ';
-                }
-
+        html2canvas(clone, options).then(async canvas => {
+            const blob = await compressToMaxSize(canvas);
+            if (!blob) {
+                console.error('Canvas to Blob failed');
+                copyBtn.innerText = 'ERROR';
                 setTimeout(() => copyBtn.innerText = originalText, 2000);
                 document.body.removeChild(exportContainer);
-            }, 'image/png');
+                return;
+            }
+
+            try {
+                await navigator.clipboard.write([
+                    new ClipboardItem({ 'image/png': blob })
+                ]);
+                logClassification('copy');
+                copyBtn.innerText = 'تم النسخ ✓';
+            } catch (err) {
+                console.error('Clipboard write failed:', err);
+                copyBtn.innerText = 'فشل النسخ';
+            }
+
+            setTimeout(() => copyBtn.innerText = originalText, 2000);
+            document.body.removeChild(exportContainer);
         }).catch(err => {
             console.error('Copy failed:', err);
             copyBtn.innerText = 'ERROR';

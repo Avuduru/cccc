@@ -1,4 +1,4 @@
-import { initUI, updatePreview, renderControls, drawBlurredBackground, updateDisplayedInfo } from './ui.js';
+import { initUI, updatePreview, renderControls, drawBlurredBackground, updateDisplayedInfo, adjustTitleSize } from './ui.js';
 import { handleSearch } from './api.js';
 import { handleExport, handleCopyToClipboard } from './export.js';
 import { debounce } from './utils.js';
@@ -222,19 +222,8 @@ function setupEventListeners() {
     // Manual Title Resizing
     const titleText = document.getElementById('title-text');
     titleText.addEventListener('input', () => {
-        // Dynamic import or assume global access? 
-        // We need to import adjustTitleSize or reproduce logic.
-        // Since we missed importing it in initializing app.js (it was module based), 
-        // let's rely on logic reproduction or cleaner update.
-        // Actually best to re-trigger UI update logic or just handle class setting here.
-
-        const len = titleText.innerText.length;
-        titleText.removeAttribute('data-length');
-        if (len >= 20 && len < 40) titleText.dataset.length = 'medium';
-        else if (len >= 40 && len < 60) titleText.dataset.length = 'long';
-        else if (len >= 60) titleText.dataset.length = 'xl';
-
         state.meta.title = titleText.innerText;
+        adjustTitleSize();
     });
 
     // Manual Mode - File Upload
