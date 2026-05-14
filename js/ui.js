@@ -562,9 +562,22 @@ function selectItem(item, type) {
 
         // Fetch full game details asynchronously
         if (item.slug) {
-            fetch(`proxy.php?query=${item.slug}&type=game_details`)
+            const gameName = item.name || item.title;
+
+            // Fire RAWG details + HLTB in parallel
+            const detailsPromise = fetch(`proxy.php?query=${item.slug}&type=game_details`)
                 .then(resp => resp.json())
-                .then(data => {
+                .catch(err => { console.error('Failed to fetch game details:', err); return null; });
+
+            const hltbPromise = gameName
+                ? fetch(`proxy.php?query=${encodeURIComponent(gameName)}&type=hltb`)
+                    .then(resp => resp.json())
+                    .catch(err => { console.error('HLTB fetch failed:', err); return null; })
+                : Promise.resolve(null);
+
+            Promise.all([detailsPromise, hltbPromise]).then(([data, hltbData]) => {
+                // --- RAWG details ---
+                if (data) {
                     let description = '';
                     if (data.description_raw) {
                         description = data.description_raw;
@@ -576,22 +589,31 @@ function selectItem(item, type) {
                         description = [platform, released].filter(Boolean).join(' • ') || 'No description available';
                     }
                     if (data.metacritic) state.meta.score = data.metacritic;
-                    if (data.playtime) state.meta.stats = formatArabicPlural(data.playtime, 'hour');
+
+                    // --- Playtime: prefer HLTB, fallback to RAWG ---
+                    if (hltbData && hltbData.success && hltbData.data && hltbData.data.main_story > 0) {
+                        state.meta.stats = formatArabicPlural(hltbData.data.main_story, 'hour');
+                    } else if (data.playtime) {
+                        // Fallback to RAWG average playtime
+                        state.meta.stats = formatArabicPlural(data.playtime, 'hour');
+                    }
 
                     // Translate description
                     translateText(description).then(translated => {
                         state.meta.synopsis = translated;
                         updateDisplayedInfo();
                     });
-                    updateDisplayedInfo();
-                })
-                .catch(err => {
-                    console.error('Failed to fetch game details:', err);
+                } else {
+                    // RAWG failed entirely — still try HLTB for stats
+                    if (hltbData && hltbData.success && hltbData.data && hltbData.data.main_story > 0) {
+                        state.meta.stats = formatArabicPlural(hltbData.data.main_story, 'hour');
+                    }
                     const platform = item.platforms ? item.platforms.map(p => p.platform.name).slice(0, 3).join(', ') : '';
                     const released = item.released ? `Released: ${item.released}` : '';
                     state.meta.synopsis = [platform, released].filter(Boolean).join(' • ') || 'No description available';
-                    updateDisplayedInfo();
-                });
+                }
+                updateDisplayedInfo();
+            });
         }
 
         // 2. Fetch vertical cover asynchronously (SteamGridDB)

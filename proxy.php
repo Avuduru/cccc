@@ -96,6 +96,140 @@ function filterNSFWFromRAWG($data)
     return $data;
 }
 
+/**
+ * HowLongToBeat scraper functions
+ * Discovers the dynamic API path/key from HLTB's JS bundle,
+ * then searches for a game and returns completion times.
+ */
+
+function hltbGet($url)
+{
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_SSL_VERIFYHOST => false,
+        CURLOPT_TIMEOUT => 10,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTPHEADER => [
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36',
+            'Accept: */*',
+            'Referer: https://howlongtobeat.com/'
+        ],
+    ]);
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    if ($response === false || $httpCode !== 200) return null;
+    return $response;
+}
+
+function searchHltb($gameName)
+{
+    global $dataDir;
+
+    // 1. Check cache first
+    $cacheFile = $dataDir . '/hltb_cache.json';
+    $cache = [];
+    if (file_exists($cacheFile)) {
+        $cache = json_decode(file_get_contents($cacheFile), true) ?: [];
+    }
+    $cacheKey = strtolower(trim($gameName));
+    if (isset($cache[$cacheKey]) && (time() - ($cache[$cacheKey]['ts'] ?? 0)) < 86400 * 30) {
+        return $cache[$cacheKey]['data'];
+    }
+
+    // 2. Init handshake
+    $timestamp = round(microtime(true) * 1000);
+    $initJson = hltbGet("https://howlongtobeat.com/api/bleed/init?t={$timestamp}");
+    if (!$initJson) return null;
+    $initData = json_decode($initJson, true);
+    if (!$initData || !isset($initData['token'], $initData['hpKey'], $initData['hpVal'])) return null;
+
+    $token = $initData['token'];
+    $hpKey = $initData['hpKey'];
+    $hpVal = $initData['hpVal'];
+
+    // 3. POST search request
+    $payloadArray = [
+        'searchType' => 'games',
+        'searchTerms' => explode(' ', $gameName),
+        'searchPage' => 1,
+        'size' => 5,
+        'searchOptions' => [
+            'games' => [
+                'userId' => 0,
+                'platform' => '',
+                'sortCategory' => 'popular',
+                'rangeCategory' => 'main',
+                'rangeTime' => ['min' => null, 'max' => null],
+                'gameplay' => ['perspective' => '', 'flow' => '', 'genre' => '', 'difficulty' => ''],
+                'rangeYear' => ['min' => '', 'max' => ''],
+                'modifier' => '',
+            ],
+            'users' => ['sortCategory' => 'postcount'],
+            'lists' => ['sortCategory' => 'follows'],
+            'filter' => '',
+            'sort' => 0,
+            'randomizer' => 0,
+        ],
+        'useCache' => true,
+    ];
+    // Add honeypot key/val
+    $payloadArray[$hpKey] = $hpVal;
+    
+    $payload = json_encode($payloadArray);
+
+    $ch = curl_init('https://howlongtobeat.com/api/bleed');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => $payload,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_SSL_VERIFYHOST => false,
+        CURLOPT_TIMEOUT => 10,
+        CURLOPT_HTTPHEADER => [
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36',
+            'Content-Type: application/json',
+            'Accept: */*',
+            'Referer: https://howlongtobeat.com/',
+            "x-auth-token: {$token}",
+            "x-hp-key: {$hpKey}",
+            "x-hp-val: {$hpVal}"
+        ],
+    ]);
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($response === false || $httpCode !== 200) return null;
+
+    $data = json_decode($response, true);
+    if (!$data || empty($data['data'])) return null;
+
+    // 4. Pick the best match (first result)
+    $game = $data['data'][0];
+    // comp_main is in seconds, convert to hours (rounded to nearest 0.5)
+    $mainSeconds = $game['comp_main'] ?? 0;
+    $mainHours = $mainSeconds > 0 ? round($mainSeconds / 3600 * 2) / 2 : 0;
+
+    $result = [
+        'main_story' => $mainHours,
+        'game_name' => $game['game_name'] ?? '',
+    ];
+
+    // 5. Cache the result
+    $cache[$cacheKey] = ['ts' => time(), 'data' => $result];
+    if (count($cache) > 500) {
+        uasort($cache, function ($a, $b) { return ($a['ts'] ?? 0) - ($b['ts'] ?? 0); });
+        $cache = array_slice($cache, -400, null, true);
+    }
+    file_put_contents($cacheFile, json_encode($cache, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+
+    return $result;
+}
+
+
 function fetchUrl($url, $headers = [])
 {
     if (empty($url))
@@ -219,6 +353,16 @@ switch ($type) {
             exit;
         }
         break;
+
+    case 'hltb':
+        // HowLongToBeat - search for game completion times
+        $result = searchHltb($query);
+        if ($result && $result['main_story'] > 0) {
+            echo json_encode(['success' => true, 'data' => $result]);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Game not found on HLTB']);
+        }
+        exit;
 
     case 'image_proxy':
         // Proxy images to avoid CORS issues during export
