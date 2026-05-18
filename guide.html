@@ -6,36 +6,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>دليل التصانيف والدرجات — CCCC</title>
 
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Handjet:wght@100..900&family=Silkscreen:wght@400;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
-        rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Handjet:wght@100..900&family=Silkscreen:wght@400;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.v3.css">
 
     <style>
-        html {
-            scroll-behavior: smooth;
-        }
+        html { scroll-behavior: smooth; }
 
-        body {
-            min-height: 100vh;
-            padding: 0;
-            margin: 0;
-        }
-
+        /* ── Shell ── */
         .guide-shell {
             display: flex;
             flex-direction: column;
-            gap: 16px;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 16px;
+            min-height: 100vh;
+            padding: 16px 24px 48px;
+            gap: 0;
+            max-width: none;
+            margin: 0;
         }
 
-        /* Topbar tweak: back-link replaces status area on guide page */
+        /* ── Back link (replaces status) ── */
         .guide-back {
             display: flex;
             align-items: center;
@@ -49,88 +39,191 @@
             transition: color 0.15s;
         }
         .guide-back:hover { color: var(--acc); }
-        .guide-back .back-arrow {
-            font-size: 14px;
-            color: var(--acc);
-            text-shadow: 0 0 8px var(--acc-glow);
-        }
+        .guide-back .back-arrow { font-size: 14px; color: var(--acc); text-shadow: 0 0 8px var(--acc-glow); }
 
-        /* Guide body: full-page, no modal constraints */
-        .guide-body {
-            background: var(--ink-2);
-            border: 1px solid var(--line-bright);
-            border-radius: 6px;
-            padding: 32px;
-            display: flex;
-            flex-direction: column;
-            gap: 0;
-        }
-
-        /* Guide page title */
-        .guide-page-title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding-bottom: 24px;
-            margin-bottom: 32px;
+        /* ── Page header ── */
+        .guide-page-header {
+            padding: 48px 0 40px;
             border-bottom: 1px solid var(--line);
+            margin-bottom: 0;
         }
-        .guide-page-title h1 {
+        .guide-page-header .kicker { margin-bottom: 12px; display: flex; }
+        .guide-page-header h1 {
             margin: 0;
-            font-size: 32px;
+            font-size: 48px;
             font-family: var(--font-ar);
             font-weight: 700;
             color: var(--text-0);
             line-height: 1;
         }
 
+        /* ── Guide body: transparent, no box ── */
+        .guide-body {
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            padding: 0;
+        }
+
+        /* ── Sections ── */
+        .guide-section {
+            padding: 48px 0;
+            border-bottom: 1px solid var(--line);
+        }
+        .guide-section:last-child { border-bottom: none; }
+        .guide-section .section-title {
+            font-size: 28px;
+            margin-bottom: 28px;
+        }
+
+        /* ── Semantic category groups ── */
+        .cat-group {
+            margin-bottom: 28px;
+        }
+        .cat-group:last-child { margin-bottom: 0; }
+
+        .cat-group-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 5px 12px;
+            border-radius: 3px;
+            margin-bottom: 12px;
+        }
+        .cat-group-label::before {
+            content: '';
+            display: inline-block;
+            width: 7px; height: 7px;
+            border-radius: 50%;
+        }
+        .cat-group-theme  .cat-group-label { color: var(--theme-purple); background: rgba(176,124,255,0.08); border: 1px solid rgba(176,124,255,0.2); }
+        .cat-group-theme  .cat-group-label::before { background: var(--theme-purple); box-shadow: 0 0 6px rgba(176,124,255,0.5); }
+        .cat-group-warning .cat-group-label { color: var(--accent-red); background: rgba(255,90,90,0.08); border: 1px solid rgba(255,90,90,0.2); }
+        .cat-group-warning .cat-group-label::before { background: var(--accent-red); box-shadow: 0 0 6px rgba(255,90,90,0.5); }
+        .cat-group-mechanic .cat-group-label { color: var(--mech-teal); background: rgba(52,208,184,0.08); border: 1px solid rgba(52,208,184,0.2); }
+        .cat-group-mechanic .cat-group-label::before { background: var(--mech-teal); box-shadow: 0 0 6px rgba(52,208,184,0.5); }
+
+        .cat-group-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 10px;
+        }
+
+        /* Larger modal items for full-page */
+        .modal-item {
+            padding: 20px;
+            gap: 18px;
+        }
+        .modal-item img {
+            width: 64px; height: 64px;
+            flex-shrink: 0;
+            object-fit: contain;
+        }
+        .item-text strong { font-size: 20px; }
+        .item-text p { font-size: 15px; }
+
+        /* ── Exceptions: 2-col layout ── */
+        .exceptions-card {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 32px;
+            padding: 28px 32px;
+        }
+        .exceptions-desc {
+            font-size: 17px;
+            line-height: 1.7;
+            margin: 0;
+        }
+        .exceptions-icons {
+            display: flex;
+            gap: 16px;
+            flex-wrap: nowrap;
+            justify-content: flex-end;
+        }
+        .exceptions-icons img {
+            width: 110px; height: 110px;
+        }
+
+        /* ── Grade cards: 3-col side by side ── */
+        .grades-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            flex-direction: unset;
+        }
+        .grade-card { height: 100%; }
+        .grade-header { padding: 18px 20px; }
+        .grade-badge { width: 44px; height: 44px; font-size: 22px; }
+        .grade-title { font-size: 22px; }
+        /* Stack narrative/games vertically inside each column card */
+        .grade-body {
+            grid-template-columns: 1fr;
+            background: transparent;
+        }
+        .grade-desc {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--line);
+        }
+        .grade-desc:last-child { border-bottom: none; }
+        .grade-desc p { font-size: 15px; line-height: 1.6; }
+
+        /* ── Responsive ── */
+        @media (max-width: 1024px) {
+            .grades-container { grid-template-columns: 1fr; }
+            .exceptions-card { grid-template-columns: 1fr; gap: 20px; }
+            .exceptions-icons { justify-content: flex-start; }
+        }
         @media (max-width: 768px) {
-            .guide-body { padding: 20px 16px; }
-            .guide-page-title h1 { font-size: 24px; }
+            .guide-shell { padding: 12px 16px 32px; }
+            .guide-page-header h1 { font-size: 32px; }
+            .cat-group-grid { grid-template-columns: 1fr; }
+            .guide-section .section-title { font-size: 22px; }
         }
     </style>
 </head>
 
 <body>
+<div class="guide-shell">
 
-    <div class="guide-shell">
-
-        <!-- ───────────────── TOPBAR ───────────────── -->
-        <header class="topbar">
-            <div class="topbar-brand">
-                <img src="assets/LOGO.png" alt="CCCC Logo" class="brand-logo" style="height: 32px; width: auto; object-fit: contain;">
-                <div class="brand-meta">
-                    <div class="brand-en">CONSERVATIVE CLASSIFICATION FOR CREATIVE CONTENT</div>
-                    <div class="brand-ar">التصنيف المحافظ للمحتوى الإبداعي</div>
-                </div>
+    <!-- ── TOPBAR ── -->
+    <header class="topbar">
+        <div class="topbar-brand">
+            <img src="assets/LOGO.png" alt="CCCC Logo" class="brand-logo" style="height: 32px; width: auto; object-fit: contain;">
+            <div class="brand-meta">
+                <div class="brand-en">CONSERVATIVE CLASSIFICATION FOR CREATIVE CONTENT</div>
+                <div class="brand-ar">التصنيف المحافظ للمحتوى الإبداعي</div>
             </div>
+        </div>
+        <a href="index.html" class="guide-back">
+            <span class="back-arrow">←</span>
+            <span class="status-sep">/</span>
+            <span>العودة للتطبيق</span>
+            <span class="status-sep">/</span>
+            <span class="status-url">muhafid.com</span>
+        </a>
+    </header>
 
-            <a href="index.html" class="guide-back">
-                <span class="back-arrow">←</span>
-                <span class="status-sep">/</span>
-                <span>العودة للتطبيق</span>
-                <span class="status-sep">/</span>
-                <span class="status-url">muhafid.com</span>
-            </a>
-        </header>
+    <!-- ── PAGE HEADER ── -->
+    <div class="guide-page-header">
+        <span class="kicker"><span class="kicker-dot"></span>الدليل</span>
+        <h1>شرح التصانيف والدرجات</h1>
+    </div>
 
-        <!-- ───────────────── GUIDE CONTENT ───────────────── -->
-        <main class="guide-body">
+    <div class="guide-body">
 
-            <div class="guide-page-title">
-                <span class="kicker"><span class="kicker-dot"></span>الدليل</span>
-                <h1>شرح التصانيف والدرجات</h1>
-            </div>
+        <!-- ── SECTION 01: الموجودات ── -->
+        <section class="guide-section">
+            <h3 class="section-title"><span class="section-num">01</span>الموجودات</h3>
 
-            <!-- Section 01: الموجودات -->
-            <section class="modal-section">
-                <h3 class="section-title"><span class="section-num">01</span>الموجودات</h3>
-                <div class="semantic-legend">
-                    <span class="legend-badge theme-badge"><span class="legend-dot"></span>محاذير عقدية وفكرية</span>
-                    <span class="legend-badge warning-badge"><span class="legend-dot"></span>انحرافات أخلاقية وصادمة</span>
-                    <span class="legend-badge mechanic-badge"><span class="legend-dot"></span>استغلال مالي وسلوكي</span>
-                </div>
-                <div class="modal-grid">
+            <!-- Group: محاذير عقدية وفكرية -->
+            <div class="cat-group cat-group-theme">
+                <div class="cat-group-label">محاذير عقدية وفكرية</div>
+                <div class="cat-group-grid">
                     <div class="modal-item theme-card">
                         <img src="assets/icons/كفريات.png?v=2" alt="كفريات">
                         <div class="item-text">
@@ -145,6 +238,13 @@
                             <p>القوى والرموز والتعويذات المرتبطة بالسحر والتنجيم ورؤية المستقبل.</p>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Group: انحرافات أخلاقية وصادمة -->
+            <div class="cat-group cat-group-warning">
+                <div class="cat-group-label">انحرافات أخلاقية وصادمة</div>
+                <div class="cat-group-grid">
                     <div class="modal-item warning-card">
                         <img src="assets/icons/جنس.png?v=2" alt="جنس">
                         <div class="item-text">
@@ -173,6 +273,13 @@
                             <p>ظهور أشلاء وما يسبب الصدمات النفسية والتقزز للمشاهد.</p>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Group: استغلال مالي وسلوكي -->
+            <div class="cat-group cat-group-mechanic">
+                <div class="cat-group-label">استغلال مالي وسلوكي</div>
+                <div class="cat-group-grid">
                     <div class="modal-item mechanic-card">
                         <img src="assets/icons/مفاسد.png?v=2" alt="مفاسد">
                         <div class="item-text">
@@ -202,88 +309,87 @@
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- Section 02: المستثنيات -->
-            <section class="modal-section">
-                <h3 class="section-title"><span class="section-num">02</span>المستثنيات</h3>
-                <div class="exceptions-card">
-                    <p class="exceptions-desc">يفترض التصنيف المحافظ أن جميع المحتويات الإبداعية تحتوي على الموسيقى
-                        والأغاني والألفاظ النابية والعلاقات خارج إطار الزواج. وفي حال خلو المحتوى منها، ينبغي للمُصنّف
-                        استخدام التالي:</p>
-                    <div class="exceptions-icons">
-                        <img src="assets/icons/موسيقى0.png" alt="خال من الموسيقى">
-                        <img src="assets/icons/ألفاظ نابية0.png" alt="خال من الألفاظ النابية">
-                        <img src="assets/icons/علاقات حب0.png" alt="خال من العلاقات خارج الزواج">
-                    </div>
+        <!-- ── SECTION 02: المستثنيات ── -->
+        <section class="guide-section">
+            <h3 class="section-title"><span class="section-num">02</span>المستثنيات</h3>
+            <div class="exceptions-card">
+                <p class="exceptions-desc">يفترض التصنيف المحافظ أن جميع المحتويات الإبداعية تحتوي على الموسيقى
+                    والأغاني والألفاظ النابية والعلاقات خارج إطار الزواج. وفي حال خلو المحتوى منها، ينبغي للمُصنّف
+                    استخدام التالي:</p>
+                <div class="exceptions-icons">
+                    <img src="assets/icons/موسيقى0.png" alt="خال من الموسيقى">
+                    <img src="assets/icons/ألفاظ نابية0.png" alt="خال من الألفاظ النابية">
+                    <img src="assets/icons/علاقات حب0.png" alt="خال من العلاقات خارج الزواج">
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- Section 03: القيم والدرجات -->
-            <section class="modal-section">
-                <h3 class="section-title"><span class="section-num">03</span>القيم والدرجات</h3>
-                <div class="grades-container">
-                    <div class="grade-card grade-red">
-                        <div class="grade-header">
-                            <div class="grade-badge red">1</div>
-                            <div class="grade-title">الدرجة الأولى</div>
-                            <div class="grade-meta">شديد</div>
-                        </div>
-                        <div class="grade-body">
-                            <div class="grade-desc">
-                                <div class="grade-desc-label">// في القصصيّات</div>
-                                <p>لا يمكن تخطي المحتوى دون التأثير على القصة. عدد مرات ظهور كثير، يفقد الفهم العام
-                                    للقصة حين التخطي.</p>
-                            </div>
-                            <div class="grade-desc">
-                                <div class="grade-desc-label">// في الألعاب</div>
-                                <p>يستحيل إتمام اللعبة دون المرور عليه.</p>
-                            </div>
-                        </div>
+        <!-- ── SECTION 03: القيم والدرجات ── -->
+        <section class="guide-section">
+            <h3 class="section-title"><span class="section-num">03</span>القيم والدرجات</h3>
+            <div class="grades-container">
+
+                <div class="grade-card grade-red">
+                    <div class="grade-header">
+                        <div class="grade-badge red">1</div>
+                        <div class="grade-title">الدرجة الأولى</div>
+                        <div class="grade-meta">شديد</div>
                     </div>
-
-                    <div class="grade-card grade-orange">
-                        <div class="grade-header">
-                            <div class="grade-badge orange">2</div>
-                            <div class="grade-title">الدرجة الثانية</div>
-                            <div class="grade-meta">متوسط</div>
+                    <div class="grade-body">
+                        <div class="grade-desc">
+                            <div class="grade-desc-label">// في القصصيّات</div>
+                            <p>لا يمكن تخطي المحتوى دون التأثير على القصة. عدد مرات ظهور كثير، يفقد الفهم العام للقصة حين التخطي.</p>
                         </div>
-                        <div class="grade-body">
-                            <div class="grade-desc">
-                                <div class="grade-desc-label">// في القصصيّات</div>
-                                <p>يمكن تخطي المحتوى دون التأثير على القصة. عدد مرّات ظهور كثير، يسبب انقطاعات
-                                    متكررة في تسلسل العرض. الفهم العام للقصة محفوظ رغم التخطي.</p>
-                            </div>
-                            <div class="grade-desc">
-                                <div class="grade-desc-label">// في الألعاب</div>
-                                <p>يصعّب إتمام اللعبة ويغيّر من تجربتها، لكن يمكن إتمامها بالكامل مع تخطّيه.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="grade-card grade-yellow">
-                        <div class="grade-header">
-                            <div class="grade-badge yellow">3</div>
-                            <div class="grade-title">الدرجة الثالثة</div>
-                            <div class="grade-meta">خفيف</div>
-                        </div>
-                        <div class="grade-body">
-                            <div class="grade-desc">
-                                <div class="grade-desc-label">// في القصصيّات</div>
-                                <p>يمكن تخطّي المحتوى دون التأثير على القصّة. ظهور قليل يمكن تخطيه بسهولة.</p>
-                            </div>
-                            <div class="grade-desc">
-                                <div class="grade-desc-label">// في الألعاب</div>
-                                <p>يمكن تجاهله أو استخدام طرق بديلة لإتمام اللعبة.</p>
-                            </div>
+                        <div class="grade-desc">
+                            <div class="grade-desc-label">// في الألعاب</div>
+                            <p>يستحيل إتمام اللعبة دون المرور عليه.</p>
                         </div>
                     </div>
                 </div>
-            </section>
 
-        </main>
+                <div class="grade-card grade-orange">
+                    <div class="grade-header">
+                        <div class="grade-badge orange">2</div>
+                        <div class="grade-title">الدرجة الثانية</div>
+                        <div class="grade-meta">متوسط</div>
+                    </div>
+                    <div class="grade-body">
+                        <div class="grade-desc">
+                            <div class="grade-desc-label">// في القصصيّات</div>
+                            <p>يمكن تخطي المحتوى دون التأثير على القصة. عدد مرّات ظهور كثير، يسبب انقطاعات متكررة في تسلسل العرض. الفهم العام للقصة محفوظ رغم التخطي.</p>
+                        </div>
+                        <div class="grade-desc">
+                            <div class="grade-desc-label">// في الألعاب</div>
+                            <p>يصعّب إتمام اللعبة ويغيّر من تجربتها، لكن يمكن إتمامها بالكامل مع تخطّيه.</p>
+                        </div>
+                    </div>
+                </div>
 
-    </div>
+                <div class="grade-card grade-yellow">
+                    <div class="grade-header">
+                        <div class="grade-badge yellow">3</div>
+                        <div class="grade-title">الدرجة الثالثة</div>
+                        <div class="grade-meta">خفيف</div>
+                    </div>
+                    <div class="grade-body">
+                        <div class="grade-desc">
+                            <div class="grade-desc-label">// في القصصيّات</div>
+                            <p>يمكن تخطّي المحتوى دون التأثير على القصّة. ظهور قليل يمكن تخطيه بسهولة.</p>
+                        </div>
+                        <div class="grade-desc">
+                            <div class="grade-desc-label">// في الألعاب</div>
+                            <p>يمكن تجاهله أو استخدام طرق بديلة لإتمام اللعبة.</p>
+                        </div>
+                    </div>
+                </div>
 
+            </div>
+        </section>
+
+    </div><!-- /guide-body -->
+</div><!-- /guide-shell -->
 </body>
 </html>
