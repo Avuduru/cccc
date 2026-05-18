@@ -4,7 +4,7 @@ node_modules/
 vendor/
 data/*.jsonl
 CLAUDE.md
+php.ini
 demo.html
 Demo/
-archive/
-php.ini
+Polished_CCCC/

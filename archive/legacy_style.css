@@ -1,0 +1,2265 @@
+:root {
+    --bg-body: #dedede;
+    --bg-card: #5c5c5c;
+    /* Main gray background */
+    --accent-green: #7cb342;
+    --accent-red: #c0392b;
+    --accent-orange: #e67e22;
+    --accent-yellow: #f1c40f;
+    --accent-blue: #2980b9;
+    --font-en: 'Silkscreen', cursive;
+    --font-ar: 'Handjet', sans-serif;
+
+    /* Canvas proportions controlled via JS config */
+    --canvas-title-size: 5.5cqw;
+    --canvas-genre-size: 2.8cqw;
+    --canvas-synopsis-size: 3.2cqw;
+    --canvas-v-title-size: 10cqw;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 20px;
+    background-color: var(--bg-body);
+    font-family: var(--font-ar);
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    direction: rtl;
+}
+
+/* --- MAIN GRID --- */
+.card-container {
+    width: 100%;
+    background-color: var(--bg-card);
+    border-radius: 20px;
+    padding: 30px;
+    /* Explicit Grid */
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    /* Right: 33%, Left: 66% */
+    grid-template-rows: auto 1fr auto;
+    /* HeaderRow, MainRow, Footer */
+    gap: 20px;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    border: 6px solid #111;
+}
+
+/* --- 1. HEADER (Top Left) --- */
+.card-header {
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+    background-color: #111;
+    color: white;
+    border-radius: 20px;
+    padding: 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border: 6px solid #000;
+}
+
+.logo {
+    font-family: var(--font-en);
+    font-size: 4rem;
+    margin: 0;
+    line-height: 1;
+    letter-spacing: 2px;
+}
+
+.subtitle-en {
+    font-family: var(--font-en);
+    font-size: 0.7rem;
+    color: #999;
+    margin: 5px 0 0 0;
+}
+
+.subtitle-ar {
+    font-size: 1.3rem;
+    margin: 5px 0 0 0;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* --- 2. UNIFIED CONTROLS PANEL (Right Column) --- */
+.top-controls {
+    grid-column: 1 / 2;
+    grid-row: 1 / 3;
+    /* Span both rows */
+    background-color: #111;
+    color: white;
+    border-radius: 20px;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    /* Align content to top */
+    gap: 15px;
+    border: 6px solid #000;
+    overflow: visible;
+    /* Allow scrolling if content is too tall */
+}
+
+.control-row {
+    display: flex;
+    justify-content: flex-start;
+    /* RTL: Start is Right side */
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    /* Fix overlap on smaller screens */
+}
+
+.control-label {
+    min-width: 80px;
+    color: white;
+    font-family: var(--font-ar);
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.search-wrapper .control-label {
+    color: #333333;
+    /* Dark color for search label only */
+    min-width: auto;
+    /* Fit content */
+    margin-left: 10px;
+}
+
+/* Type Pills */
+/* Custom Dropdown */
+.custom-dropdown {
+    position: relative;
+    font-family: var(--font-ar);
+}
+
+.dropdown-toggle {
+    background: #333;
+    border: 3px solid #000;
+    color: #ccc;
+    padding: 10px 20px;
+    font-family: inherit;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: bold;
+    box-shadow: 3px 3px 0px #000;
+    min-width: 150px;
+    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dropdown-toggle::after {
+    content: '▼';
+    font-size: 0.8em;
+    margin-right: 10px;
+}
+
+.dropdown-toggle:hover {
+    background: #444;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    left: 0;
+    background: #222;
+    border: 3px solid #000;
+    box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    display: none;
+    /* Hidden by default */
+    border-radius: 0 0 10px 10px;
+    overflow: hidden;
+}
+
+.dropdown-menu.show {
+    display: block;
+}
+
+.dropdown-item {
+    padding: 10px 15px;
+    color: #fff;
+    cursor: pointer;
+    border-bottom: 1px solid #333;
+    text-align: right;
+    transition: background 0.2s;
+}
+
+.dropdown-item:hover {
+    background: #333;
+}
+
+.dropdown-item.active {
+    background: #2980b9;
+    color: white;
+}
+
+.dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.orient-btn {
+    background: #333;
+    border: 3px solid #000;
+    color: #ccc;
+    padding: 10px 20px;
+    font-family: inherit;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: bold;
+    box-shadow: 3px 3px 0px #000;
+}
+
+.orient-btn.active {
+    background: #2980b9;
+    color: #fff;
+}
+
+
+
+.type-btn:active,
+.orient-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0px #000;
+}
+
+.type-btn.active {
+    background: var(--accent-green);
+    color: #000;
+    border-color: #000;
+}
+
+/* Search Bar */
+.search-wrapper {
+    flex: 1;
+    position: relative;
+    background: #ccc;
+    border: 3px solid #000;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    box-shadow: 3px 3px 0px #000;
+}
+
+#search-query,
+#reviewer-name-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+#search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #222;
+    border: 1px solid #444;
+    border-radius: 10px;
+    color: white;
+    z-index: 99999;
+    max-height: 250px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.search-result-item {
+    padding: 10px;
+    border-bottom: 1px solid #333;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    background-color: #222;
+    overflow: hidden;
+    position: relative;
+    z-index: 100000;
+}
+
+.search-result-item:hover {
+    background: #333;
+}
+
+.search-result-item img {
+    width: 30px;
+    height: 45px;
+    object-fit: cover;
+}
+
+/* --- 3. PREVIEW PANEL (Bottom Left) --- */
+/* --- 3. PREVIEW PANEL (Canvas) --- */
+.info-panel {
+    grid-column: 2 / 3;
+    grid-row: 2 / 3;
+    background-color: #000;
+    border: 6px solid #111;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    container-type: size;
+    /* Enable both width and height container queries */
+}
+
+/* Aspect Ratio Locking */
+.info-panel.horizontal {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+}
+
+.info-panel.vertical {
+    --card-h: min(800px, 80vh);
+    --card-w: calc(var(--card-h) * 0.8);
+    width: var(--card-w);
+    height: var(--card-h);
+    margin: 0 auto;
+}
+
+.canvas-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: #000;
+}
+
+.bg-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.9;
+    /* Increased image opacity for better visibility */
+    z-index: 1;
+}
+
+.bg-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    /* 70% overlay darkness */
+    z-index: 2;
+}
+
+.vertical .bg-overlay {
+    background: rgba(0, 0, 0, 0.80); /* Re-enable slight poster blur texture natively */
+}
+
+.canvas-content {
+    position: relative;
+    z-index: 5;
+    width: 100%;
+    height: 100%;
+    padding: 2cqw;
+    /* Tighter padding for social media */
+    display: flex;
+    gap: 2cqw;
+    /* Reduced gap to pull columns closer together */
+    box-sizing: border-box;
+    pointer-events: none;
+    /* FIX: Allow clicks to pass through to poster */
+}
+
+/* Re-enable clicks for content children */
+.canvas-content>* {
+    pointer-events: auto;
+}
+
+.horizontal .canvas-content {
+    flex-direction: row;
+}
+
+.horizontal .poster-column {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    gap: 15px;
+}
+
+.horizontal .poster-container {
+    height: calc(100% - 50px);
+    max-height: 100%;
+    aspect-ratio: 1 / 1.414;
+    /* A4 Ratio */
+    flex-shrink: 1;
+    min-height: 0;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    /* Match vertical style */
+    box-shadow: 10px 10px 0px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+}
+
+.poster-div {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: block;
+    position: relative;
+    cursor: default;
+}
+
+.poster-div.manual-mode {
+    cursor: pointer;
+}
+
+.upload-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+}
+
+.poster-div.manual-mode.empty-poster .upload-overlay {
+    opacity: 1;
+}
+
+/* Optional: Show on hover only if empty? Or never show if full?
+   User asked to "remove upload button... to not obstruct".
+   So if it has an image, we don't show overlay even on hover.
+   But we keep cursor pointer.
+*/
+.poster-div.manual-mode:not(.empty-poster):hover .upload-overlay {
+    opacity: 0;
+    /* Ensure it stays hidden */
+}
+
+/* Vertical mode: show full poster without cropping */
+.vertical .poster-div {
+    background-size: cover;
+    background-position: center top;
+    aspect-ratio: 4 / 5;
+    width: 100%;
+    height: auto;
+}
+
+.info-content-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+    color: white;
+    container-type: inline-size;
+}
+
+.header-info {
+    text-align: right;
+    /* Ensure consistent left alignment for English content -> REMOVED */
+    margin: 0;
+    padding: 0;
+}
+
+/* GRADUAL DARKNESS FROM TOP AND BOTTOM */
+.vertical .poster-container::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.4) 0%,
+        rgba(0, 0, 0, 0) 25%,
+        rgba(0, 0, 0, 0) 50%,
+        rgba(0, 0, 0, 0.7) 75%,
+        rgba(0, 0, 0, 0.95) 100%
+    );
+    z-index: 2;
+    pointer-events: none;
+    /* FIX: Allow clicks to pass through to poster */
+}
+
+/* ... */
+
+.header-info h2 {
+    font-family: var(--font-ar);
+    font-weight: 800;
+    /* Heavier weight for Handjet title */
+    /* Strict relative sizing based on width */
+    font-size: var(--canvas-title-size);
+    margin: 0;
+    padding: 0;
+    line-height: 1.05;
+    /* Tighter line-height for bold Arabic titles */
+    /* letter-spacing: 6px; REMOVED: Breaks Arabic text in export */
+    /* text-transform: uppercase; REMOVED per user request */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    direction: auto;
+    /* Fix English title direction for punctuation */
+    unicode-bidi: isolate;
+}
+
+/* Dynamic Title Sizing */
+.header-info h2[data-length="medium"] {
+    font-size: calc(var(--canvas-title-size) * 0.85);
+}
+
+.header-info h2[data-length="long"] {
+    font-size: calc(var(--canvas-title-size) * 0.7);
+}
+
+.header-info h2[data-length="xl"] {
+    font-size: calc(var(--canvas-title-size) * 0.55);
+    /* For extra long titles */
+}
+
+.genre-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* RTL pushes it to the right */
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 1.5cqw;
+}
+.horizontal .genre-row {
+    margin-top: 5px !important;
+}
+
+.genre-label {
+    font-size: var(--canvas-genre-size);
+    /* Relative size */
+    color: var(--accent-yellow);
+    opacity: 1;
+    margin-top: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+
+.genre-pill {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--accent-green);
+    border-radius: 6px;
+    padding: 2px 8px 4px; /* Added extra bottom padding to center font baseline */
+    color: var(--accent-green);
+    font-size: 0.9em;
+    white-space: nowrap;
+    line-height: 1.2; /* Prevent descenders from touching borders */
+    display: flex; /* Helps vertically align text centrally */
+    align-items: center;
+}
+
+.stats-pill {
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+}
+
+/* HORIZONTAL TWEAKS: Smaller Genre, closer to title */
+.horizontal .genre-label {
+    font-size: calc(var(--canvas-genre-size) * 0.7) !important;
+    margin-top: 0 !important;
+}
+
+.score-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 2px 8px 4px; /* MATCH genre-pill exactly */
+    border-radius: 6px;
+    border: 1px solid var(--accent-yellow);
+    color: var(--accent-yellow);
+    font-family: var(--font-en);
+    font-size: calc(var(--canvas-genre-size) * 0.9);
+    direction: ltr;
+    line-height: 1.2; /* Prevent text from touching borders */
+    height: fit-content;
+}
+
+.horizontal .score-badge {
+    font-size: calc(var(--canvas-genre-size) * 0.7 * 0.9) !important;
+}
+
+.score-badge.hidden {
+    display: none !important;
+}
+
+.score-icon {
+    color: var(--accent-yellow);
+}
+
+.synopsis-wrapper {
+    margin-top: 1cqw;
+    /* Tighter top margin for synopsis */
+    flex: 1;
+    overflow: hidden;
+    /* Strict clipping for html2canvas */
+}
+
+.horizontal .synopsis-wrapper {
+    /* Allow full height based on flex availability */
+    max-height: none !important;
+    overflow: hidden;
+}
+
+.horizontal #synopsis-text {
+    min-height: 100%;
+    -webkit-line-clamp: 8 !important;
+    line-clamp: 8 !important;
+    max-height: none !important;
+}
+
+#synopsis-text {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: #eee;
+    font-family: var(--font-ar);
+    font-size: var(--canvas-synopsis-size);
+    /* Relative size */
+    line-height: 1.15;
+    /* Reduced line spacing to minimum without overlap */
+    outline: none;
+    direction: rtl;
+    text-align: right;
+    unicode-bidi: embed;
+    padding: 1cqw 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    -webkit-box-orient: vertical;
+}
+
+#synopsis-text:focus {
+    outline: none;
+}
+
+/* Dynamic Synopsis Scaling - Based on Icon Count */
+#synopsis-text.scale-medium {
+    font-size: calc(var(--canvas-synopsis-size) * 0.85) !important;
+}
+
+#synopsis-text.scale-heavy {
+    font-size: calc(var(--canvas-synopsis-size) * 0.75) !important;
+}
+
+#synopsis-text.scale-extreme {
+    font-size: calc(var(--canvas-synopsis-size) * 0.65) !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 3 !important;
+    line-clamp: 3 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+}
+
+/* Synopsis Size Controls */
+.size-controls {
+    display: flex;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.size-btn {
+    flex: 1;
+    padding: 5px;
+    background: #333;
+    border: 1px solid #444;
+    border-radius: 5px;
+    color: #ccc;
+    cursor: pointer;
+    font-family: var(--font-ar);
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.size-btn:hover {
+    background: #444;
+    color: #fff;
+}
+
+.size-btn.active {
+    background: var(--accent-green);
+    color: #111;
+    border-color: var(--accent-green);
+    font-weight: bold;
+}
+
+/* Manual Synopsis Sizes */
+#synopsis-text.manual-size-sm {
+    font-size: calc(var(--canvas-synopsis-size) * 0.7) !important;
+}
+
+#synopsis-text.manual-size-md {
+    font-size: calc(var(--canvas-synopsis-size) * 0.85) !important;
+}
+
+#synopsis-text.manual-size-lg {
+    font-size: var(--canvas-synopsis-size) !important;
+}
+
+#synopsis-text.manual-size-xl {
+    font-size: calc(var(--canvas-synopsis-size) * 1.15) !important;
+}
+
+/* Placeholder for contenteditable div */
+[contenteditable]:empty:before {
+    content: attr(placeholder);
+    color: #888;
+    pointer-events: none;
+    display: block;
+}
+
+/* VERTICAL LAYOUT */
+.vertical .canvas-content {
+    display: block !important; /* Strip flex completely */
+    position: relative;
+    padding: 0 !important; /* Managed natively by internal absolute coordinates */
+    width: 100%; height: 100%;
+}
+
+/* Dynamic Space Optimization (1 Row of Icons) */
+/* REMOVED: legacy single-row logic conflicts with 4:5 full-bleed layout */
+
+.vertical .poster-column {
+    display: contents;
+}
+
+.vertical .poster-container {
+    position: absolute !important;
+    top: 26%; right: 5%;
+    width: 44% !important;
+    height: 52.8% !important; /* Maps rigidly to perfect 2:3 dynamically natively */
+    max-height: 52.8% !important;
+    flex-shrink: 0;
+    z-index: 5;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    margin: 0 !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+.vertical .poster-div {
+    width: 100%;
+    height: 100%;
+    background-size: cover !important;
+    background-position: center !important;
+}
+
+.vertical #poster-img {
+    /* poster-div handles width/height/fit */
+    opacity: 1;
+    filter: none;
+}
+
+/* Removed gradient overlay - not needed with centered poster design */
+
+/* FULL BLUR BACKGROUND */
+.vertical .canvas-bg {
+    height: 100%;
+    width: 100%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.vertical .info-content-right {
+    display: block !important; /* Neutralize display:contents parsing bug */
+    width: 100%; height: 100%;
+    position: static;
+    pointer-events: none;
+}
+
+.vertical .info-content-right>* {
+    pointer-events: auto;
+}
+
+.vertical .header-info {
+    position: absolute !important;
+    top: 3%; left: 0; right: 0; width: 100%;
+    display: flex !important;
+    flex-direction: column;
+    align-items: center; /* Center elements in header info */
+    text-align: center; /* Center title */
+    z-index: 10;
+    margin: 0 !important;
+}
+
+.vertical .classification-label {
+    width: 100%;
+    text-align: center !important;
+}
+
+.vertical .header-info h2 {
+    -webkit-line-clamp: 2 !important; /* Cap at 2 lines for safety */
+    line-clamp: 2 !important;
+    overflow: hidden !important;
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    font-size: calc(var(--canvas-v-title-size) * 0.9);
+    text-shadow: 0.5cqw 0.5cqw 2cqw rgba(0, 0, 0, 1);
+    transition: font-size 0.2s ease;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+/* Dynamic resizing for long titles */
+.vertical .header-info h2[data-length="medium"] {
+    font-size: calc(var(--canvas-v-title-size) * 1.1);
+}
+
+.vertical .header-info h2[data-length="long"] {
+    font-size: calc(var(--canvas-v-title-size) * 0.9);
+}
+
+.vertical .header-info h2[data-length="xl"] {
+    font-size: calc(var(--canvas-v-title-size) * 0.7);
+}
+
+/* Vertical Title Auto-Scaling (JS-driven, progressively smaller) */
+.vertical .header-info h2.title-scale-1 {
+    font-size: calc(var(--canvas-v-title-size) * 0.75) !important;
+}
+.vertical .header-info h2.title-scale-2 {
+    font-size: calc(var(--canvas-v-title-size) * 0.6) !important;
+}
+.vertical .header-info h2.title-scale-3 {
+    font-size: calc(var(--canvas-v-title-size) * 0.5) !important;
+}
+
+/* Single-line clamp for titles >5 words that still overflow (vertical only) */
+.vertical .header-info h2.single-line-clamp {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: block !important;
+    -webkit-line-clamp: unset !important;
+    line-clamp: unset !important;
+    -webkit-box-orient: unset !important;
+}
+
+/* Export compatibility for single-line title clamp */
+.export-mode .header-info h2.single-line-clamp {
+    white-space: nowrap !important;
+    max-height: 1.1em !important;
+}
+
+.vertical .genre-label {
+    display: flex !important; /* Re-enable genre label in vertical mode */
+}
+
+.vertical .synopsis-wrapper {
+    position: absolute !important;
+    top: 26%; left: 5%;
+    width: 42% !important;
+    height: 52.8% !important;
+    max-height: 52.8% !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    display: block !important;
+}
+
+.vertical #synopsis-text {
+    font-size: calc(var(--canvas-synopsis-size) * 0.8) !important;
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 24 !important; /* Absolute height safely natively stops visual overflowing */
+    overflow: hidden !important;
+    text-shadow: 0px 2px 8px rgba(0,0,0,0.8);
+    text-align: start !important; /* Respect LTR/RTL perfectly */
+}
+
+.vertical .genre-row {
+    margin-top: 2cqw !important;
+    margin-bottom: 3cqw !important; /* Kept tight to the synopsis */
+    justify-content: center !important; /* Forces centered tags perfectly */
+}
+
+/* STICKERS CONTAINER - Wraps Watermark + Icons */
+.stickers-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: auto;
+    width: 100%;
+}
+
+.vertical .stickers-grid-canvas { 
+    position: absolute !important; 
+    bottom: 1.5% !important; left: 0 !important; right: 0 !important; width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-wrap: nowrap !important;
+    z-index: 10;
+    margin: 0 !important; 
+    pointer-events: auto;
+}
+
+/* Classifier Box below Poster */
+.vertical .modern-watermark.vertical-only {
+    position: absolute !important;
+    top: 80%; 
+    right: 27%; /* Central right-axis coordinate perfectly under 44% width poster (5% offset + 22% half-width) */
+    width: auto !important; /* Fixes horrible stretching from previous 44% metric */
+    transform: translateX(50%) !important; /* Centers natively */
+    display: flex;
+    justify-content: center;
+    box-sizing: border-box;
+    margin: 0 !important; 
+    white-space: nowrap;
+    pointer-events: auto;
+}
+
+
+/* STICKERS GRID */
+.stickers-grid-canvas {
+    display: flex;
+    flex-wrap: nowrap;
+    /* Force single row */
+    justify-content: center;
+    /* Center icons */
+    gap: 0.4cqw;
+    /* Reduced from 0.8cqw */
+    padding: 1cqw 1cqw 0 1cqw;
+    /* No bottom padding — flush with poster bottom */
+    width: 100%;
+    /* Ensure full width for Flexbox scaling */
+    min-width: 0;
+    /* Allow flex items to shrink */
+}
+
+.horizontal .stickers-grid-canvas {
+    width: 100%;
+    /* Override legacy grid logic */
+    align-self: flex-start;
+    max-width: 100%;
+}
+
+.vertical .stickers-container {
+    order: 3;
+    /* Place after poster (order: 2) */
+    margin-top: 0;
+    width: 100%;
+}
+
+.vertical .stickers-grid-canvas {
+    width: 100% !important;
+    max-width: 100% !important; /* FIXED LAYOUT BUG! Eliminated old 1000px restriction */
+    padding: 1cqw;
+    background: transparent;
+    margin-top: 0;
+}
+
+/* Logic for <= 4 icons: Center + larger gap */
+.vertical .stickers-grid-canvas.few-icons {
+    /* Flex alignment handles centering naturally */
+    gap: 1.5cqw;
+    /* Slightly pulled together */
+}
+
+.vertical .stickers-grid-canvas.few-icons .sticker-item {
+    width: 18%;
+    /* Consistent base size */
+    max-width: 200px;
+    flex-shrink: 0;
+    /* Don't shrink when few */
+}
+
+.vertical .stickers-grid-canvas.few-icons .sticker-item img {
+    width: 100%;
+    height: auto;
+}
+
+.sticker-item {
+    aspect-ratio: 1 / 1;
+    background: transparent;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    /* Align icon images to the bottom */
+    padding: 0.8cqw 0.8cqw 0 0.8cqw;
+    /* No bottom padding — flush alignment */
+
+    /* FLEXBOX ADDITIONS */
+    flex: 0 1 auto;
+    /* Grow: 0, Shrink: 1, Basis: auto */
+    width: 18%;
+    /* Base size ~1/5th creates a nice row of 5 */
+    max-width: 15vh;
+    /* Variable limit based on viewport height */
+    min-width: 0;
+    /* CRITICAL: Allow shrinking below content intrinsic size */
+}
+
+.sticker-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.classification-label {
+    /* Positioned relative to header now */
+    font-size: 1.5rem;
+    /* Much bigger size */
+    color: rgba(255, 255, 255, 0.9);
+    /* Brighter */
+    margin-bottom: 12px;
+    /* Increased fixed spacing */
+    /* letter-spacing: 1px; Removed - breaks Arabic text in html2canvas */
+    font-family: var(--font-ar);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    /* Added slight drop shadow */
+}
+
+
+/* --- 4. RATINGS PANEL (Bottom Right) --- */
+.ratings-panel {
+    grid-column: 1 / 2;
+    grid-row: 2 / 3;
+    background-color: #0f0f0f;
+    /* Pitch black */
+    color: white;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    /* justify-content: space-between; */
+    border: 6px solid #000;
+    /* Border if needed, or blending into bg */
+}
+
+.ratings-title {
+    font-size: 3rem;
+    color: var(--accent-green);
+    /* Green pixel text */
+    text-align: center;
+    margin: 0 0 20px 0;
+    font-family: var(--font-ar);
+    /* Pixel shadow attempt */
+    text-shadow: 4px 4px 0px #003300;
+}
+
+.label-white {
+    color: white;
+}
+
+.label-green {
+    color: #7cb342;
+    /* Requested green */
+}
+
+.tags-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 25px;
+    justify-content: center;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 12px;
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.category-tag {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #bbb;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.category-tag:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+#export-btn:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+}
+
+#copy-btn {
+    background-color: #2ecc71;
+    color: white;
+    border: 2px solid white;
+    border-radius: 30px;
+    padding: 10px 40px;
+    font-size: 1.4rem;
+    font-family: var(--font-ar);
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+#copy-btn:hover {
+    background-color: #27ae60;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
+}
+
+.category-tag .plus-icon {
+    color: var(--accent-green);
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.ratings-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.rating-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: fadeInRow 0.3s ease-out;
+}
+
+@keyframes fadeInRow {
+    from {
+        opacity: 0;
+        transform: translateX(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.rating-row-label {
+    width: 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: right;
+    font-size: 1.1rem;
+}
+
+.remove-slider-btn {
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0 5px;
+    transition: color 0.2s;
+    line-height: 1;
+}
+
+.remove-slider-btn:hover {
+    color: var(--accent-red);
+}
+
+/* Bars: Red | Orange | Yellow | White */
+.rating-bar-container {
+    flex: 1;
+    display: flex;
+    height: 30px;
+    border: 2px solid #000;
+    position: relative;
+    cursor: pointer;
+}
+
+.bar-segment {
+    flex: 1;
+    transition: 0.2s;
+    border-left: 1px solid rgba(0, 0, 0, 0.5);
+}
+
+.bar-segment:first-child {
+    border-left: none;
+}
+
+/* Default Colors (Bright) */
+.seg-red {
+    background: var(--accent-red);
+    order: 4;
+}
+
+.seg-orange {
+    background: var(--accent-orange);
+    order: 3;
+}
+
+.seg-yellow {
+    background: var(--accent-yellow);
+    order: 2;
+}
+
+.seg-gray {
+    background: #444;
+    order: 1;
+}
+
+/* Active State Handling via JS classes active-1, active-2 etc */
+/* If Level 1 (Red/Severe): Only Red is bright? or all up to Red? */
+/* Let's assume singular highlighting based on image, but typically bars fill. */
+/* Image shows: Red is left. Yellow is right. */
+.rating-bar-container.active-1 .seg-red {
+    background: var(--accent-red);
+}
+
+.rating-bar-container.active-2 .seg-orange {
+    background: var(--accent-orange);
+}
+
+.rating-bar-container.active-3 .seg-yellow {
+    background: var(--accent-yellow);
+}
+
+/* Knob */
+.rating-knob {
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    /* Larger circular knob */
+    background: #ddd;
+    border: 3px solid #333;
+    border-radius: 50%;
+    top: 50%;
+    transform: translate(50%, -50%);
+    /* Centers knob on the 'right' percentage */
+    right: 12.5%;
+    /* Default Gray center */
+    pointer-events: none;
+    transition: right 0.2s;
+    box-shadow: 0 4px 0px rgba(0, 0, 0, 0.5);
+}
+
+/* Toggles */
+.toggles-grid {
+    margin-top: 5px;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.toggle-badge {
+    background: transparent;
+    padding: 2px 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    cursor: pointer;
+    min-width: 110px;
+    transition: all 0.1s;
+}
+
+.toggle-badge span {
+    font-size: 1rem;
+    color: #ccc;
+    font-weight: bold;
+}
+
+.toggle-badge.active span {
+    color: #fff;
+}
+
+.toggle-badge:active {
+    transform: scale(0.98);
+}
+
+.toggle-square {
+    width: 44px;
+    height: 24px;
+    background: #444;
+    border: 3px solid #000;
+    position: relative;
+    flex-shrink: 0;
+    box-shadow: 2px 2px 0px #000;
+    transition: background 0.2s;
+}
+
+/* The Knob */
+.toggle-square::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 18px;
+    /* 24px height - 6px total horizontal borders = 18px pure box height. It effectively fills the space */
+    height: 18px;
+    background: #888;
+    border-right: 3px solid #000;
+    transition: all 0.2s;
+}
+
+.toggle-badge.active .toggle-square {
+    background: var(--accent-green);
+}
+
+.toggle-badge.active .toggle-square::after {
+    left: 20px;
+    /* 44 width - 18 knob - 6 borders = 20 left offset */
+    background: #fff;
+    border-right: none;
+    border-left: 3px solid #000;
+}
+
+.warning-text {
+    margin-top: auto;
+    font-size: 1.4rem;
+    /* Increased size (+5px approx) */
+    color: #fff;
+    /* White body text */
+    text-align: center;
+    /* Centered as requested */
+    padding-top: 10px;
+    font-family: var(--font-ar);
+}
+
+.warn-prefix {
+    color: var(--accent-yellow);
+    font-weight: bold;
+}
+
+.warning-text a {
+    color: #3498db;
+    /* Blue link */
+    text-decoration: none;
+}
+
+.warning-text a:hover {
+    text-decoration: underline;
+}
+
+/* --- 5. FOOTER (Export) --- */
+.card-footer {
+    grid-column: 1 / 3;
+    grid-row: 3 / 4;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: -10px;
+    /* Pull up closer */
+}
+
+#export-btn {
+    background: #2980b9;
+    color: white;
+    font-family: var(--font-ar);
+    font-size: 1.5rem;
+    padding: 10px 50px;
+    border-radius: 30px;
+    border: 4px solid #fff;
+    cursor: pointer;
+    box-shadow: 0 5px 0 #1c5980;
+}
+
+#export-btn:active {
+    transform: translateY(5px);
+    box-shadow: none;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* --- MODAL STYLES --- */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 10, 0.95);
+    /* Deep dark overlay for performance */
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.modal-content {
+    background-color: rgba(26, 26, 26, 0.95);
+    /* Frosted dark background */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    /* Subtle inner glow border */
+    border-radius: 12px;
+    width: 100%;
+    max-width: 85vw;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 15px 20px -10px rgba(0, 0, 0, 0.5);
+    animation: modalSlide 0.3s ease-out;
+    color: #eee;
+    overflow: hidden;
+}
+
+/* ... existing keyframes ... */
+
+/* Header styles remain fine (already dark) */
+
+.section-title {
+    font-size: 2rem;
+    color: #fff;
+    /* White title */
+    border-bottom: 3px solid rgba(255, 255, 255, 0.2);
+    /* Softer underline */
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    display: inline-block;
+}
+
+.section-subtitle {
+    font-size: 1.15rem;
+    color: #bbb;
+    line-height: 1.6;
+    margin-bottom: 25px;
+    margin-top: 5px;
+    max-width: 90%;
+}
+
+.semantic-legend {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+.legend-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 8px 15px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 1rem;
+    color: #e0e0e0;
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.theme-badge .legend-dot {
+    background-color: #9b59b6;
+    box-shadow: 0 0 8px rgba(155, 89, 182, 0.5);
+}
+
+.warning-badge .legend-dot {
+    background-color: var(--accent-red);
+    box-shadow: 0 0 8px rgba(231, 76, 60, 0.5);
+}
+
+.mechanic-badge .legend-dot {
+    background-color: #1abc9c;
+    box-shadow: 0 0 8px rgba(26, 188, 156, 0.5);
+}
+
+/* Grid styles ... */
+
+.modal-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    background: #252525;
+    /* Elevated card background */
+    padding: 20px 15px;
+    /* More breathing room */
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    cursor: default;
+}
+
+.modal-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    background: #2a2a2a;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Semantic Colored Borders (RTL right-side accents) */
+.modal-item.warning-card {
+    border-right: 4px solid var(--accent-red);
+}
+
+.modal-item.theme-card {
+    border-right: 4px solid #9b59b6;
+    /* Purple for Magic/Kufriyat */
+}
+
+.modal-item.mechanic-card {
+    border-right: 4px solid #1abc9c;
+    /* Teal for Game Mechanics */
+}
+
+/* Image styles ... */
+
+.item-text strong {
+    display: block;
+    font-size: 1.4rem;
+    color: #fff;
+    /* White strong text */
+    margin-bottom: 6px;
+}
+
+.item-text p {
+    margin: 0;
+    font-size: 1.15rem;
+    line-height: 1.6;
+    /* Improved readability for Arabic */
+    color: #bbb;
+    /* Softer gray body text */
+}
+
+/* Level info styles ... */
+
+@keyframes modalSlide {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    background: #111;
+    color: white;
+    padding: 15px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 6px solid #000;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-family: var(--font-ar);
+}
+
+.close-btn {
+    background: var(--accent-red);
+    color: white;
+    border: 3px solid #000;
+    font-size: 2rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-family: var(--font-en);
+    box-shadow: 4px 4px 0px #000;
+}
+
+.close-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px #000;
+}
+
+.modal-body {
+    padding: 25px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* Custom Scrollbar for Modal Body to match Frosted Theme */
+.modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Restored Layout Rules */
+.modal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+/* ===== EXCEPTIONS CARD ===== */
+.exceptions-card {
+    background: rgba(46, 204, 113, 0.08);
+    border: 1px solid rgba(46, 204, 113, 0.2);
+    border-left: 5px solid #2ecc71;
+    border-radius: 12px;
+    padding: 20px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.exceptions-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 24px rgba(46, 204, 113, 0.15);
+}
+
+.exceptions-desc {
+    margin: 0 0 16px 0;
+    font-size: 1.25rem;
+    line-height: 1.7;
+    color: #ddd;
+}
+
+.exceptions-icons {
+    display: flex;
+    justify-content: flex-start;
+    gap: 12px;
+    flex-wrap: nowrap;
+}
+
+.exceptions-icons img {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    background: transparent;
+    border: none;
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+.modal-item img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    flex-shrink: 0;
+    background: #000;
+    padding: 8px;
+    border: none;
+}
+
+/* ===== GRADE CARDS ===== */
+.grades-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.grade-card {
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.grade-card:hover {
+    transform: translateY(-2px);
+}
+
+/* --- Header (Badge + Title) --- */
+.grade-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+}
+
+.grade-badge {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: 900;
+    flex-shrink: 0;
+}
+
+.grade-badge.red {
+    background: var(--accent-red);
+    color: #fff;
+    box-shadow: 0 0 18px rgba(231, 76, 60, 0.6), 0 0 40px rgba(231, 76, 60, 0.2);
+}
+
+.grade-badge.orange {
+    background: var(--accent-orange);
+    color: #fff;
+    box-shadow: 0 0 18px rgba(230, 126, 34, 0.6), 0 0 40px rgba(230, 126, 34, 0.2);
+}
+
+.grade-badge.yellow {
+    background: var(--accent-yellow);
+    color: #000;
+    box-shadow: 0 0 18px rgba(241, 196, 15, 0.6), 0 0 40px rgba(241, 196, 15, 0.2);
+}
+
+.grade-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    font-family: var(--font-ar);
+}
+
+/* --- Color Tint Variants --- */
+.grade-red {
+    background: rgba(231, 76, 60, 0.08);
+    border-left: 5px solid var(--accent-red);
+}
+
+.grade-red .grade-title {
+    color: #f87171;
+}
+
+.grade-red:hover {
+    box-shadow: 0 4px 24px rgba(231, 76, 60, 0.15);
+}
+
+.grade-orange {
+    background: rgba(230, 126, 34, 0.08);
+    border-left: 5px solid var(--accent-orange);
+}
+
+.grade-orange .grade-title {
+    color: #fb923c;
+}
+
+.grade-orange:hover {
+    box-shadow: 0 4px 24px rgba(230, 126, 34, 0.15);
+}
+
+.grade-yellow {
+    background: rgba(241, 196, 15, 0.08);
+    border-left: 5px solid var(--accent-yellow);
+}
+
+.grade-yellow .grade-title {
+    color: #facc15;
+}
+
+.grade-yellow:hover {
+    box-shadow: 0 4px 24px rgba(241, 196, 15, 0.15);
+}
+
+/* --- Body (Dual Descriptions) --- */
+.grade-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: rgba(255, 255, 255, 0.04);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.grade-desc {
+    padding: 14px 20px;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.grade-desc-label {
+    font-size: 1.25rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: rgba(255, 255, 255, 0.45);
+    margin-bottom: 8px;
+    font-family: var(--font-ar);
+}
+
+.grade-desc p {
+    margin: 0;
+    font-size: 1.22rem;
+    line-height: 1.65;
+    color: #ddd;
+}
+
+/* --- Mobile: Stack descriptions vertically --- */
+@media (max-width: 768px) {
+    .grade-body {
+        grid-template-columns: 1fr;
+    }
+
+    .grade-header {
+        padding: 14px 16px;
+    }
+
+    .grade-badge {
+        width: 40px;
+        height: 40px;
+        font-size: 1.25rem;
+    }
+
+    .grade-title {
+        font-size: 1.05rem;
+    }
+}
+
+/* ===== OLD TABLE (deprecated, kept for reference) ===== */
+/* .comparison-table, .level-box, .table-header, .table-row, .level-cell, .desc-cell — now replaced by grade cards */
+
+/* Tablet/Constrained Desktop Tweaks */
+@media (max-width: 1200px) {
+    .rating-row {
+        flex-direction: column;
+        align-items: stretch;
+        margin-bottom: 5px;
+    }
+
+    .rating-row-label {
+        width: 100%;
+        text-align: right;
+        font-size: 1rem;
+        margin-bottom: 2px;
+    }
+
+    .rating-bar-container {
+        width: 100%;
+        height: 30px;
+    }
+}
+
+/* Responsive fixes for modal */
+@media (max-width: 768px) {
+
+    .modal-grid {
+        grid-template-columns: 1fr;
+    }
+
+    @media (max-width: 900px) {
+        body {
+            padding: 10px;
+            align-items: flex-start;
+            height: auto;
+        }
+
+        .card-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 100%;
+            gap: 15px;
+            padding: 15px;
+            border-width: 4px;
+        }
+
+        /* 1. Header */
+        .card-header {
+            order: 1;
+            grid-column: auto;
+            grid-row: auto;
+            padding: 15px;
+            border-width: 4px;
+        }
+
+        .logo {
+            font-size: 3rem;
+        }
+
+        .subtitle-ar {
+            font-size: 1rem;
+        }
+
+        /* 2. Controls & Ratings */
+        .top-controls {
+            order: 2;
+            grid-column: auto;
+            grid-row: auto;
+            max-height: none;
+            overflow: visible;
+            padding: 15px;
+            border-width: 4px;
+            flex: 1 0 auto;
+        }
+
+        /* Stack controls */
+        .control-row {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .control-label {
+            text-align: right;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .orientation-selector,
+        .custom-dropdown,
+        .search-wrapper {
+            width: 100%;
+            display: flex;
+            box-sizing: border-box;
+        }
+
+        .orient-btn {
+            flex: 1;
+        }
+
+        .dropdown-toggle {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        /* Search Fixes */
+        .search-wrapper {
+            width: 100%;
+        }
+
+        /* Ratings */
+        .ratings-section {
+            margin-top: 20px;
+        }
+
+        .ratings-title {
+            font-size: 2rem;
+        }
+
+        .rating-row {
+            flex-direction: row;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .rating-row-label {
+            font-size: 0.9rem;
+            width: 50px;
+            margin-bottom: 0;
+        }
+
+        .rating-bar-container {
+            height: 25px;
+        }
+
+        /* 3. Preview Canvas */
+        .info-panel {
+            order: 3;
+            grid-column: auto;
+            grid-row: auto;
+            width: 100%;
+            border-width: 4px;
+            min-height: 300px;
+        }
+
+        /* Fix Vertical Panel fixed height */
+        .info-panel.vertical {
+            height: auto;
+            aspect-ratio: 2/3;
+            max-height: none;
+            margin: 0;
+        }
+
+        /* 4. Footer */
+        .card-footer {
+            order: 4;
+            grid-column: auto;
+            grid-row: auto;
+            margin-top: 10px;
+            padding-bottom: 20px;
+        }
+
+        #export-btn {
+            width: 100%;
+            font-size: 1.2rem;
+            padding: 10px;
+        }
+
+        /* Modal adjustments */
+        .modal-content {
+            max-width: 95vw;
+            max-height: 90vh;
+            border-width: 3px;
+            margin: 10px;
+        }
+    }
+}
+
+
+/* Export Mode Overrides */
+.export-mode {
+    --canvas-title-size: 106px;
+    --canvas-genre-size: 54px;
+    --canvas-synopsis-size: 40px;
+    --canvas-v-title-size: 114px;
+    /* Reduced to 114px */
+    width: 1920px !important;
+    min-width: 1920px !important;
+    max-width: none !important;
+}
+
+/* Force poster to cover the entire space, overriding any leaked mobile media queries */
+.export-mode.vertical .poster-div {
+    background-size: cover !important;
+    background-position: center !important;
+}
+
+/* Allow natural scaling without forced 'contain' */
+.export-mode.vertical .poster-container {
+    max-height: none !important;
+    height: auto !important;
+    width: 75% !important;
+    aspect-ratio: var(--poster-aspect-ratio, 2/3) !important;
+}
+
+.export-mode #synopsis-text {
+    line-height: 1.15 !important;
+}
+
+.export-mode.vertical {
+    width: 1200px !important;
+    min-width: 1200px !important;
+    max-width: none !important;
+    height: 1800px !important;
+    aspect-ratio: 2 / 3 !important;
+    position: relative !important;
+}
+
+/* Resolve cutoff by using natural flex distribution instead of absolute positioning */
+.export-mode.vertical .canvas-content {
+    justify-content: space-between !important;
+}
+
+.export-mode.vertical .poster-container {
+    /* Poster takes its natural centered position between top title and bottom icons */
+    margin-bottom: 0 !important;
+}
+
+/* Vertical Export Icons tweaks */
+.export-mode.vertical .stickers-container {
+    /* No absolute positioning to avoid html2canvas clipping */
+    margin-top: 0 !important;
+}
+
+
+
+/* FIX SEARCH OVERFLOW */
+#search-results {
+    position: absolute !important;
+    top: 100% !important;
+    left: auto !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
+    max-height: 250px !important;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5) !important;
+    border-radius: 0 0 10px 10px !important;
+    z-index: 99999 !important;
+    background-color: #222 !important;
+}
+
+.search-result-item {
+    overflow: hidden !important;
+}
+
+.search-result-item span {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    min-width: 0 !important;
+    flex: 1 !important;
+}
+
+/* WATERMARK STYLING - FROSTED PILL */
+.modern-watermark {
+    font-family: var(--font-ar);
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    padding: 4px 18px;
+    font-size: 1.6cqw;
+    font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    align-self: center;
+    direction: rtl;
+    opacity: 1;
+    letter-spacing: normal !important;
+    transition: opacity 0.3s ease;
+}
+
+.vertical .modern-watermark {
+    font-size: 2.4cqw;
+    padding: 5px 22px;
+}
+
+.modern-watermark .watermark-label {
+    color: #2980b9;
+    font-weight: 800;
+    font-size: calc(100% + 1px);
+    margin-left: 4px;
+}
+
+.modern-watermark.hidden {
+    display: none !important;
+}
+
+/* DUPLICATE WATERMARK TOGGLES */
+.horizontal .modern-watermark.vertical-only {
+    display: none !important;
+}
+
+.vertical .modern-watermark.horizontal-only {
+    display: none !important;
+}
+
+/* EXPORT MODE DIMENSIONS */
+#preview-canvas.export-mode.vertical {
+    width: 1200px !important;
+    height: 1500px !important; /* Force exact 4:5 resolution */
+    max-width: none !important;
+    max-height: none !important;
+    margin: 0 !important;
+}
+
+#preview-canvas.export-mode.horizontal {
+    width: 1920px !important;
+    height: 1080px !important; /* Force exact 16:9 resolution */
+    max-width: none !important;
+    max-height: none !important;
+    margin: 0 !important;
+}
+
+/* IRONCLAD HTML2CANVAS PIXEL COORDINATES */
+.export-mode.vertical .canvas-content {
+    padding: 0 !important; 
+}
+
+.export-mode.vertical .header-info { top: 45px !important; }
+
+.export-mode.vertical .poster-container {
+    top: 330px !important; right: 60px !important;
+    width: 528px !important; height: 792px !important;
+    max-height: 792px !important; max-width: 528px !important;
+}
+
+.export-mode.vertical .synopsis-wrapper {
+    top: 330px !important; left: 60px !important;
+    width: 504px !important; height: 792px !important;
+    max-height: 792px !important;
+}
+
+
+.export-mode.vertical .genre-row {
+    margin: 12px 0 0 0 !important; /* Condense tag boxes strongly against the title */
+    justify-content: center !important;
+}
+
+/* HTML2CANVAS FONT & LAYOUT COMPATIBILITY FIXES */
+.export-mode .header-info h2 {
+    display: block !important;     /* html2canvas completely fails computing bounds on -webkit-box */
+    overflow: hidden !important;
+    max-height: 2.2em !important;  /* Hardcap to exactly 2 lines (1.1 line-height * 2) */
+    margin-bottom: 8px !important; /* Condensed clustering down from 20px */
+}
+
+.export-mode #synopsis-text {
+    display: block !important;
+    overflow: hidden !important;
+    max-height: 870px !important; /* Hardcap Story cleanly alongside 891px Poster */
+}
+
+/* EXPORT MODE COMPONENT OVERRIDES */
+.export-mode .modern-watermark {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
+    opacity: 1 !important;
+    padding: 5px 23px !important;
+    font-size: 21px !important;
+    letter-spacing: normal !important;
+}
+
+.export-mode:not(.vertical) .modern-watermark {
+    transform: translateY(20%) !important;
+}
+
+.export-mode.vertical .modern-watermark {
+    font-size: 26px !important;
+    padding: 8px 29px !important;
+    top: 76% !important; /* Poster bottom at 74.8% — maintain 1.2% gap */
+    /* Center under poster without transform (html2canvas breaks translateX%) */
+    left: 51% !important;  /* Poster left edge: 100% - 5% - 44% */
+    right: 5% !important;  /* Poster right edge */
+    width: fit-content !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    transform: none !important;
+}
+
+.export-mode.horizontal .stickers-grid-canvas {
+    gap: 12px !important;
+    padding: 24px 24px 0 24px !important;
+    align-items: flex-end !important;
+}
+.export-mode.horizontal .sticker-item {
+    padding: 14px 14px 0 14px !important;
+    max-width: none !important;
+    width: 210px !important;
+    flex-shrink: 0 !important;
+    align-self: auto !important;
+}
+.export-mode.horizontal .sticker-item img {
+    width: 100% !important;
+    height: auto !important;
+    object-fit: contain !important;
+}
+.export-mode.horizontal .stickers-container {
+    max-height: 260px !important;
+    margin-top: auto !important;
+}
+.export-mode.vertical .stickers-grid-canvas {
+    bottom: 4% !important; /* Lowered from 6.5% — more space below watermark */
+}
+
+/* Removed conflicting "@media portrait" export queries that crashed the html2canvas engine */
