@@ -67,7 +67,12 @@ function setupEventListeners() {
             item.classList.add('active');
 
             // Update Button Text
-            currentTypeBtn.textContent = item.textContent;
+            const labelSpan = currentTypeBtn.querySelector('span');
+            if (labelSpan) {
+                labelSpan.textContent = item.textContent;
+            } else {
+                currentTypeBtn.textContent = item.textContent;
+            }
 
             // Close Menu
             dropdownMenu.classList.remove('show');

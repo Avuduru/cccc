@@ -4,3 +4,7 @@ node_modules/
 vendor/
 data/*.jsonl
 CLAUDE.md
+demo.html
+Demo/
+archive/
+php.ini
