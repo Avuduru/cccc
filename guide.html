@@ -11,7 +11,20 @@
     <link href="https://fonts.googleapis.com/css2?family=Handjet:wght@100..900&family=Silkscreen:wght@400;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.v3.css">
 
+    <!-- Match main app topbar zoom -->
+    <script>
+        function updateAppScale() {
+            var scale = Math.min(window.innerWidth / 1700, window.innerHeight / 940);
+            scale = Math.max(0.75, Math.min(1.5, scale));
+            document.documentElement.style.setProperty('--app-zoom', scale);
+        }
+        window.addEventListener('resize', updateAppScale);
+        window.addEventListener('DOMContentLoaded', updateAppScale);
+        updateAppScale();
+    </script>
+
     <style>
+        .guide-topbar-wrap { zoom: var(--app-zoom, 1); }
         html, body { scroll-behavior: smooth; min-height: 100vh; }
 
         /* ── Shell ─────────────────────────────── */
@@ -240,7 +253,8 @@
 <body>
 <div class="guide-shell">
 
-    <!-- ── TOPBAR (identical to main app) ── -->
+    <!-- ── TOPBAR (zoomed to match main app) ── -->
+    <div class="guide-topbar-wrap">
     <header class="topbar">
         <div class="topbar-brand">
             <img src="assets/LOGO.png" alt="CCCC Logo" class="brand-logo" style="height: 32px; width: auto; object-fit: contain;">
@@ -258,6 +272,7 @@
             <span class="status-url">muhafid.com</span>
         </a>
     </header>
+    </div>
 
     <!-- ── PAGE HEADER ── -->
     <div class="guide-page-header">
