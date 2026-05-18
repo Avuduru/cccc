@@ -46,7 +46,12 @@ function getDB()
     }
 
     try {
-        $dsn = "mysql:host={$host};dbname={$name};charset=utf8mb4";
+        $port = '3306';
+        if (strpos($host, ':') !== false) {
+            [$host, $port] = explode(':', $host, 2);
+        }
+
+        $dsn = "mysql:host={$host};port={$port};dbname={$name};charset=utf8mb4";
         $pdo = new PDO($dsn, $user, $pass, [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,

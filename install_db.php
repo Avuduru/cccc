@@ -25,7 +25,12 @@ if (!$host || !$name) {
 }
 
 try {
-    $pdo = new PDO("mysql:host={$host};dbname={$name};charset=utf8mb4", $user, $pass, [
+    $port = '3306';
+    if (strpos($host, ':') !== false) {
+        [$host, $port] = explode(':', $host, 2);
+    }
+
+    $pdo = new PDO("mysql:host={$host};port={$port};dbname={$name};charset=utf8mb4", $user, $pass, [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
     ]);
     
