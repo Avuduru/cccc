@@ -72,6 +72,14 @@ function getFilename() {
     return `CCCC-${base}.png`;
 }
 
+function downloadLink(url, filename) {
+    const link = document.createElement('a');
+    link.href = url; link.download = filename; link.style.display = 'none';
+    document.body.appendChild(link);
+    link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+    setTimeout(() => { if (document.body.contains(link)) document.body.removeChild(link); }, 2000);
+}
+
 // Shared render pipeline: clone → wait for fonts → html2canvas → compress
 async function renderToBlob(originalCanvas) {
     const isVertical = originalCanvas.classList.contains('vertical');
@@ -94,12 +102,19 @@ async function renderToBlob(originalCanvas) {
         clonedBg.getContext('2d').drawImage(originalBg, 0, 0);
     }
 
-    // Wait for all webfonts (Handjet, Silkscreen, JetBrains Mono) to be ready.
-    // This prevents Arabic characters from falling back to a system font on mobile,
-    // which causes scrambled/unshaped output in html2canvas.
+    // Wait for CSS font loading API to settle
     await document.fonts.ready;
-    // Small extra settle time for layout reflow in the off-screen container
-    await new Promise(r => setTimeout(r, 150));
+    // Force-load the exact Handjet weight/size instances used in card text.
+    // On iOS, document.fonts.ready resolves immediately from cache but the
+    // font hasn't been applied+shaped in the newly created off-screen clone yet.
+    // Explicitly calling fonts.load() forces those instances to be activated.
+    await document.fonts.load('800 48px Handjet');
+    await document.fonts.load('400 20px Handjet');
+    // Two rAF passes guarantee the browser has completed at least one full
+    // layout+paint cycle on the off-screen clone before html2canvas reads it.
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    // Extra buffer for slower iOS devices
+    await new Promise(r => setTimeout(r, 300));
 
     rescaleSynopsisInClone(clone);
 
@@ -123,40 +138,45 @@ export function handleExport() {
     const exportBtn = document.getElementById('export-btn');
     exportBtn.innerText = 'جاري التصدير...';
 
+    // iOS: navigator.share({ files }) triggers the document share sheet, which
+    // does NOT include "Save to Photos". The fix: open a blank tab synchronously
+    // (within the gesture, before any async work) so Safari doesn't block it as
+    // a popup, then navigate it to the blob URL after rendering. The user then
+    // sees the image fullscreen with Safari's native Share → "Save Image" UI.
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const iosTab = isIOS ? window.open('', '_blank') : null;
+
     renderToBlob(originalCanvas)
         .then(async blob => {
             if (!blob) { exportBtn.innerText = 'ERROR'; return; }
 
             const filename = getFilename();
-            const file = new File([blob], filename, { type: 'image/png' });
+            const url = URL.createObjectURL(blob);
 
-            // On iOS/Android: use the native share sheet (Web Share API).
-            // This lets users save directly to Photos or share to any app —
-            // much friendlier than a download link, which Safari can't handle.
-            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-                try {
-                    await navigator.share({ files: [file] });
-                    logClassification('export');
-                } catch (err) {
-                    // AbortError = user dismissed the sheet, not a real failure
-                    if (err.name !== 'AbortError') console.error('Share failed:', err);
-                }
-            } else {
-                // Desktop: trigger a file download
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = filename;
-                link.style.display = 'none';
-                document.body.appendChild(link);
-                link.dispatchEvent(new MouseEvent('click', {
-                    bubbles: true, cancelable: true, view: window
-                }));
+            if (isIOS && iosTab) {
+                iosTab.location.href = url;
                 logClassification('export');
-                setTimeout(() => {
-                    if (document.body.contains(link)) document.body.removeChild(link);
-                    URL.revokeObjectURL(url);
-                }, 2000);
+
+            } else if (navigator.share && navigator.canShare) {
+                // Android: Web Share API works correctly there
+                const file = new File([blob], filename, { type: 'image/png' });
+                if (navigator.canShare({ files: [file] })) {
+                    try {
+                        await navigator.share({ files: [file] });
+                        logClassification('export');
+                    } catch (err) {
+                        if (err.name !== 'AbortError') console.error('Share failed:', err);
+                    }
+                    return;
+                }
+                downloadLink(url, filename);
+                logClassification('export');
+
+            } else {
+                // Desktop: file download
+                downloadLink(url, filename);
+                logClassification('export');
+                setTimeout(() => URL.revokeObjectURL(url), 2000);
             }
         })
         .catch(err => {
