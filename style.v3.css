@@ -1603,10 +1603,6 @@ body {
 .exceptions-icons img {
     width: 90px; height: 90px;
     object-fit: contain;
-    background: var(--ink-1);
-    padding: 6px;
-    border-radius: 3px;
-    border: 1px solid var(--line);
     flex-shrink: 1;
     min-width: 0;
 }
