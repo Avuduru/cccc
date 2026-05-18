@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>دليل التصانيف والدرجات — CCCC</title>
+    <title>دليل الدرجات والتصانيف — CCCC</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,18 +48,18 @@
             --font-pixel:  'Silkscreen', 'JetBrains Mono', monospace;
         }
 
-        .guide-topbar-wrap { zoom: var(--app-zoom, 1); }
         html, body { scroll-behavior: smooth; min-height: 100vh; }
 
         /* ── Shell ─────────────────────────────── */
         .guide-shell {
             display: flex;
             flex-direction: column;
-            gap: 0;
-            padding: 20px 32px 64px;
-            max-width: none;
-            margin: 0;
+            gap: 18px;
+            padding: 18px 22px 64px;
+            max-width: 1680px;
+            margin: 0 auto;
             position: relative;
+            zoom: var(--app-zoom, 1);
         }
         /* Faint global CRT scanlines */
         .guide-shell::before {
@@ -273,7 +273,7 @@
             border: 1px solid var(--g-line);
             padding: 22px 22px 22px 26px;
             display: grid;
-            grid-template-columns: 88px 1fr;
+            grid-template-columns: 114px 1fr;
             gap: 20px;
             align-items: center;
             transition: border-color 0.15s, transform 0.15s, background 0.15s;
@@ -304,12 +304,12 @@
         .codex-tile:hover.cat-mech    { border-color: rgba(52,208,184,0.40); }
 
         .codex-tile-icon {
-            width: 88px; height: 88px;
+            width: 114px; height: 114px;
             display: grid;
             place-items: center;
             position: relative;
         }
-        .codex-tile-icon img { width: 72px; height: 72px; object-fit: contain; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5)); }
+        .codex-tile-icon img { width: 94px; height: 94px; object-fit: contain; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5)); }
 
         .codex-tile-text { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
         .codex-tile-text .tile-tag {
@@ -346,12 +346,13 @@
            SECTION 02 — STATUS MODIFIERS
            ============================================ */
         .exc-panel {
-            display: grid;
-            grid-template-columns: 1.2fr 1.8fr;
-            gap: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 32px;
             background: var(--g-ink-1);
             border: 1px solid var(--g-line);
-            padding: 32px 36px;
+            padding: 40px 36px;
             position: relative;
         }
         .exc-panel::before,
@@ -369,8 +370,9 @@
             display: flex;
             flex-direction: column;
             gap: 18px;
-            border-left: 1px dashed var(--g-line-2);
-            padding-left: 28px;
+            width: 100%;
+            max-width: 760px;
+            text-align: center;
         }
         .exc-text-label {
             display: inline-flex;
@@ -395,9 +397,10 @@
         .exc-panel .exceptions-desc strong { color: var(--g-acc); font-weight: 700; }
 
         .exc-icons-side {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 14px;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            gap: 48px;
         }
         .exc-modifier {
             display: flex;
@@ -405,7 +408,7 @@
             align-items: center;
             justify-content: center;
         }
-        .exc-modifier img { width: 100px; height: 100px; object-fit: contain; filter: drop-shadow(0 2px 14px rgba(200,255,94,0.22)); }
+        .exc-modifier img { width: 140px; height: 140px; object-fit: contain; filter: drop-shadow(0 2px 14px rgba(200,255,94,0.22)); }
 
         /* ============================================
            SECTION 03 — TIER LADDER
@@ -555,9 +558,9 @@
             .guide-page-header h1 { font-size: 42px; }
             .section-title-block h3 { font-size: 26px; }
             .codex-grid { grid-template-columns: 1fr; }
-            .codex-tile { grid-template-columns: 72px 1fr; padding: 18px; }
-            .codex-tile-icon { width: 72px; height: 72px; }
-            .codex-tile-icon img { width: 50px; height: 50px; }
+            .codex-tile { grid-template-columns: 88px 1fr; padding: 18px; }
+            .codex-tile-icon { width: 88px; height: 88px; }
+            .codex-tile-icon img { width: 70px; height: 70px; }
             .tier-row { grid-template-columns: 1fr; gap: 6px; }
         }
     </style>
@@ -591,7 +594,7 @@
     <div class="guide-page-header">
         <div class="header-left">
             <span class="kicker"><span class="kicker-dot"></span>الدليل</span>
-            <h1>شرح التصانيف والدرجات</h1>
+            <h1>شرح الدرجات والتصانيف</h1>
         </div>
         <div class="header-bar-readout">
             <div class="pixel-bar" aria-hidden="true">
