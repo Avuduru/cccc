@@ -31,6 +31,36 @@ function loadEnv($path)
 }
 
 /**
+ * Connect to MySQL using credentials from .env
+ * Returns a PDO instance or null if DB vars are not configured.
+ */
+function getDB()
+{
+    $host = getenv('DB_HOST') ?: '';
+    $name = getenv('DB_NAME') ?: '';
+    $user = getenv('DB_USER') ?: '';
+    $pass = getenv('DB_PASS') ?: '';
+
+    if (!$host || !$name || !$user) {
+        return null; // DB not configured — fall back gracefully
+    }
+
+    try {
+        $dsn = "mysql:host={$host};dbname={$name};charset=utf8mb4";
+        $pdo = new PDO($dsn, $user, $pass, [
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES   => false,
+        ]);
+        return $pdo;
+    } catch (PDOException $e) {
+        // Log to error_log but never expose credentials to the client
+        error_log('CCCC DB connection failed: ' . $e->getMessage());
+        return null;
+    }
+}
+
+/**
  * Filter out anime/Japanese content from TMDB results
  * For TV/Movie searches, we exclude all Japanese content to keep anime separate
  */
@@ -297,7 +327,7 @@ if (!$type) {
 }
 
 // Ensure query is present for API searches
-$needsQuery = !in_array($type, ['log', 'stats']);
+$needsQuery = !in_array($type, ['log', 'stats', 'lookup']);
 if ($needsQuery && empty($query)) {
     http_response_code(400);
     echo json_encode(['error' => 'Missing query parameter']);
@@ -439,71 +469,302 @@ switch ($type) {
         break;
 
     case 'log':
-        // Log classification data
+        // Save classification data to MySQL (one vote per IP per work, UPSERT)
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
             echo json_encode(['error' => 'Method not allowed']);
             exit;
         }
 
-        $raw = file_get_contents('php://input');
+        $raw   = file_get_contents('php://input');
         $input = json_decode($raw, true);
         if (!$input || !isset($input['content_type']) || !isset($input['ratings'])) {
             http_response_code(400);
-            echo json_encode(['error' => 'Invalid payload', 'raw' => $raw, 'json_error' => json_last_error_msg()]);
+            echo json_encode(['error' => 'Invalid payload', 'json_error' => json_last_error_msg()]);
             exit;
         }
 
-        $logEntry = [
-            'id' => uniqid(),
-            'content_id' => $input['content_id'] ?? null,
-            'content_type' => $input['content_type'],
-            'title' => $input['title'] ?? '',
-            'ratings' => $input['ratings'],
-            'badges' => $input['badges'] ?? [],
-            'classifier' => $input['classifier'] ?? '',
-            'orientation' => $input['orientation'] ?? 'horizontal',
-            'action' => $input['action'] ?? 'export',
-            'created_at' => date('c')
-        ];
+        $pdo = getDB();
+        if (!$pdo) {
+            // DB not available — fall back to JSONL so nothing is lost
+            $logEntry = [
+                'id'           => uniqid(),
+                'content_id'   => $input['content_id'] ?? null,
+                'content_type' => $input['content_type'],
+                'title'        => $input['title'] ?? '',
+                'ratings'      => $input['ratings'],
+                'badges'       => $input['badges'] ?? [],
+                'classifier'   => $input['classifier'] ?? '',
+                'orientation'  => $input['orientation'] ?? 'horizontal',
+                'action'       => $input['action'] ?? 'export',
+                'created_at'   => date('c')
+            ];
+            file_put_contents($logFile, json_encode($logEntry, JSON_UNESCAPED_UNICODE) . "\n", FILE_APPEND | LOCK_EX);
+            echo json_encode(['status' => 'ok', 'storage' => 'jsonl_fallback']);
+            exit;
+        }
 
-        if (file_put_contents($logFile, json_encode($logEntry, JSON_UNESCAPED_UNICODE) . "\n", FILE_APPEND | LOCK_EX) !== false) {
-            echo json_encode(['status' => 'ok']);
-        } else {
+        try {
+            // ── 1. Resolve ratings & badges ──────────────────────────────
+            $ratings = is_array($input['ratings']) ? $input['ratings'] : [];
+            $badges  = is_array($input['badges'])  ? $input['badges']  : [];
+
+            $contentId   = substr((string)($input['content_id'] ?? 'manual'), 0, 255);
+            $contentType = $input['content_type'];
+            $title       = substr((string)($input['title'] ?? ''), 0, 500);
+            $classifier  = substr((string)($input['classifier'] ?? ''), 0, 100);
+            $orientation = in_array($input['orientation'] ?? '', ['horizontal','vertical']) ? $input['orientation'] : 'horizontal';
+            $action      = in_array($input['action'] ?? '', ['export','copy','rate']) ? $input['action'] : 'export';
+
+            // SHA-256 of client IP — never stored raw
+            $ip       = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+            $ip       = trim(explode(',', $ip)[0]); // take first IP if behind proxy
+            $ipHash   = hash('sha256', $ip);
+
+            // ── 2. Upsert the work ───────────────────────────────────────
+            $pdo->prepare(
+                "INSERT INTO works (content_id, content_type, title)
+                 VALUES (?, ?, ?)
+                 ON DUPLICATE KEY UPDATE
+                    title      = VALUES(title),
+                    updated_at = NOW()"
+            )->execute([$contentId, $contentType, $title]);
+
+            // Fetch the work id (works whether it was inserted or already existed)
+            $workId = $pdo->query("SELECT LAST_INSERT_ID()")->fetchColumn();
+            if (!$workId) {
+                $stmt = $pdo->prepare("SELECT id FROM works WHERE content_id = ? AND content_type = ?");
+                $stmt->execute([$contentId, $contentType]);
+                $workId = $stmt->fetchColumn();
+            }
+
+            // ── 3. Upsert the classification (one row per IP per work) ───
+            $pdo->prepare(
+                "INSERT INTO classifications
+                    (work_id, ip_hash,
+                     kufr, sex, nudity, vices, magic, lgbt, gore, addiction, lootbox, p2w,
+                     badge_nomusic, badge_noprofanity, badge_noaffairs,
+                     classifier, orientation, action)
+                 VALUES
+                    (?, ?,
+                     ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                     ?, ?, ?,
+                     ?, ?, ?)
+                 ON DUPLICATE KEY UPDATE
+                     kufr             = VALUES(kufr),
+                     sex              = VALUES(sex),
+                     nudity           = VALUES(nudity),
+                     vices            = VALUES(vices),
+                     magic            = VALUES(magic),
+                     lgbt             = VALUES(lgbt),
+                     gore             = VALUES(gore),
+                     addiction        = VALUES(addiction),
+                     lootbox          = VALUES(lootbox),
+                     p2w              = VALUES(p2w),
+                     badge_nomusic    = VALUES(badge_nomusic),
+                     badge_noprofanity= VALUES(badge_noprofanity),
+                     badge_noaffairs  = VALUES(badge_noaffairs),
+                     classifier       = VALUES(classifier),
+                     orientation      = VALUES(orientation),
+                     action           = VALUES(action),
+                     updated_at       = NOW()"
+            )->execute([
+                $workId, $ipHash,
+                (int)($ratings['kufr']     ?? 0),
+                (int)($ratings['sex']      ?? 0),
+                (int)($ratings['nudity']   ?? 0),
+                (int)($ratings['vices']    ?? 0),
+                (int)($ratings['magic']    ?? 0),
+                (int)($ratings['lgbt']     ?? 0),
+                (int)($ratings['gore']     ?? 0),
+                (int)($ratings['addiction']?? 0),
+                (int)($ratings['lootbox']  ?? 0),
+                (int)($ratings['p2w']      ?? 0),
+                !empty($badges['nomusic'])     ? 1 : 0,
+                !empty($badges['noprofanity']) ? 1 : 0,
+                !empty($badges['noaffairs'])   ? 1 : 0,
+                $classifier, $orientation, $action
+            ]);
+
+            // ── 4. Sync rater_count (unique IPs who rated this work) ─────
+            $pdo->prepare(
+                "UPDATE works
+                 SET rater_count = (SELECT COUNT(*) FROM classifications WHERE work_id = ?),
+                     updated_at  = NOW()
+                 WHERE id = ?"
+            )->execute([$workId, $workId]);
+
+            echo json_encode(['status' => 'ok', 'work_id' => (int)$workId, 'storage' => 'mysql']);
+
+        } catch (PDOException $e) {
+            error_log('CCCC log error: ' . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['error' => 'Failed to write to log file']);
+            echo json_encode(['error' => 'Database error']);
         }
         exit;
 
     case 'stats':
-        // Return anonymous aggregate stats from JSONL
-        if (!file_exists($logFile)) {
-            echo json_encode(['total' => 0, 'by_type' => [], 'by_action' => []]);
+        // Return aggregate stats — from MySQL if available, JSONL fallback
+        $pdo = getDB();
+
+        if ($pdo) {
+            try {
+                $totalRaters = (int)$pdo->query("SELECT SUM(rater_count) FROM works")->fetchColumn();
+                $totalWorks  = (int)$pdo->query("SELECT COUNT(*) FROM works WHERE rater_count > 0")->fetchColumn();
+                $byType = [];
+                foreach ($pdo->query("SELECT content_type, SUM(rater_count) as cnt FROM works GROUP BY content_type") as $row) {
+                    $byType[$row['content_type']] = (int)$row['cnt'];
+                }
+                $top = [];
+                foreach ($pdo->query("SELECT title, content_type, rater_count FROM works ORDER BY rater_count DESC LIMIT 10") as $row) {
+                    $top[] = $row;
+                }
+                echo json_encode([
+                    'total_raters' => $totalRaters,
+                    'total_works'  => $totalWorks,
+                    'by_type'      => $byType,
+                    'top_works'    => $top,
+                    'source'       => 'mysql'
+                ]);
+            } catch (PDOException $e) {
+                error_log('CCCC stats error: ' . $e->getMessage());
+                echo json_encode(['error' => 'Database error']);
+            }
+        } else {
+            // Fallback: read from JSONL
+            if (!file_exists($logFile)) {
+                echo json_encode(['total_raters' => 0, 'by_type' => [], 'source' => 'jsonl']);
+                exit;
+            }
+            $lines    = file($logFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            $byType   = [];
+            $byAction = [];
+            foreach ($lines as $line) {
+                $entry = json_decode($line, true);
+                if ($entry) {
+                    $t = $entry['content_type'] ?? 'unknown';
+                    $a = $entry['action']       ?? 'export';
+                    $byType[$t]   = ($byType[$t]   ?? 0) + 1;
+                    $byAction[$a] = ($byAction[$a] ?? 0) + 1;
+                }
+            }
+            echo json_encode([
+                'total_raters' => count($lines),
+                'by_type'      => $byType,
+                'by_action'    => $byAction,
+                'source'       => 'jsonl'
+            ]);
+        }
+        exit;
+
+    case 'lookup':
+        // Return consensus ratings for a specific work (for the future Letterboxd page)
+        // Usage: proxy.php?type=lookup&query=CONTENT_ID&content_type=anime
+        $lookupId   = $query;
+        $lookupType = $_GET['content_type'] ?? '';
+
+        if (!$lookupId || !$lookupType) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Missing query or content_type']);
             exit;
         }
 
-        $lines = file($logFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        $total = count($lines);
-        $byType = [];
-        $byAction = [];
-
-        foreach ($lines as $line) {
-            $entry = json_decode($line, true);
-            if ($entry) {
-                $type = $entry['content_type'] ?? 'unknown';
-                $action = $entry['action'] ?? 'export';
-
-                $byType[$type] = ($byType[$type] ?? 0) + 1;
-                $byAction[$action] = ($byAction[$action] ?? 0) + 1;
-            }
+        $pdo = getDB();
+        if (!$pdo) {
+            echo json_encode(['found' => false, 'reason' => 'db_unavailable']);
+            exit;
         }
 
-        echo json_encode([
-            'total' => $total,
-            'by_type' => $byType,
-            'by_action' => $byAction
-        ]);
+        try {
+            $stmt = $pdo->prepare("SELECT * FROM works WHERE content_id = ? AND content_type = ?");
+            $stmt->execute([$lookupId, $lookupType]);
+            $work = $stmt->fetch();
+
+            if (!$work || (int)$work['rater_count'] === 0) {
+                echo json_encode(['found' => false]);
+                exit;
+            }
+
+            $workId     = $work['id'];
+            $totalCount = (int)$work['rater_count'];
+            $categories = ['kufr','sex','nudity','vices','magic','lgbt','gore','addiction','lootbox','p2w'];
+            $consensus  = [];
+            $scoreTotal = 0;
+
+            // Majority vote (mode) per category — presence threshold 30%
+            foreach ($categories as $cat) {
+                $stmt = $pdo->prepare(
+                    "SELECT `{$cat}` AS level, COUNT(*) AS votes
+                     FROM classifications
+                     WHERE work_id = ? AND `{$cat}` > 0
+                     GROUP BY `{$cat}`
+                     ORDER BY votes DESC, `{$cat}` ASC
+                     LIMIT 1"
+                );
+                $stmt->execute([$workId]);
+                $row = $stmt->fetch();
+
+                if ($row && ($row['votes'] / $totalCount) >= 0.30) {
+                    $level = (int)$row['level'];
+                    $pts   = $level === 1 ? 3 : ($level === 2 ? 2 : 1);
+                    $consensus[$cat] = [
+                        'level'   => $level,
+                        'votes'   => (int)$row['votes'],
+                        'percent' => round(($row['votes'] / $totalCount) * 100) . '%'
+                    ];
+                    $scoreTotal += $pts;
+                }
+            }
+
+            // Badge consensus
+            $badgeKeys = ['badge_nomusic','badge_noprofanity','badge_noaffairs'];
+            $badgeOut  = [];
+            foreach ($badgeKeys as $badge) {
+                $stmt = $pdo->prepare(
+                    "SELECT COUNT(*) AS cnt FROM classifications WHERE work_id = ? AND `{$badge}` = 1"
+                );
+                $stmt->execute([$workId]);
+                $cnt = (int)$stmt->fetchColumn();
+                if ($cnt > 0 && ($cnt / $totalCount) >= 0.30) {
+                    $key = str_replace('badge_', '', $badge);
+                    $badgeOut[$key] = [
+                        'count'   => $cnt,
+                        'percent' => round(($cnt / $totalCount) * 100) . '%'
+                    ];
+                }
+            }
+
+            // Individual classifications (for detail page)
+            $stmt = $pdo->prepare(
+                "SELECT kufr, sex, nudity, vices, magic, lgbt, gore, addiction, lootbox, p2w,
+                        badge_nomusic, badge_noprofanity, badge_noaffairs,
+                        classifier, orientation, DATE(updated_at) AS date
+                 FROM classifications WHERE work_id = ? ORDER BY updated_at DESC"
+            );
+            $stmt->execute([$workId]);
+            $individuals = $stmt->fetchAll();
+
+            echo json_encode([
+                'found'           => true,
+                'work'            => [
+                    'title'        => $work['title'],
+                    'content_type' => $work['content_type'],
+                    'content_id'   => $work['content_id'],
+                    'rater_count'  => $totalCount
+                ],
+                'consensus'       => $consensus,
+                'badges'          => $badgeOut,
+                'severity_score'  => $scoreTotal,
+                'classifications' => $individuals
+            ], JSON_UNESCAPED_UNICODE);
+
+        } catch (PDOException $e) {
+            error_log('CCCC lookup error: ' . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['error' => 'Database error']);
+        }
         exit;
+
     default:
         http_response_code(400);
         echo json_encode(['error' => 'Invalid type']);

@@ -1,1 +1,4 @@
-Deny from all
+# Block direct access to raw data files
+<FilesMatch "\.(jsonl|json|sql)$">
+    Deny from all
+</FilesMatch>
