@@ -239,13 +239,12 @@
         .codex-legend .legend-chip {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            font-family: var(--font-mono);
-            font-size: 10px;
-            font-weight: 500;
-            letter-spacing: 1.2px;
-            text-transform: uppercase;
-            padding: 7px 12px 7px 14px;
+            gap: 10px;
+            font-family: var(--font-ar);
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 0;
+            padding: 10px 18px 10px 20px;
             border-radius: 2px;
             border: 1px solid;
         }
@@ -309,20 +308,8 @@
             display: grid;
             place-items: center;
             position: relative;
-            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.04), transparent 70%), var(--g-bg);
-            border: 1px solid var(--g-line);
         }
-        .codex-tile-icon::before,
-        .codex-tile-icon::after {
-            content: '';
-            position: absolute;
-            width: 6px; height: 6px;
-            border: 1px solid currentColor;
-            opacity: 0.7;
-        }
-        .codex-tile-icon::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
-        .codex-tile-icon::after  { bottom: -1px; right: -1px; border-left: none; border-top: none; }
-        .codex-tile-icon img { width: 64px; height: 64px; object-fit: contain; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5)); }
+        .codex-tile-icon img { width: 72px; height: 72px; object-fit: contain; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5)); }
 
         .codex-tile-text { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
         .codex-tile-text .tile-tag {
@@ -341,14 +328,14 @@
         .codex-tile-text strong {
             font-family: var(--font-ar);
             font-weight: 700;
-            font-size: 26px;
+            font-size: 32px;
             color: var(--g-text-0);
             line-height: 1.05;
             letter-spacing: -0.3px;
         }
         .codex-tile-text p {
             margin: 0;
-            font-size: 14px;
+            font-size: 17px;
             line-height: 1.55;
             color: var(--g-text-1);
             font-family: var(--font-ar);
@@ -399,7 +386,7 @@
         .exc-panel .exceptions-desc {
             margin: 0;
             font-family: var(--font-ar);
-            font-size: 19px;
+            font-size: 26px;
             line-height: 1.7;
             color: var(--g-text-0);
             font-weight: 400;
@@ -413,53 +400,12 @@
             gap: 14px;
         }
         .exc-modifier {
-            position: relative;
-            background: var(--g-bg);
-            border: 1px solid var(--g-line);
-            padding: 16px 12px 14px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
         }
-        .exc-modifier::before {
-            content: '';
-            position: absolute;
-            top: -1px; right: -1px;
-            width: 12px; height: 12px;
-            border-top: 2px solid var(--g-acc);
-            border-right: 2px solid var(--g-acc);
-        }
-        .exc-modifier::after {
-            content: '';
-            position: absolute;
-            bottom: -1px; left: -1px;
-            width: 12px; height: 12px;
-            border-bottom: 2px solid var(--g-acc);
-            border-left: 2px solid var(--g-acc);
-        }
-        .exc-modifier img { width: 80px; height: 80px; object-fit: contain; filter: drop-shadow(0 2px 10px rgba(200,255,94,0.18)); }
-        .exc-modifier .mod-stamp {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-family: var(--font-pixel);
-            font-size: 10px;
-            letter-spacing: 1.5px;
-            color: var(--g-acc);
-            padding: 4px 9px;
-            background: rgba(200,255,94,0.08);
-            border: 1px solid rgba(200,255,94,0.35);
-        }
-        .exc-modifier .mod-stamp::before { content: '✓'; color: var(--g-acc); }
-        .exc-modifier .mod-name {
-            font-family: var(--font-ar);
-            font-size: 15px;
-            color: var(--g-text-1);
-            font-weight: 500;
-            text-align: center;
-            line-height: 1.25;
-        }
+        .exc-modifier img { width: 100px; height: 100px; object-fit: contain; filter: drop-shadow(0 2px 14px rgba(200,255,94,0.22)); }
 
         /* ============================================
            SECTION 03 — TIER LADDER
@@ -554,24 +500,24 @@
 
         .tier-body { display: flex; flex-direction: column; flex: 1; }
         .tier-row {
-            padding: 18px 28px;
+            padding: 20px 28px;
             border-bottom: 1px solid var(--g-line);
             display: grid;
-            grid-template-columns: 110px 1fr;
-            gap: 18px;
+            grid-template-columns: auto 1fr;
+            gap: 16px 20px;
             align-items: start;
         }
         .tier-row:last-child { border-bottom: none; }
         .tier-row-label {
-            font-family: var(--font-mono);
-            font-size: 10px;
-            letter-spacing: 1.6px;
-            text-transform: uppercase;
+            font-family: var(--font-ar);
+            font-size: 17px;
+            letter-spacing: 0;
             color: var(--g-text-2);
-            padding-top: 3px;
+            padding-top: 2px;
+            white-space: nowrap;
         }
-        .tier-row-label::before { content: '//'; color: currentColor; margin-left: 6px; opacity: 0.7; }
-        .tier-row p { margin: 0; font-family: var(--font-ar); font-size: 16px; line-height: 1.65; color: var(--g-text-1); font-weight: 400; }
+        .tier-row-label::before { content: '//'; font-family: var(--font-mono); font-size: 13px; color: currentColor; margin-left: 8px; opacity: 0.7; }
+        .tier-row p { margin: 0; font-family: var(--font-ar); font-size: 19px; line-height: 1.65; color: var(--g-text-1); font-weight: 400; }
 
         /* ============================================
            FOOTER
@@ -664,11 +610,95 @@
         </div>
     </div>
 
+    <!-- ── SECTION 03: القيم والدرجات ── -->
+    <section class="guide-section">
+        <div class="section-head-row">
+            <div class="section-title-block">
+                <h3>القيم والدرجات</h3>
+            </div>
+            <div class="section-trail"></div>
+            <div class="section-readout">TIER LADDER <strong>·</strong> 03 LEVELS</div>
+        </div>
+
+        <div class="ladder-meta">
+            <span>سُلَّم الشدّة</span>
+            <span class="axis">
+                <span>خفيف</span>
+                <span class="axis-bar"></span>
+                <span>شديد</span>
+            </span>
+        </div>
+
+        <div class="ladder grades-container">
+            <div class="tier tier-1 grade-card grade-red">
+                <div class="tier-head grade-header">
+                    <div class="tier-badge grade-badge red">1</div>
+                    <div class="tier-title grade-title">الدرجة الأولى</div>
+                    <div class="tier-meta grade-meta">شديد</div>
+                    <div class="tier-bars" aria-hidden="true">
+                        <span></span><span></span><span></span><span></span><span></span>
+                    </div>
+                </div>
+                <div class="tier-body grade-body">
+                    <div class="tier-row grade-desc">
+                        <span class="tier-row-label grade-desc-label">في القصصيّات</span>
+                        <p>لا يمكن تخطي المحتوى دون التأثير على القصة. عدد مرات ظهور كثير، يفقد الفهم العام للقصة حين التخطي.</p>
+                    </div>
+                    <div class="tier-row grade-desc">
+                        <span class="tier-row-label grade-desc-label">في الألعاب</span>
+                        <p>يستحيل إتمام اللعبة دون المرور عليه.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tier tier-2 grade-card grade-orange">
+                <div class="tier-head grade-header">
+                    <div class="tier-badge grade-badge orange">2</div>
+                    <div class="tier-title grade-title">الدرجة الثانية</div>
+                    <div class="tier-meta grade-meta">متوسط</div>
+                    <div class="tier-bars" aria-hidden="true">
+                        <span></span><span></span><span></span><span></span><span></span>
+                    </div>
+                </div>
+                <div class="tier-body grade-body">
+                    <div class="tier-row grade-desc">
+                        <span class="tier-row-label grade-desc-label">في القصصيّات</span>
+                        <p>يمكن تخطي المحتوى دون التأثير على القصة. عدد مرّات ظهور كثير، يسبب انقطاعات متكررة في تسلسل العرض. الفهم العام للقصة محفوظ رغم التخطي.</p>
+                    </div>
+                    <div class="tier-row grade-desc">
+                        <span class="tier-row-label grade-desc-label">في الألعاب</span>
+                        <p>يصعّب إتمام اللعبة ويغيّر من تجربتها، لكن يمكن إتمامها بالكامل مع تخطّيه.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tier tier-3 grade-card grade-yellow">
+                <div class="tier-head grade-header">
+                    <div class="tier-badge grade-badge yellow">3</div>
+                    <div class="tier-title grade-title">الدرجة الثالثة</div>
+                    <div class="tier-meta grade-meta">خفيف</div>
+                    <div class="tier-bars" aria-hidden="true">
+                        <span></span><span></span><span></span><span></span><span></span>
+                    </div>
+                </div>
+                <div class="tier-body grade-body">
+                    <div class="tier-row grade-desc">
+                        <span class="tier-row-label grade-desc-label">في القصصيّات</span>
+                        <p>يمكن تخطّي المحتوى دون التأثير على القصّة. ظهور قليل يمكن تخطيه بسهولة.</p>
+                    </div>
+                    <div class="tier-row grade-desc">
+                        <span class="tier-row-label grade-desc-label">في الألعاب</span>
+                        <p>يمكن تجاهله أو استخدام طرق بديلة لإتمام اللعبة.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- ── SECTION 01: الموجودات ── -->
     <section class="guide-section">
         <div class="section-head-row">
             <div class="section-title-block">
-                <span class="section-num">SEC · 01</span>
                 <h3>الموجودات</h3>
             </div>
             <div class="section-trail"></div>
@@ -789,7 +819,6 @@
     <section class="guide-section">
         <div class="section-head-row">
             <div class="section-title-block">
-                <span class="section-num">SEC · 02</span>
                 <h3>المستثنيات</h3>
             </div>
             <div class="section-trail"></div>
@@ -800,112 +829,19 @@
             <div class="exc-icons-side exceptions-icons">
                 <div class="exc-modifier">
                     <img src="assets/icons/موسيقى0.png" alt="خال من الموسيقى">
-                    <span class="mod-stamp">CLEAR</span>
-                    <span class="mod-name">خال من الموسيقى</span>
                 </div>
                 <div class="exc-modifier">
                     <img src="assets/icons/ألفاظ نابية0.png" alt="خال من الألفاظ النابية">
-                    <span class="mod-stamp">CLEAR</span>
-                    <span class="mod-name">خال من الألفاظ النابية</span>
                 </div>
                 <div class="exc-modifier">
                     <img src="assets/icons/علاقات حب0.png" alt="خال من العلاقات خارج الزواج">
-                    <span class="mod-stamp">CLEAR</span>
-                    <span class="mod-name">خال من العلاقات خارج الزواج</span>
                 </div>
             </div>
             <div class="exc-text-side">
-                <span class="exc-text-label">EXCEPTION · القاعدة الافتراضية</span>
                 <p class="exceptions-desc">يفترض التصنيف المحافظ أن جميع المحتويات الإبداعية تحتوي على
                     <strong>الموسيقى والأغاني</strong> و<strong>الألفاظ النابية</strong>
                     و<strong>العلاقات خارج إطار الزواج</strong>. وفي حال خلو المحتوى منها، ينبغي للمُصنّف
                     استخدام الرموز التالية.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- ── SECTION 03: القيم والدرجات ── -->
-    <section class="guide-section">
-        <div class="section-head-row">
-            <div class="section-title-block">
-                <span class="section-num">SEC · 03</span>
-                <h3>القيم والدرجات</h3>
-            </div>
-            <div class="section-trail"></div>
-            <div class="section-readout">TIER LADDER <strong>·</strong> 03 LEVELS</div>
-        </div>
-
-        <div class="ladder-meta">
-            <span>سُلَّم الشدّة</span>
-            <span class="axis">
-                <span>خفيف</span>
-                <span class="axis-bar"></span>
-                <span>شديد</span>
-            </span>
-        </div>
-
-        <div class="ladder grades-container">
-            <div class="tier tier-1 grade-card grade-red">
-                <div class="tier-head grade-header">
-                    <div class="tier-badge grade-badge red">1</div>
-                    <div class="tier-title grade-title">الدرجة الأولى</div>
-                    <div class="tier-meta grade-meta">شديد</div>
-                    <div class="tier-bars" aria-hidden="true">
-                        <span></span><span></span><span></span><span></span><span></span>
-                    </div>
-                </div>
-                <div class="tier-body grade-body">
-                    <div class="tier-row grade-desc">
-                        <span class="tier-row-label grade-desc-label">في القصصيّات</span>
-                        <p>لا يمكن تخطي المحتوى دون التأثير على القصة. عدد مرات ظهور كثير، يفقد الفهم العام للقصة حين التخطي.</p>
-                    </div>
-                    <div class="tier-row grade-desc">
-                        <span class="tier-row-label grade-desc-label">في الألعاب</span>
-                        <p>يستحيل إتمام اللعبة دون المرور عليه.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="tier tier-2 grade-card grade-orange">
-                <div class="tier-head grade-header">
-                    <div class="tier-badge grade-badge orange">2</div>
-                    <div class="tier-title grade-title">الدرجة الثانية</div>
-                    <div class="tier-meta grade-meta">متوسط</div>
-                    <div class="tier-bars" aria-hidden="true">
-                        <span></span><span></span><span></span><span></span><span></span>
-                    </div>
-                </div>
-                <div class="tier-body grade-body">
-                    <div class="tier-row grade-desc">
-                        <span class="tier-row-label grade-desc-label">في القصصيّات</span>
-                        <p>يمكن تخطي المحتوى دون التأثير على القصة. عدد مرّات ظهور كثير، يسبب انقطاعات متكررة في تسلسل العرض. الفهم العام للقصة محفوظ رغم التخطي.</p>
-                    </div>
-                    <div class="tier-row grade-desc">
-                        <span class="tier-row-label grade-desc-label">في الألعاب</span>
-                        <p>يصعّب إتمام اللعبة ويغيّر من تجربتها، لكن يمكن إتمامها بالكامل مع تخطّيه.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="tier tier-3 grade-card grade-yellow">
-                <div class="tier-head grade-header">
-                    <div class="tier-badge grade-badge yellow">3</div>
-                    <div class="tier-title grade-title">الدرجة الثالثة</div>
-                    <div class="tier-meta grade-meta">خفيف</div>
-                    <div class="tier-bars" aria-hidden="true">
-                        <span></span><span></span><span></span><span></span><span></span>
-                    </div>
-                </div>
-                <div class="tier-body grade-body">
-                    <div class="tier-row grade-desc">
-                        <span class="tier-row-label grade-desc-label">في القصصيّات</span>
-                        <p>يمكن تخطّي المحتوى دون التأثير على القصّة. ظهور قليل يمكن تخطيه بسهولة.</p>
-                    </div>
-                    <div class="tier-row grade-desc">
-                        <span class="tier-row-label grade-desc-label">في الألعاب</span>
-                        <p>يمكن تجاهله أو استخدام طرق بديلة لإتمام اللعبة.</p>
-                    </div>
-                </div>
             </div>
         </div>
     </section>
