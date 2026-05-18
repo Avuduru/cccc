@@ -102,14 +102,19 @@ async function renderToBlob(originalCanvas) {
         clonedBg.getContext('2d').drawImage(originalBg, 0, 0);
     }
 
+    // Remove contenteditable: iOS uses a different rendering path for editable
+    // elements that can break Arabic contextual letter shaping in html2canvas.
+    clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+
     // Wait for CSS font loading API to settle
     await document.fonts.ready;
     // Force-load the exact Handjet weight/size instances used in card text.
     // On iOS, document.fonts.ready resolves immediately from cache but the
     // font hasn't been applied+shaped in the newly created off-screen clone yet.
     // Explicitly calling fonts.load() forces those instances to be activated.
-    await document.fonts.load('800 48px Handjet');
-    await document.fonts.load('400 20px Handjet');
+    // Sizes match export-mode CSS: --canvas-title-size:106px, --canvas-synopsis-size:40px
+    await document.fonts.load('800 106px Handjet');
+    await document.fonts.load('400 40px Handjet');
     // Two rAF passes guarantee the browser has completed at least one full
     // layout+paint cycle on the off-screen clone before html2canvas reads it.
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
@@ -117,6 +122,21 @@ async function renderToBlob(originalCanvas) {
     await new Promise(r => setTimeout(r, 300));
 
     rescaleSynopsisInClone(clone);
+
+    // On iOS, html2canvas calls ctx.fillText() without setting ctx.direction='rtl',
+    // so the canvas shaping engine renders Arabic letters in isolated (unjoined) form.
+    // Patching fillText to detect Arabic and set RTL direction before each draw fixes this.
+    const arabicRE = /[؀-ۿ]/;
+    const origFillText   = CanvasRenderingContext2D.prototype.fillText;
+    const origStrokeText = CanvasRenderingContext2D.prototype.strokeText;
+    CanvasRenderingContext2D.prototype.fillText = function(text, x, y, mw) {
+        if (arabicRE.test(text)) this.direction = 'rtl';
+        return mw !== undefined ? origFillText.call(this, text, x, y, mw) : origFillText.call(this, text, x, y);
+    };
+    CanvasRenderingContext2D.prototype.strokeText = function(text, x, y, mw) {
+        if (arabicRE.test(text)) this.direction = 'rtl';
+        return mw !== undefined ? origStrokeText.call(this, text, x, y, mw) : origStrokeText.call(this, text, x, y);
+    };
 
     const canvas = await html2canvas(clone, {
         backgroundColor: null,
@@ -128,6 +148,9 @@ async function renderToBlob(originalCanvas) {
         height: clone.offsetHeight,
         windowWidth: exportWidth
     });
+
+    CanvasRenderingContext2D.prototype.fillText   = origFillText;
+    CanvasRenderingContext2D.prototype.strokeText = origStrokeText;
 
     document.body.removeChild(exportContainer);
     return compressToMaxSize(canvas);
