@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دليل التصانيف والدرجات — CCCC</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Handjet:wght@100..900&family=Silkscreen:wght@400;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="style.v3.css">
+
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+        }
+
+        .guide-shell {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        /* Topbar tweak: back-link replaces status area on guide page */
+        .guide-back {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-1);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: color 0.15s;
+        }
+        .guide-back:hover { color: var(--acc); }
+        .guide-back .back-arrow {
+            font-size: 14px;
+            color: var(--acc);
+            text-shadow: 0 0 8px var(--acc-glow);
+        }
+
+        /* Guide body: full-page, no modal constraints */
+        .guide-body {
+            background: var(--ink-2);
+            border: 1px solid var(--line-bright);
+            border-radius: 6px;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        /* Guide page title */
+        .guide-page-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 24px;
+            margin-bottom: 32px;
+            border-bottom: 1px solid var(--line);
+        }
+        .guide-page-title h1 {
+            margin: 0;
+            font-size: 32px;
+            font-family: var(--font-ar);
+            font-weight: 700;
+            color: var(--text-0);
+            line-height: 1;
+        }
+
+        @media (max-width: 768px) {
+            .guide-body { padding: 20px 16px; }
+            .guide-page-title h1 { font-size: 24px; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="guide-shell">
+
+        <!-- ───────────────── TOPBAR ───────────────── -->
+        <header class="topbar">
+            <div class="topbar-brand">
+                <img src="assets/LOGO.png" alt="CCCC Logo" class="brand-logo" style="height: 32px; width: auto; object-fit: contain;">
+                <div class="brand-meta">
+                    <div class="brand-en">CONSERVATIVE CLASSIFICATION FOR CREATIVE CONTENT</div>
+                    <div class="brand-ar">التصنيف المحافظ للمحتوى الإبداعي</div>
+                </div>
+            </div>
+
+            <a href="index.html" class="guide-back">
+                <span class="back-arrow">←</span>
+                <span class="status-sep">/</span>
+                <span>العودة للتطبيق</span>
+                <span class="status-sep">/</span>
+                <span class="status-url">muhafid.com</span>
+            </a>
+        </header>
+
+        <!-- ───────────────── GUIDE CONTENT ───────────────── -->
+        <main class="guide-body">
+
+            <div class="guide-page-title">
+                <span class="kicker"><span class="kicker-dot"></span>الدليل</span>
+                <h1>شرح التصانيف والدرجات</h1>
+            </div>
+
+            <!-- Section 01: الموجودات -->
+            <section class="modal-section">
+                <h3 class="section-title"><span class="section-num">01</span>الموجودات</h3>
+                <div class="semantic-legend">
+                    <span class="legend-badge theme-badge"><span class="legend-dot"></span>محاذير عقدية وفكرية</span>
+                    <span class="legend-badge warning-badge"><span class="legend-dot"></span>انحرافات أخلاقية وصادمة</span>
+                    <span class="legend-badge mechanic-badge"><span class="legend-dot"></span>استغلال مالي وسلوكي</span>
+                </div>
+                <div class="modal-grid">
+                    <div class="modal-item theme-card">
+                        <img src="assets/icons/كفريات.png?v=2" alt="كفريات">
+                        <div class="item-text">
+                            <strong>كفريات</strong>
+                            <p>ترويج أو تشجيع على الكفر، سخرية من الأديان أو الإله، فلسفات وعقائد فاسدة.</p>
+                        </div>
+                    </div>
+                    <div class="modal-item theme-card">
+                        <img src="assets/icons/سحر.png?v=2" alt="سحر">
+                        <div class="item-text">
+                            <strong>سحر</strong>
+                            <p>القوى والرموز والتعويذات المرتبطة بالسحر والتنجيم ورؤية المستقبل.</p>
+                        </div>
+                    </div>
+                    <div class="modal-item warning-card">
+                        <img src="assets/icons/جنس.png?v=2" alt="جنس">
+                        <div class="item-text">
+                            <strong>جنس</strong>
+                            <p>مشاهد جنسية إيحائية أو مباشرة.</p>
+                        </div>
+                    </div>
+                    <div class="modal-item warning-card">
+                        <img src="assets/icons/تعري.png?v=2" alt="تعرّي">
+                        <div class="item-text">
+                            <strong>تعرّي</strong>
+                            <p>ظهور أشخاص بجسد عاري كلياً أو جزئياً.</p>
+                        </div>
+                    </div>
+                    <div class="modal-item warning-card">
+                        <img src="assets/icons/شذوذ.png?v=2" alt="شذوذ">
+                        <div class="item-text">
+                            <strong>شذوذ</strong>
+                            <p>عرض وتمجيد العلاقات الجنسية المثليّة.</p>
+                        </div>
+                    </div>
+                    <div class="modal-item warning-card">
+                        <img src="assets/icons/صادم.png?v=2" alt="صادم">
+                        <div class="item-text">
+                            <strong>صادم</strong>
+                            <p>ظهور أشلاء وما يسبب الصدمات النفسية والتقزز للمشاهد.</p>
+                        </div>
+                    </div>
+                    <div class="modal-item mechanic-card">
+                        <img src="assets/icons/مفاسد.png?v=2" alt="مفاسد">
+                        <div class="item-text">
+                            <strong>مفاسد</strong>
+                            <p>ترويج أو تشجيع على القمار أو تعاطي المخدرات أو إظهارها بصفة إيجابية.</p>
+                        </div>
+                    </div>
+                    <div class="modal-item mechanic-card">
+                        <img src="assets/icons/إدمانيّات.png?v=2" alt="إدمانيّات">
+                        <div class="item-text">
+                            <strong>إدمانيّات</strong>
+                            <p>(خاص للألعاب) مصممة للعودة المستمرة والمتابعة الدورية اليومية لتحقيق التقدم.</p>
+                        </div>
+                    </div>
+                    <div class="modal-item mechanic-card">
+                        <img src="assets/icons/تبذير.png?v=2" alt="تبذير">
+                        <div class="item-text">
+                            <strong>تبذير</strong>
+                            <p>(خاص للألعاب) مصممة لربط التقدم بالمال المنفق على أغراض داخل اللعبة.</p>
+                        </div>
+                    </div>
+                    <div class="modal-item mechanic-card">
+                        <img src="assets/icons/قمار.png?v=2" alt="قمار">
+                        <div class="item-text">
+                            <strong>قمار</strong>
+                            <p>(خاص للألعاب) مصممة لتشجيع شراء الصناديق ذات المحتوى العشوائي ونظام السحب.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 02: المستثنيات -->
+            <section class="modal-section">
+                <h3 class="section-title"><span class="section-num">02</span>المستثنيات</h3>
+                <div class="exceptions-card">
+                    <p class="exceptions-desc">يفترض التصنيف المحافظ أن جميع المحتويات الإبداعية تحتوي على الموسيقى
+                        والأغاني والألفاظ النابية والعلاقات خارج إطار الزواج. وفي حال خلو المحتوى منها، ينبغي للمُصنّف
+                        استخدام التالي:</p>
+                    <div class="exceptions-icons">
+                        <img src="assets/icons/موسيقى0.png" alt="خال من الموسيقى">
+                        <img src="assets/icons/ألفاظ نابية0.png" alt="خال من الألفاظ النابية">
+                        <img src="assets/icons/علاقات حب0.png" alt="خال من العلاقات خارج الزواج">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 03: القيم والدرجات -->
+            <section class="modal-section">
+                <h3 class="section-title"><span class="section-num">03</span>القيم والدرجات</h3>
+                <div class="grades-container">
+                    <div class="grade-card grade-red">
+                        <div class="grade-header">
+                            <div class="grade-badge red">1</div>
+                            <div class="grade-title">الدرجة الأولى</div>
+                            <div class="grade-meta">شديد</div>
+                        </div>
+                        <div class="grade-body">
+                            <div class="grade-desc">
+                                <div class="grade-desc-label">// في القصصيّات</div>
+                                <p>لا يمكن تخطي المحتوى دون التأثير على القصة. عدد مرات ظهور كثير، يفقد الفهم العام
+                                    للقصة حين التخطي.</p>
+                            </div>
+                            <div class="grade-desc">
+                                <div class="grade-desc-label">// في الألعاب</div>
+                                <p>يستحيل إتمام اللعبة دون المرور عليه.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grade-card grade-orange">
+                        <div class="grade-header">
+                            <div class="grade-badge orange">2</div>
+                            <div class="grade-title">الدرجة الثانية</div>
+                            <div class="grade-meta">متوسط</div>
+                        </div>
+                        <div class="grade-body">
+                            <div class="grade-desc">
+                                <div class="grade-desc-label">// في القصصيّات</div>
+                                <p>يمكن تخطي المحتوى دون التأثير على القصة. عدد مرّات ظهور كثير، يسبب انقطاعات
+                                    متكررة في تسلسل العرض. الفهم العام للقصة محفوظ رغم التخطي.</p>
+                            </div>
+                            <div class="grade-desc">
+                                <div class="grade-desc-label">// في الألعاب</div>
+                                <p>يصعّب إتمام اللعبة ويغيّر من تجربتها، لكن يمكن إتمامها بالكامل مع تخطّيه.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grade-card grade-yellow">
+                        <div class="grade-header">
+                            <div class="grade-badge yellow">3</div>
+                            <div class="grade-title">الدرجة الثالثة</div>
+                            <div class="grade-meta">خفيف</div>
+                        </div>
+                        <div class="grade-body">
+                            <div class="grade-desc">
+                                <div class="grade-desc-label">// في القصصيّات</div>
+                                <p>يمكن تخطّي المحتوى دون التأثير على القصّة. ظهور قليل يمكن تخطيه بسهولة.</p>
+                            </div>
+                            <div class="grade-desc">
+                                <div class="grade-desc-label">// في الألعاب</div>
+                                <p>يمكن تجاهله أو استخدام طرق بديلة لإتمام اللعبة.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+    </div>
+
+</body>
+</html>
