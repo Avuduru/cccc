@@ -24,6 +24,30 @@
     </script>
 
     <style>
+        /* ============================================
+           GUIDE — CODEX / HUD REDESIGN
+           ============================================ */
+        :root {
+            --g-bg:        var(--bg, #0e1014);
+            --g-ink-0:     var(--ink-0, #14181f);
+            --g-ink-1:     var(--ink-1, #1a1f28);
+            --g-ink-2:     var(--ink-2, #232a35);
+            --g-line:      var(--line, rgba(255,255,255,0.09));
+            --g-line-2:    var(--line-2, rgba(255,255,255,0.15));
+            --g-text-0:    var(--text-0, #e9edf2);
+            --g-text-1:    var(--text-1, #a4adb8);
+            --g-text-2:    var(--text-2, #6a7280);
+            --g-acc:       var(--acc, #c8ff5e);
+            --g-acc-glow:  var(--acc-glow, rgba(200,255,94,0.55));
+            --g-purple:    var(--theme-purple, #b07cff);
+            --g-red:       var(--accent-red, #ff5a5a);
+            --g-teal:      var(--mech-teal, #34d0b8);
+            --g-grade-1:   var(--grade-red, #ff5a5a);
+            --g-grade-2:   var(--grade-orange, #ffa552);
+            --g-grade-3:   var(--grade-yellow, #ffd84a);
+            --font-pixel:  'Silkscreen', 'JetBrains Mono', monospace;
+        }
+
         .guide-topbar-wrap { zoom: var(--app-zoom, 1); }
         html, body { scroll-behavior: smooth; min-height: 100vh; }
 
@@ -31,221 +55,564 @@
         .guide-shell {
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 0;
             padding: 20px 32px 64px;
             max-width: none;
             margin: 0;
+            position: relative;
         }
+        /* Faint global CRT scanlines */
+        .guide-shell::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image: repeating-linear-gradient(
+                0deg,
+                transparent 0,
+                transparent 2px,
+                rgba(255,255,255,0.012) 2px,
+                rgba(255,255,255,0.012) 3px
+            );
+            z-index: 0;
+        }
+        .guide-shell > * { position: relative; z-index: 1; }
 
-        /* ── Topbar: back link styled like status area ── */
+        /* ── Topbar back link ── */
         .guide-back {
             display: flex;
             align-items: center;
             gap: 10px;
             font-family: var(--font-mono);
             font-size: 11px;
-            color: var(--text-1);
+            color: var(--g-text-1);
             letter-spacing: 0.5px;
             text-transform: uppercase;
             text-decoration: none;
             transition: color 0.15s;
         }
-        .guide-back:hover { color: var(--acc); }
-        .guide-back:hover .status-dot { box-shadow: 0 0 12px var(--acc-glow), 0 0 0 3px rgba(200,255,94,0.2); }
+        .guide-back:hover { color: var(--g-acc); }
+        .guide-back:hover .status-dot { box-shadow: 0 0 12px var(--g-acc-glow), 0 0 0 3px rgba(200,255,94,0.2); }
 
-        /* ── Page header ───────────────────────── */
+        /* ============================================
+           PAGE HEADER
+           ============================================ */
         .guide-page-header {
-            padding: 52px 0 44px;
-            border-bottom: 1px solid var(--line);
+            padding: 56px 0 36px;
+            border-bottom: 1px solid var(--g-line);
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: end;
+            gap: 32px;
         }
-        .guide-page-header .kicker {
+        .guide-page-header .header-left .kicker {
             display: inline-flex;
-            margin-bottom: 16px;
+            margin-bottom: 18px;
         }
         .guide-page-header h1 {
             margin: 0;
-            font-size: 56px;
+            font-size: 64px;
             font-family: var(--font-ar);
             font-weight: 700;
-            color: var(--text-0);
-            line-height: 1;
+            color: var(--g-text-0);
+            line-height: 0.95;
             letter-spacing: -0.5px;
         }
-
-        /* ── Sections ──────────────────────────── */
-        .guide-section {
-            padding: 52px 0;
-            border-bottom: 1px solid var(--line);
-        }
-        .guide-section:last-child { border-bottom: none; padding-bottom: 0; }
-        .guide-section > .section-title {
-            font-size: 32px;
-            margin-bottom: 36px;
-            padding-bottom: 14px;
-        }
-
-        /* ── Semantic category groups ──────────── */
-        .cat-group { margin-bottom: 36px; }
-        .cat-group:last-child { margin-bottom: 0; }
-
-        .cat-group-label {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
+        .header-bar-readout {
             font-family: var(--font-mono);
-            font-size: 12px;
-            letter-spacing: 1px;
+            font-size: 10px;
+            color: var(--g-text-2);
+            letter-spacing: 1.4px;
             text-transform: uppercase;
-            padding: 7px 16px;
-            border-radius: 3px;
-            margin-bottom: 16px;
-        }
-        .cat-group-label::before {
-            content: '';
-            display: inline-block;
-            width: 8px; height: 8px;
-            border-radius: 50%;
-        }
-        .cat-group-theme .cat-group-label {
-            color: var(--theme-purple);
-            background: rgba(176,124,255,0.09);
-            border: 1px solid rgba(176,124,255,0.25);
-        }
-        .cat-group-theme .cat-group-label::before {
-            background: var(--theme-purple);
-            box-shadow: 0 0 8px rgba(176,124,255,0.6);
-        }
-        .cat-group-warning .cat-group-label {
-            color: var(--accent-red);
-            background: rgba(255,90,90,0.08);
-            border: 1px solid rgba(255,90,90,0.22);
-        }
-        .cat-group-warning .cat-group-label::before {
-            background: var(--accent-red);
-            box-shadow: 0 0 8px rgba(255,90,90,0.55);
-        }
-        .cat-group-mechanic .cat-group-label {
-            color: var(--mech-teal);
-            background: rgba(52,208,184,0.08);
-            border: 1px solid rgba(52,208,184,0.22);
-        }
-        .cat-group-mechanic .cat-group-label::before {
-            background: var(--mech-teal);
-            box-shadow: 0 0 8px rgba(52,208,184,0.55);
-        }
-
-        /* Fixed 2-col grid — cards are always wide */
-        .cat-group-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-        }
-
-        /* ── Category cards: big and bold ──────── */
-        .modal-item {
-            padding: 28px 24px;
-            gap: 22px;
-            align-items: center;
-        }
-        .modal-item img {
-            width: 80px; height: 80px;
-            flex-shrink: 0;
-            object-fit: contain;
-            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
-        }
-        .item-text strong {
-            font-size: 22px;
-            margin-bottom: 7px;
-        }
-        .item-text p {
-            font-size: 16px;
-            line-height: 1.6;
-            margin: 0;
-        }
-
-        /* ── Exceptions: large, side by side ───── */
-        .exceptions-card {
-            display: grid;
-            grid-template-columns: 1fr auto;
-            align-items: center;
-            gap: 48px;
-            padding: 36px 40px;
-        }
-        .exceptions-desc {
-            font-size: 18px;
-            line-height: 1.75;
-            margin: 0;
-        }
-        .exceptions-icons {
-            display: flex;
-            gap: 20px;
-            flex-wrap: nowrap;
-            justify-content: flex-end;
-            flex-shrink: 0;
-        }
-        .exceptions-icons img {
-            width: 130px; height: 130px;
-            object-fit: contain;
-            background: var(--ink-1);
-            padding: 10px;
-            border-radius: 4px;
-            border: 1px solid var(--line);
-        }
-
-        /* ── Grade cards: 3-col, tall, impactful ─ */
-        .grades-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            flex-direction: unset;
-        }
-        .grade-card { display: flex; flex-direction: column; }
-        .grade-header {
-            padding: 24px 28px;
-            gap: 18px;
-        }
-        .grade-badge {
-            width: 52px; height: 52px;
-            font-size: 26px;
-            border-radius: 6px;
-        }
-        .grade-title { font-size: 24px; }
-        .grade-meta { font-size: 12px; letter-spacing: 1.5px; }
-        .grade-body {
-            grid-template-columns: 1fr;
-            background: transparent;
-            flex: 1;
             display: flex;
             flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            padding-bottom: 4px;
         }
-        .grade-desc {
-            padding: 20px 28px;
-            border-bottom: 1px solid var(--line);
-            flex: 1;
+        .header-bar-readout .pixel-bar {
+            display: inline-flex;
+            gap: 2px;
         }
-        .grade-desc:last-child { border-bottom: none; }
-        .grade-desc-label {
-            font-size: 12px;
-            margin-bottom: 10px;
-            letter-spacing: 0.8px;
+        .header-bar-readout .pixel-bar span {
+            width: 8px;
+            height: 14px;
+            background: var(--g-acc);
+            box-shadow: 0 0 6px var(--g-acc-glow);
         }
-        .grade-desc p {
-            margin: 0;
-            font-size: 16px;
-            line-height: 1.7;
+        .header-bar-readout .pixel-bar span:nth-child(n+8) {
+            background: var(--g-line-2);
+            box-shadow: none;
+        }
+        .header-bar-readout .meta-row {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+        }
+        .header-bar-readout .meta-row .pulse {
+            width: 6px; height: 6px;
+            background: var(--g-acc);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--g-acc-glow);
+            animation: pulse 1.6s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.35; }
         }
 
-        /* ── Responsive ────────────────────────── */
-        @media (max-width: 1100px) {
-            .grades-container { grid-template-columns: 1fr; }
-            .exceptions-card { grid-template-columns: 1fr; gap: 24px; }
-            .exceptions-icons { justify-content: flex-start; }
+        /* ============================================
+           SECTION CHROME
+           ============================================ */
+        .guide-section {
+            padding: 48px 0 56px;
+            border-bottom: 1px solid var(--g-line);
+            position: relative;
+        }
+        .guide-section:last-child { border-bottom: none; padding-bottom: 24px; }
+
+        .section-head-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            gap: 24px;
+        }
+        .section-title-block {
+            display: flex;
+            align-items: baseline;
+            gap: 18px;
+        }
+        .section-title-block .section-num {
+            font-family: var(--font-pixel);
+            font-size: 14px;
+            color: var(--g-acc);
+            letter-spacing: 2px;
+            padding: 6px 10px;
+            border: 1px solid var(--g-acc);
+            box-shadow: 0 0 12px rgba(200,255,94,0.18), inset 0 0 12px rgba(200,255,94,0.05);
+            line-height: 1;
+            border-radius: 0;
+        }
+        .section-title-block h3 {
+            margin: 0;
+            font-family: var(--font-ar);
+            font-size: 38px;
+            font-weight: 700;
+            color: var(--g-text-0);
+            line-height: 1;
+        }
+        .section-head-row .section-trail {
+            flex: 1;
+            height: 1px;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--g-line-2) 0,
+                var(--g-line-2) 4px,
+                transparent 4px,
+                transparent 8px
+            );
+            margin: 0 16px;
+        }
+        .section-readout {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--g-text-2);
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .section-readout strong {
+            color: var(--g-text-1);
+            font-weight: 500;
+        }
+
+        /* ============================================
+           SECTION 01 — CODEX GRID
+           ============================================ */
+        .codex-legend {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+        .codex-legend .legend-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            padding: 7px 12px 7px 14px;
+            border-radius: 2px;
+            border: 1px solid;
+        }
+        .codex-legend .legend-chip::before {
+            content: '';
+            width: 7px; height: 7px;
+            border-radius: 50%;
+        }
+        .legend-chip.lc-theme  { color: var(--g-purple); background: rgba(176,124,255,0.07); border-color: rgba(176,124,255,0.30); }
+        .legend-chip.lc-theme::before  { background: var(--g-purple); box-shadow: 0 0 8px rgba(176,124,255,0.7); }
+        .legend-chip.lc-warning { color: var(--g-red); background: rgba(255,90,90,0.07); border-color: rgba(255,90,90,0.28); }
+        .legend-chip.lc-warning::before { background: var(--g-red); box-shadow: 0 0 8px rgba(255,90,90,0.65); }
+        .legend-chip.lc-mech   { color: var(--g-teal); background: rgba(52,208,184,0.07); border-color: rgba(52,208,184,0.28); }
+        .legend-chip.lc-mech::before   { background: var(--g-teal); box-shadow: 0 0 8px rgba(52,208,184,0.65); }
+        .legend-chip .count { color: var(--g-text-2); margin-right: 4px; font-weight: 400; }
+
+        .codex-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .codex-tile {
+            position: relative;
+            background: var(--g-ink-1);
+            border: 1px solid var(--g-line);
+            padding: 22px 22px 22px 26px;
+            display: grid;
+            grid-template-columns: 88px 1fr;
+            gap: 20px;
+            align-items: center;
+            transition: border-color 0.15s, transform 0.15s, background 0.15s;
+            overflow: hidden;
+        }
+        .codex-tile::before {
+            content: '';
+            position: absolute;
+            top: 0; bottom: 0; right: 0;
+            width: 4px;
+            background: currentColor;
+            box-shadow: 0 0 16px currentColor;
+            opacity: 0.85;
+        }
+        .codex-tile::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 14px; height: 14px;
+            background: linear-gradient(135deg, var(--g-bg) 50%, transparent 50%);
+        }
+        .codex-tile:hover { background: var(--g-ink-2); transform: translateY(-1px); }
+        .codex-tile.cat-theme   { color: var(--g-purple); }
+        .codex-tile.cat-warning { color: var(--g-red); }
+        .codex-tile.cat-mech    { color: var(--g-teal); }
+        .codex-tile:hover.cat-theme   { border-color: rgba(176,124,255,0.40); }
+        .codex-tile:hover.cat-warning { border-color: rgba(255,90,90,0.40); }
+        .codex-tile:hover.cat-mech    { border-color: rgba(52,208,184,0.40); }
+
+        .codex-tile-icon {
+            width: 88px; height: 88px;
+            display: grid;
+            place-items: center;
+            position: relative;
+            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.04), transparent 70%), var(--g-bg);
+            border: 1px solid var(--g-line);
+        }
+        .codex-tile-icon::before,
+        .codex-tile-icon::after {
+            content: '';
+            position: absolute;
+            width: 6px; height: 6px;
+            border: 1px solid currentColor;
+            opacity: 0.7;
+        }
+        .codex-tile-icon::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+        .codex-tile-icon::after  { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+        .codex-tile-icon img { width: 64px; height: 64px; object-fit: contain; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5)); }
+
+        .codex-tile-text { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+        .codex-tile-text .tile-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-mono);
+            font-size: 9px;
+            font-weight: 500;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: currentColor;
+            opacity: 0.85;
+        }
+        .codex-tile-text .tile-tag .tag-id { font-family: var(--font-pixel); color: var(--g-text-2); opacity: 0.7; }
+        .codex-tile-text strong {
+            font-family: var(--font-ar);
+            font-weight: 700;
+            font-size: 26px;
+            color: var(--g-text-0);
+            line-height: 1.05;
+            letter-spacing: -0.3px;
+        }
+        .codex-tile-text p {
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.55;
+            color: var(--g-text-1);
+            font-family: var(--font-ar);
+            font-weight: 400;
+        }
+
+        /* ============================================
+           SECTION 02 — STATUS MODIFIERS
+           ============================================ */
+        .exc-panel {
+            display: grid;
+            grid-template-columns: 1.2fr 1.8fr;
+            gap: 24px;
+            background: var(--g-ink-1);
+            border: 1px solid var(--g-line);
+            padding: 32px 36px;
+            position: relative;
+        }
+        .exc-panel::before,
+        .exc-panel::after {
+            content: '';
+            position: absolute;
+            width: 14px; height: 14px;
+            border: 1px solid var(--g-acc);
+            opacity: 0.6;
+        }
+        .exc-panel::before { top: -1px; right: -1px; border-left: none; border-bottom: none; }
+        .exc-panel::after  { bottom: -1px; left: -1px; border-right: none; border-top: none; }
+
+        .exc-text-side {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            border-left: 1px dashed var(--g-line-2);
+            padding-left: 28px;
+        }
+        .exc-text-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 1.6px;
+            text-transform: uppercase;
+            color: var(--g-acc);
+        }
+        .exc-text-label::before { content: '◢'; color: var(--g-acc); font-size: 9px; }
+        .exc-panel .exceptions-desc {
+            margin: 0;
+            font-family: var(--font-ar);
+            font-size: 19px;
+            line-height: 1.7;
+            color: var(--g-text-0);
+            font-weight: 400;
+            letter-spacing: -0.1px;
+        }
+        .exc-panel .exceptions-desc strong { color: var(--g-acc); font-weight: 700; }
+
+        .exc-icons-side {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+        }
+        .exc-modifier {
+            position: relative;
+            background: var(--g-bg);
+            border: 1px solid var(--g-line);
+            padding: 16px 12px 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .exc-modifier::before {
+            content: '';
+            position: absolute;
+            top: -1px; right: -1px;
+            width: 12px; height: 12px;
+            border-top: 2px solid var(--g-acc);
+            border-right: 2px solid var(--g-acc);
+        }
+        .exc-modifier::after {
+            content: '';
+            position: absolute;
+            bottom: -1px; left: -1px;
+            width: 12px; height: 12px;
+            border-bottom: 2px solid var(--g-acc);
+            border-left: 2px solid var(--g-acc);
+        }
+        .exc-modifier img { width: 80px; height: 80px; object-fit: contain; filter: drop-shadow(0 2px 10px rgba(200,255,94,0.18)); }
+        .exc-modifier .mod-stamp {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-pixel);
+            font-size: 10px;
+            letter-spacing: 1.5px;
+            color: var(--g-acc);
+            padding: 4px 9px;
+            background: rgba(200,255,94,0.08);
+            border: 1px solid rgba(200,255,94,0.35);
+        }
+        .exc-modifier .mod-stamp::before { content: '✓'; color: var(--g-acc); }
+        .exc-modifier .mod-name {
+            font-family: var(--font-ar);
+            font-size: 15px;
+            color: var(--g-text-1);
+            font-weight: 500;
+            text-align: center;
+            line-height: 1.25;
+        }
+
+        /* ============================================
+           SECTION 03 — TIER LADDER
+           ============================================ */
+        .ladder-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+            color: var(--g-text-2);
+            margin-bottom: 14px;
+        }
+        .ladder-meta .axis { display: flex; align-items: center; gap: 12px; }
+        .ladder-meta .axis .axis-bar {
+            display: inline-block;
+            width: 120px; height: 4px;
+            background: linear-gradient(to left, var(--g-grade-1) 0%, var(--g-grade-2) 50%, var(--g-grade-3) 100%);
+        }
+
+        .ladder {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+        }
+
+        .tier {
+            background: var(--g-ink-1);
+            border: 1px solid var(--g-line);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+        .tier::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: currentColor;
+            box-shadow: 0 0 14px currentColor;
+        }
+        .tier.tier-1 { color: var(--g-grade-1); }
+        .tier.tier-2 { color: var(--g-grade-2); }
+        .tier.tier-3 { color: var(--g-grade-3); }
+
+        .tier-head {
+            padding: 26px 28px 22px;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            grid-template-rows: auto auto;
+            grid-template-areas: "badge title meta" "badge bars  bars";
+            gap: 4px 18px;
+            align-items: center;
+            border-bottom: 1px solid var(--g-line);
+        }
+        .tier-badge {
+            grid-area: badge;
+            width: 64px; height: 64px;
+            display: grid;
+            place-items: center;
+            font-family: var(--font-pixel);
+            font-size: 28px;
+            font-weight: 700;
+            position: relative;
+            box-shadow: 0 0 0 1px currentColor, 0 0 22px color-mix(in oklab, currentColor 60%, transparent);
+        }
+        .tier.tier-1 .tier-badge { background: var(--g-grade-1); color: #0e1014; }
+        .tier.tier-2 .tier-badge { background: var(--g-grade-2); color: #0e1014; }
+        .tier.tier-3 .tier-badge { background: var(--g-grade-3); color: #0e1014; }
+        .tier-badge::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            background:
+                linear-gradient(45deg,  transparent 6px, currentColor 6px, currentColor 7px, transparent 7px) top    left  / 8px 8px no-repeat,
+                linear-gradient(-45deg, transparent 6px, currentColor 6px, currentColor 7px, transparent 7px) top    right / 8px 8px no-repeat,
+                linear-gradient(135deg, transparent 6px, currentColor 6px, currentColor 7px, transparent 7px) bottom left  / 8px 8px no-repeat,
+                linear-gradient(-135deg,transparent 6px, currentColor 6px, currentColor 7px, transparent 7px) bottom right / 8px 8px no-repeat;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+        .tier-title { grid-area: title; font-family: var(--font-ar); font-size: 26px; font-weight: 700; color: var(--g-text-0); line-height: 1; }
+        .tier-meta  { grid-area: meta; font-family: var(--font-mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: currentColor; padding: 5px 10px; border: 1px solid currentColor; opacity: 0.9; }
+        .tier-bars  { grid-area: bars; display: inline-flex; gap: 3px; margin-top: 8px; }
+        .tier-bars span { width: 14px; height: 6px; background: var(--g-line-2); }
+        .tier-1 .tier-bars span:nth-child(-n+5) { background: var(--g-grade-1); box-shadow: 0 0 6px var(--g-grade-1); }
+        .tier-2 .tier-bars span:nth-child(-n+3) { background: var(--g-grade-2); box-shadow: 0 0 6px var(--g-grade-2); }
+        .tier-3 .tier-bars span:nth-child(-n+1) { background: var(--g-grade-3); box-shadow: 0 0 6px var(--g-grade-3); }
+
+        .tier-body { display: flex; flex-direction: column; flex: 1; }
+        .tier-row {
+            padding: 18px 28px;
+            border-bottom: 1px solid var(--g-line);
+            display: grid;
+            grid-template-columns: 110px 1fr;
+            gap: 18px;
+            align-items: start;
+        }
+        .tier-row:last-child { border-bottom: none; }
+        .tier-row-label {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 1.6px;
+            text-transform: uppercase;
+            color: var(--g-text-2);
+            padding-top: 3px;
+        }
+        .tier-row-label::before { content: '//'; color: currentColor; margin-left: 6px; opacity: 0.7; }
+        .tier-row p { margin: 0; font-family: var(--font-ar); font-size: 16px; line-height: 1.65; color: var(--g-text-1); font-weight: 400; }
+
+        /* ============================================
+           FOOTER
+           ============================================ */
+        .guide-footnote {
+            margin-top: 32px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+            color: var(--g-text-2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: center;
+        }
+        .guide-footnote .dot { width: 4px; height: 4px; background: var(--g-text-2); border-radius: 50%; }
+        .guide-footnote .term { color: var(--g-acc); }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 1280px) {
+            .codex-grid { grid-template-columns: repeat(2, 1fr); }
+            .ladder { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 980px) {
+            .exc-panel { grid-template-columns: 1fr; }
+            .exc-text-side { border-left: none; padding-left: 0; border-bottom: 1px dashed var(--g-line-2); padding-bottom: 18px; }
         }
         @media (max-width: 768px) {
             .guide-shell { padding: 14px 16px 40px; }
-            .guide-page-header h1 { font-size: 36px; }
-            .cat-group-grid { grid-template-columns: 1fr; }
-            .guide-section > .section-title { font-size: 24px; }
+            .guide-page-header { grid-template-columns: 1fr; }
+            .header-bar-readout { align-items: flex-start; }
+            .guide-page-header h1 { font-size: 42px; }
+            .section-title-block h3 { font-size: 26px; }
+            .codex-grid { grid-template-columns: 1fr; }
+            .codex-tile { grid-template-columns: 72px 1fr; padding: 18px; }
+            .codex-tile-icon { width: 72px; height: 72px; }
+            .codex-tile-icon img { width: 50px; height: 50px; }
+            .tier-row { grid-template-columns: 1fr; gap: 6px; }
         }
     </style>
 </head>
@@ -253,7 +620,7 @@
 <body>
 <div class="guide-shell">
 
-    <!-- ── TOPBAR (zoomed to match main app) ── -->
+    <!-- ── TOPBAR (UNCHANGED) ── -->
     <div class="guide-topbar-wrap">
     <header class="topbar">
         <div class="topbar-brand">
@@ -276,98 +643,143 @@
 
     <!-- ── PAGE HEADER ── -->
     <div class="guide-page-header">
-        <span class="kicker"><span class="kicker-dot"></span>الدليل</span>
-        <h1>شرح التصانيف والدرجات</h1>
+        <div class="header-left">
+            <span class="kicker"><span class="kicker-dot"></span>الدليل</span>
+            <h1>شرح التصانيف والدرجات</h1>
+        </div>
+        <div class="header-bar-readout">
+            <div class="pixel-bar" aria-hidden="true">
+                <span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span>
+            </div>
+            <div class="meta-row">
+                <span class="pulse"></span>
+                <span>DOC // GUIDE.v3</span>
+                <span>·</span>
+                <span>3 SECTIONS</span>
+                <span>·</span>
+                <span>READY</span>
+            </div>
+        </div>
     </div>
 
     <!-- ── SECTION 01: الموجودات ── -->
     <section class="guide-section">
-        <h3 class="section-title"><span class="section-num">01</span>الموجودات</h3>
+        <div class="section-head-row">
+            <div class="section-title-block">
+                <span class="section-num">SEC · 01</span>
+                <h3>الموجودات</h3>
+            </div>
+            <div class="section-trail"></div>
+            <div class="section-readout">10 ENTRIES <strong>·</strong> 3 CATEGORIES</div>
+        </div>
 
-        <div class="cat-group cat-group-theme">
-            <div class="cat-group-label">محاذير عقدية وفكرية</div>
-            <div class="cat-group-grid">
-                <div class="modal-item theme-card">
+        <div class="codex-legend">
+            <span class="legend-chip lc-theme"><span class="count">02</span>محاذير عقدية وفكرية</span>
+            <span class="legend-chip lc-warning"><span class="count">04</span>انحرافات أخلاقية وصادمة</span>
+            <span class="legend-chip lc-mech"><span class="count">04</span>استغلال مالي وسلوكي</span>
+        </div>
+
+        <div class="codex-grid">
+            <div class="codex-tile cat-theme theme-card modal-item">
+                <div class="codex-tile-icon">
                     <img src="assets/icons/كفريات.png?v=2" alt="كفريات">
-                    <div class="item-text">
-                        <strong>كفريات</strong>
-                        <p>ترويج أو تشجيع على الكفر، سخرية من الأديان أو الإله، فلسفات وعقائد فاسدة.</p>
-                    </div>
                 </div>
-                <div class="modal-item theme-card">
+                <div class="codex-tile-text item-text">
+                    <span class="tile-tag"><span class="tag-id">[01]</span>محاذير عقدية</span>
+                    <strong>كفريات</strong>
+                    <p>ترويج أو تشجيع على الكفر، سخرية من الأديان أو الإله، فلسفات وعقائد فاسدة.</p>
+                </div>
+            </div>
+            <div class="codex-tile cat-theme theme-card modal-item">
+                <div class="codex-tile-icon">
                     <img src="assets/icons/سحر.png?v=2" alt="سحر">
-                    <div class="item-text">
-                        <strong>سحر</strong>
-                        <p>القوى والرموز والتعويذات المرتبطة بالسحر والتنجيم ورؤية المستقبل.</p>
-                    </div>
+                </div>
+                <div class="codex-tile-text item-text">
+                    <span class="tile-tag"><span class="tag-id">[02]</span>محاذير عقدية</span>
+                    <strong>سحر</strong>
+                    <p>القوى والرموز والتعويذات المرتبطة بالسحر والتنجيم ورؤية المستقبل.</p>
                 </div>
             </div>
-        </div>
-
-        <div class="cat-group cat-group-warning">
-            <div class="cat-group-label">انحرافات أخلاقية وصادمة</div>
-            <div class="cat-group-grid">
-                <div class="modal-item warning-card">
+            <div class="codex-tile cat-warning warning-card modal-item">
+                <div class="codex-tile-icon">
                     <img src="assets/icons/جنس.png?v=2" alt="جنس">
-                    <div class="item-text">
-                        <strong>جنس</strong>
-                        <p>مشاهد جنسية إيحائية أو مباشرة.</p>
-                    </div>
                 </div>
-                <div class="modal-item warning-card">
-                    <img src="assets/icons/تعري.png?v=2" alt="تعرّي">
-                    <div class="item-text">
-                        <strong>تعرّي</strong>
-                        <p>ظهور أشخاص بجسد عاري كلياً أو جزئياً.</p>
-                    </div>
-                </div>
-                <div class="modal-item warning-card">
-                    <img src="assets/icons/شذوذ.png?v=2" alt="شذوذ">
-                    <div class="item-text">
-                        <strong>شذوذ</strong>
-                        <p>عرض وتمجيد العلاقات الجنسية المثليّة.</p>
-                    </div>
-                </div>
-                <div class="modal-item warning-card">
-                    <img src="assets/icons/صادم.png?v=2" alt="صادم">
-                    <div class="item-text">
-                        <strong>صادم</strong>
-                        <p>ظهور أشلاء وما يسبب الصدمات النفسية والتقزز للمشاهد.</p>
-                    </div>
+                <div class="codex-tile-text item-text">
+                    <span class="tile-tag"><span class="tag-id">[03]</span>انحرافات أخلاقية</span>
+                    <strong>جنس</strong>
+                    <p>مشاهد جنسية إيحائية أو مباشرة.</p>
                 </div>
             </div>
-        </div>
-
-        <div class="cat-group cat-group-mechanic">
-            <div class="cat-group-label">استغلال مالي وسلوكي</div>
-            <div class="cat-group-grid">
-                <div class="modal-item mechanic-card">
+            <div class="codex-tile cat-warning warning-card modal-item">
+                <div class="codex-tile-icon">
+                    <img src="assets/icons/تعري.png?v=2" alt="تعرّي">
+                </div>
+                <div class="codex-tile-text item-text">
+                    <span class="tile-tag"><span class="tag-id">[04]</span>انحرافات أخلاقية</span>
+                    <strong>تعرّي</strong>
+                    <p>ظهور أشخاص بجسد عاري كلياً أو جزئياً.</p>
+                </div>
+            </div>
+            <div class="codex-tile cat-warning warning-card modal-item">
+                <div class="codex-tile-icon">
+                    <img src="assets/icons/شذوذ.png?v=2" alt="شذوذ">
+                </div>
+                <div class="codex-tile-text item-text">
+                    <span class="tile-tag"><span class="tag-id">[05]</span>انحرافات أخلاقية</span>
+                    <strong>شذوذ</strong>
+                    <p>عرض وتمجيد العلاقات الجنسية المثليّة.</p>
+                </div>
+            </div>
+            <div class="codex-tile cat-warning warning-card modal-item">
+                <div class="codex-tile-icon">
+                    <img src="assets/icons/صادم.png?v=2" alt="صادم">
+                </div>
+                <div class="codex-tile-text item-text">
+                    <span class="tile-tag"><span class="tag-id">[06]</span>انحرافات أخلاقية</span>
+                    <strong>صادم</strong>
+                    <p>ظهور أشلاء وما يسبب الصدمات النفسية والتقزز للمشاهد.</p>
+                </div>
+            </div>
+            <div class="codex-tile cat-mech mechanic-card modal-item">
+                <div class="codex-tile-icon">
                     <img src="assets/icons/مفاسد.png?v=2" alt="مفاسد">
-                    <div class="item-text">
-                        <strong>مفاسد</strong>
-                        <p>ترويج أو تشجيع على القمار أو تعاطي المخدرات أو إظهارها بصفة إيجابية.</p>
-                    </div>
                 </div>
-                <div class="modal-item mechanic-card">
+                <div class="codex-tile-text item-text">
+                    <span class="tile-tag"><span class="tag-id">[07]</span>استغلال مالي</span>
+                    <strong>مفاسد</strong>
+                    <p>ترويج أو تشجيع على القمار أو تعاطي المخدرات أو إظهارها بصفة إيجابية.</p>
+                </div>
+            </div>
+            <div class="codex-tile cat-mech mechanic-card modal-item">
+                <div class="codex-tile-icon">
                     <img src="assets/icons/إدمانيّات.png?v=2" alt="إدمانيّات">
-                    <div class="item-text">
-                        <strong>إدمانيّات</strong>
-                        <p>(خاص للألعاب) مصممة للعودة المستمرة والمتابعة الدورية اليومية لتحقيق التقدم.</p>
-                    </div>
                 </div>
-                <div class="modal-item mechanic-card">
+                <div class="codex-tile-text item-text">
+                    <span class="tile-tag"><span class="tag-id">[08]</span>خاص للألعاب</span>
+                    <strong>إدمانيّات</strong>
+                    <p>(خاص للألعاب) مصممة للعودة المستمرة والمتابعة الدورية اليومية لتحقيق التقدم.</p>
+                </div>
+            </div>
+            <div class="codex-tile cat-mech mechanic-card modal-item">
+                <div class="codex-tile-icon">
                     <img src="assets/icons/تبذير.png?v=2" alt="تبذير">
-                    <div class="item-text">
-                        <strong>تبذير</strong>
-                        <p>(خاص للألعاب) مصممة لربط التقدم بالمال المنفق على أغراض داخل اللعبة.</p>
-                    </div>
                 </div>
-                <div class="modal-item mechanic-card">
+                <div class="codex-tile-text item-text">
+                    <span class="tile-tag"><span class="tag-id">[09]</span>خاص للألعاب</span>
+                    <strong>تبذير</strong>
+                    <p>(خاص للألعاب) مصممة لربط التقدم بالمال المنفق على أغراض داخل اللعبة.</p>
+                </div>
+            </div>
+            <div class="codex-tile cat-mech mechanic-card modal-item">
+                <div class="codex-tile-icon">
                     <img src="assets/icons/قمار.png?v=2" alt="قمار">
-                    <div class="item-text">
-                        <strong>قمار</strong>
-                        <p>(خاص للألعاب) مصممة لتشجيع شراء الصناديق ذات المحتوى العشوائي ونظام السحب.</p>
-                    </div>
+                </div>
+                <div class="codex-tile-text item-text">
+                    <span class="tile-tag"><span class="tag-id">[10]</span>خاص للألعاب</span>
+                    <strong>قمار</strong>
+                    <p>(خاص للألعاب) مصممة لتشجيع شراء الصناديق ذات المحتوى العشوائي ونظام السحب.</p>
                 </div>
             </div>
         </div>
@@ -375,80 +787,136 @@
 
     <!-- ── SECTION 02: المستثنيات ── -->
     <section class="guide-section">
-        <h3 class="section-title"><span class="section-num">02</span>المستثنيات</h3>
-        <div class="exceptions-card">
-            <p class="exceptions-desc">يفترض التصنيف المحافظ أن جميع المحتويات الإبداعية تحتوي على الموسيقى
-                والأغاني والألفاظ النابية والعلاقات خارج إطار الزواج. وفي حال خلو المحتوى منها، ينبغي للمُصنّف
-                استخدام التالي:</p>
-            <div class="exceptions-icons">
-                <img src="assets/icons/موسيقى0.png" alt="خال من الموسيقى">
-                <img src="assets/icons/ألفاظ نابية0.png" alt="خال من الألفاظ النابية">
-                <img src="assets/icons/علاقات حب0.png" alt="خال من العلاقات خارج الزواج">
+        <div class="section-head-row">
+            <div class="section-title-block">
+                <span class="section-num">SEC · 02</span>
+                <h3>المستثنيات</h3>
+            </div>
+            <div class="section-trail"></div>
+            <div class="section-readout">STATUS MODIFIERS <strong>·</strong> +03</div>
+        </div>
+
+        <div class="exc-panel exceptions-card">
+            <div class="exc-icons-side exceptions-icons">
+                <div class="exc-modifier">
+                    <img src="assets/icons/موسيقى0.png" alt="خال من الموسيقى">
+                    <span class="mod-stamp">CLEAR</span>
+                    <span class="mod-name">خال من الموسيقى</span>
+                </div>
+                <div class="exc-modifier">
+                    <img src="assets/icons/ألفاظ نابية0.png" alt="خال من الألفاظ النابية">
+                    <span class="mod-stamp">CLEAR</span>
+                    <span class="mod-name">خال من الألفاظ النابية</span>
+                </div>
+                <div class="exc-modifier">
+                    <img src="assets/icons/علاقات حب0.png" alt="خال من العلاقات خارج الزواج">
+                    <span class="mod-stamp">CLEAR</span>
+                    <span class="mod-name">خال من العلاقات خارج الزواج</span>
+                </div>
+            </div>
+            <div class="exc-text-side">
+                <span class="exc-text-label">EXCEPTION · القاعدة الافتراضية</span>
+                <p class="exceptions-desc">يفترض التصنيف المحافظ أن جميع المحتويات الإبداعية تحتوي على
+                    <strong>الموسيقى والأغاني</strong> و<strong>الألفاظ النابية</strong>
+                    و<strong>العلاقات خارج إطار الزواج</strong>. وفي حال خلو المحتوى منها، ينبغي للمُصنّف
+                    استخدام الرموز التالية.</p>
             </div>
         </div>
     </section>
 
     <!-- ── SECTION 03: القيم والدرجات ── -->
     <section class="guide-section">
-        <h3 class="section-title"><span class="section-num">03</span>القيم والدرجات</h3>
-        <div class="grades-container">
+        <div class="section-head-row">
+            <div class="section-title-block">
+                <span class="section-num">SEC · 03</span>
+                <h3>القيم والدرجات</h3>
+            </div>
+            <div class="section-trail"></div>
+            <div class="section-readout">TIER LADDER <strong>·</strong> 03 LEVELS</div>
+        </div>
 
-            <div class="grade-card grade-red">
-                <div class="grade-header">
-                    <div class="grade-badge red">1</div>
-                    <div class="grade-title">الدرجة الأولى</div>
-                    <div class="grade-meta">شديد</div>
+        <div class="ladder-meta">
+            <span>سُلَّم الشدّة</span>
+            <span class="axis">
+                <span>خفيف</span>
+                <span class="axis-bar"></span>
+                <span>شديد</span>
+            </span>
+        </div>
+
+        <div class="ladder grades-container">
+            <div class="tier tier-1 grade-card grade-red">
+                <div class="tier-head grade-header">
+                    <div class="tier-badge grade-badge red">1</div>
+                    <div class="tier-title grade-title">الدرجة الأولى</div>
+                    <div class="tier-meta grade-meta">شديد</div>
+                    <div class="tier-bars" aria-hidden="true">
+                        <span></span><span></span><span></span><span></span><span></span>
+                    </div>
                 </div>
-                <div class="grade-body">
-                    <div class="grade-desc">
-                        <div class="grade-desc-label">// في القصصيّات</div>
+                <div class="tier-body grade-body">
+                    <div class="tier-row grade-desc">
+                        <span class="tier-row-label grade-desc-label">في القصصيّات</span>
                         <p>لا يمكن تخطي المحتوى دون التأثير على القصة. عدد مرات ظهور كثير، يفقد الفهم العام للقصة حين التخطي.</p>
                     </div>
-                    <div class="grade-desc">
-                        <div class="grade-desc-label">// في الألعاب</div>
+                    <div class="tier-row grade-desc">
+                        <span class="tier-row-label grade-desc-label">في الألعاب</span>
                         <p>يستحيل إتمام اللعبة دون المرور عليه.</p>
                     </div>
                 </div>
             </div>
 
-            <div class="grade-card grade-orange">
-                <div class="grade-header">
-                    <div class="grade-badge orange">2</div>
-                    <div class="grade-title">الدرجة الثانية</div>
-                    <div class="grade-meta">متوسط</div>
+            <div class="tier tier-2 grade-card grade-orange">
+                <div class="tier-head grade-header">
+                    <div class="tier-badge grade-badge orange">2</div>
+                    <div class="tier-title grade-title">الدرجة الثانية</div>
+                    <div class="tier-meta grade-meta">متوسط</div>
+                    <div class="tier-bars" aria-hidden="true">
+                        <span></span><span></span><span></span><span></span><span></span>
+                    </div>
                 </div>
-                <div class="grade-body">
-                    <div class="grade-desc">
-                        <div class="grade-desc-label">// في القصصيّات</div>
+                <div class="tier-body grade-body">
+                    <div class="tier-row grade-desc">
+                        <span class="tier-row-label grade-desc-label">في القصصيّات</span>
                         <p>يمكن تخطي المحتوى دون التأثير على القصة. عدد مرّات ظهور كثير، يسبب انقطاعات متكررة في تسلسل العرض. الفهم العام للقصة محفوظ رغم التخطي.</p>
                     </div>
-                    <div class="grade-desc">
-                        <div class="grade-desc-label">// في الألعاب</div>
+                    <div class="tier-row grade-desc">
+                        <span class="tier-row-label grade-desc-label">في الألعاب</span>
                         <p>يصعّب إتمام اللعبة ويغيّر من تجربتها، لكن يمكن إتمامها بالكامل مع تخطّيه.</p>
                     </div>
                 </div>
             </div>
 
-            <div class="grade-card grade-yellow">
-                <div class="grade-header">
-                    <div class="grade-badge yellow">3</div>
-                    <div class="grade-title">الدرجة الثالثة</div>
-                    <div class="grade-meta">خفيف</div>
+            <div class="tier tier-3 grade-card grade-yellow">
+                <div class="tier-head grade-header">
+                    <div class="tier-badge grade-badge yellow">3</div>
+                    <div class="tier-title grade-title">الدرجة الثالثة</div>
+                    <div class="tier-meta grade-meta">خفيف</div>
+                    <div class="tier-bars" aria-hidden="true">
+                        <span></span><span></span><span></span><span></span><span></span>
+                    </div>
                 </div>
-                <div class="grade-body">
-                    <div class="grade-desc">
-                        <div class="grade-desc-label">// في القصصيّات</div>
+                <div class="tier-body grade-body">
+                    <div class="tier-row grade-desc">
+                        <span class="tier-row-label grade-desc-label">في القصصيّات</span>
                         <p>يمكن تخطّي المحتوى دون التأثير على القصّة. ظهور قليل يمكن تخطيه بسهولة.</p>
                     </div>
-                    <div class="grade-desc">
-                        <div class="grade-desc-label">// في الألعاب</div>
+                    <div class="tier-row grade-desc">
+                        <span class="tier-row-label grade-desc-label">في الألعاب</span>
                         <p>يمكن تجاهله أو استخدام طرق بديلة لإتمام اللعبة.</p>
                     </div>
                 </div>
             </div>
-
         </div>
     </section>
+
+    <div class="guide-footnote">
+        <span>END OF DOCUMENT</span>
+        <span class="dot"></span>
+        <span class="term">muhafid.com</span>
+        <span class="dot"></span>
+        <span>GUIDE.v3 · CCCC</span>
+    </div>
 
 </div>
 </body>
