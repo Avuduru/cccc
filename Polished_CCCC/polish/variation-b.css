@@ -1,0 +1,638 @@
+/* ============================================================
+   Variation B — CRT Arcade
+   Scanlines, phosphor glow, neon edges.
+   Style here is gated by [data-variation="b"] on <body>.
+   ============================================================ */
+
+[data-variation="b"] {
+  --accent: #00ff9c;
+  --accent-soft: #00b870;
+  --crt-scan: rgba(255, 255, 255, 0.04);
+  --shadow-glow: 0 0 12px rgba(0, 255, 156, 0.35);
+}
+
+/* CRT scanline overlay sits on top of everything but is non-interactive */
+[data-variation="b"]::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    var(--crt-scan) 2px,
+    var(--crt-scan) 3px
+  );
+  mix-blend-mode: overlay;
+  opacity: 0.6;
+}
+
+[data-variation="b"] .chunk {
+  border-color: var(--accent-soft);
+  box-shadow: var(--shadow-glow);
+}
+
+[data-variation="b"] .chunk__title {
+  color: var(--accent);
+  text-shadow: 0 0 8px rgba(0, 255, 156, 0.5);
+}
+
+[data-variation="b"] .vbtn.is-active {
+  background: var(--accent);
+  color: #001a10;
+  box-shadow: 0 0 10px rgba(0, 255, 156, 0.7);
+}
+
+[data-variation="b"] .topbar__logo {
+  color: var(--accent);
+  text-shadow: 0 0 8px rgba(0, 255, 156, 0.45);
+}
+
+/* ============================================================
+   sliders — CRT polish
+   ============================================================ */
+
+/* row gets a faint inner phosphor on hover */
+[data-variation="b"] .srow {
+  border-color: #1f3a30;
+  background: #0d1410;
+}
+
+[data-variation="b"] .srow:hover {
+  border-color: var(--accent-soft);
+  background: #10201a;
+  box-shadow: 0 0 14px rgba(0, 255, 156, 0.15) inset;
+}
+
+/* active row gets a subtle outer glow that matches its severity */
+[data-variation="b"] .srow[data-active="1"] { box-shadow: 0 0 12px rgba(255, 59, 59, 0.18); }
+[data-variation="b"] .srow[data-active="2"] { box-shadow: 0 0 12px rgba(255, 138, 31, 0.18); }
+[data-variation="b"] .srow[data-active="3"] { box-shadow: 0 0 12px rgba(255, 210, 58, 0.18); }
+
+/* track gets scanlines on top of the rail */
+[data-variation="b"] .srow__track {
+  border-color: #1f3a30;
+  background: #05090a;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    rgba(255, 255, 255, 0.03) 2px,
+    rgba(255, 255, 255, 0.03) 3px
+  );
+}
+
+/* fill becomes a phosphor sweep tinted by the active severity */
+[data-variation="b"] .srow[data-active="1"] .srow__fill {
+  background: linear-gradient(to left, transparent, rgba(255, 59, 59, 0.22));
+  box-shadow: inset 0 0 14px rgba(255, 59, 59, 0.25);
+}
+[data-variation="b"] .srow[data-active="2"] .srow__fill {
+  background: linear-gradient(to left, transparent, rgba(255, 138, 31, 0.22));
+  box-shadow: inset 0 0 14px rgba(255, 138, 31, 0.25);
+}
+[data-variation="b"] .srow[data-active="3"] .srow__fill {
+  background: linear-gradient(to left, transparent, rgba(255, 210, 58, 0.22));
+  box-shadow: inset 0 0 14px rgba(255, 210, 58, 0.25);
+}
+
+/* segment dividers get the CRT teal */
+[data-variation="b"] .seg {
+  border-inline-start-color: #14241e;
+}
+
+/* active dot — phosphor bloom */
+[data-variation="b"] .seg.is-active .seg__dot {
+  transform: scale(1.7);
+}
+
+[data-variation="b"] .seg--sev-1.is-active .seg__dot {
+  box-shadow:
+    0 0 6px var(--sev-1),
+    0 0 14px rgba(255, 59, 59, 0.7),
+    0 0 24px rgba(255, 59, 59, 0.35);
+}
+[data-variation="b"] .seg--sev-2.is-active .seg__dot {
+  box-shadow:
+    0 0 6px var(--sev-2),
+    0 0 14px rgba(255, 138, 31, 0.7),
+    0 0 24px rgba(255, 138, 31, 0.35);
+}
+[data-variation="b"] .seg--sev-3.is-active .seg__dot {
+  box-shadow:
+    0 0 6px var(--sev-3),
+    0 0 14px rgba(255, 210, 58, 0.7),
+    0 0 24px rgba(255, 210, 58, 0.35);
+}
+[data-variation="b"] .seg--sev-0.is-active .seg__dot {
+  background: #2a3a32;
+  box-shadow: 0 0 0 1px rgba(0, 255, 156, 0.25);
+}
+
+/* readout glows in its severity color */
+[data-variation="b"] .srow__readout {
+  border-color: #1f3a30;
+  background: #05090a;
+}
+
+[data-variation="b"] .srow[data-active="1"] .srow__readout {
+  text-shadow: 0 0 8px rgba(255, 59, 59, 0.7);
+  box-shadow: 0 0 10px rgba(255, 59, 59, 0.25);
+}
+[data-variation="b"] .srow[data-active="2"] .srow__readout {
+  text-shadow: 0 0 8px rgba(255, 138, 31, 0.7);
+  box-shadow: 0 0 10px rgba(255, 138, 31, 0.25);
+}
+[data-variation="b"] .srow[data-active="3"] .srow__readout {
+  text-shadow: 0 0 8px rgba(255, 210, 58, 0.7);
+  box-shadow: 0 0 10px rgba(255, 210, 58, 0.25);
+}
+
+/* labels: Arabic stays clean, EN gets phosphor */
+[data-variation="b"] .srow__en {
+  color: var(--accent-soft);
+  text-shadow: 0 0 6px rgba(0, 255, 156, 0.25);
+}
+
+/* ============================================================
+   header — CRT arcade
+   ============================================================ */
+
+[data-variation="b"] .card-header {
+  border-color: var(--accent-soft);
+  background: #0d1410;
+  box-shadow:
+    0 0 18px rgba(0, 255, 156, 0.18),
+    inset 0 0 30px rgba(0, 255, 156, 0.05);
+}
+
+/* CRT scanlines on the header surface itself */
+[data-variation="b"] .card-header {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    rgba(0, 255, 156, 0.04) 2px,
+    rgba(0, 255, 156, 0.04) 3px
+  );
+}
+
+[data-variation="b"] .logo__char {
+  color: var(--accent);
+  text-shadow:
+    0 0 8px rgba(0, 255, 156, 0.7),
+    0 0 18px rgba(0, 255, 156, 0.45),
+    0 0 32px rgba(0, 255, 156, 0.25);
+}
+
+[data-variation="b"] .logo__cursor {
+  background: var(--accent);
+  box-shadow:
+    0 0 8px rgba(0, 255, 156, 0.7),
+    0 0 16px rgba(0, 255, 156, 0.4);
+}
+
+[data-variation="b"] .subtitle-en {
+  color: var(--accent);
+  text-shadow: 0 0 6px rgba(0, 255, 156, 0.4);
+}
+
+[data-variation="b"] .subtitle-ar {
+  color: #d8ffec;
+  text-shadow: 0 0 6px rgba(0, 255, 156, 0.25);
+}
+
+[data-variation="b"] .header-meta {
+  border-color: var(--accent-soft);
+}
+
+[data-variation="b"] .header-meta__pip {
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+[data-variation="b"] .header-meta__txt {
+  color: var(--accent);
+}
+
+[data-variation="b"] .card-header::before,
+[data-variation="b"] .card-header::after {
+  border-color: var(--accent-soft);
+  opacity: calc(0.7 * var(--tw-corners, 1));
+}
+
+/* ============================================================
+   footer — CRT arcade
+   ============================================================ */
+
+[data-variation="b"] .card-footer {
+  border-color: var(--accent-soft);
+  background: #0d1410;
+  box-shadow: 0 0 14px rgba(0, 255, 156, 0.15);
+}
+
+[data-variation="b"] .cf-btn {
+  border-color: #1f3a30;
+  background: #05090a;
+  color: var(--accent);
+}
+
+[data-variation="b"] .cf-btn:hover {
+  border-color: var(--accent);
+  background: #0a1c14;
+  box-shadow:
+    0 0 14px rgba(0, 255, 156, 0.3),
+    inset 0 0 14px rgba(0, 255, 156, 0.08);
+}
+
+[data-variation="b"] .cf-btn__ar {
+  text-shadow: 0 0 6px rgba(0, 255, 156, 0.4);
+}
+
+[data-variation="b"] .cf-btn__en {
+  color: var(--accent-soft);
+}
+
+[data-variation="b"] .cf-btn__icon {
+  color: var(--accent);
+  border-color: var(--accent-soft);
+  background: #0a1c14;
+}
+
+[data-variation="b"] .cf-btn--export {
+  border-color: var(--accent);
+  background: linear-gradient(180deg, #0a1c14, #06120c);
+  color: var(--accent);
+  text-shadow: 0 0 8px rgba(0, 255, 156, 0.55);
+}
+
+[data-variation="b"] .cf-btn--export:hover {
+  background: linear-gradient(180deg, #0d2418, #08160f);
+  box-shadow:
+    0 0 22px rgba(0, 255, 156, 0.5),
+    inset 0 0 18px rgba(0, 255, 156, 0.12);
+}
+
+[data-variation="b"] .cf-btn__kbd {
+  border-color: var(--accent-soft);
+  color: var(--accent);
+  background: #05090a;
+}
+
+[data-variation="b"] .cf-divider span {
+  background: var(--accent-soft);
+  box-shadow: 0 0 6px rgba(0, 255, 156, 0.4);
+}
+
+/* ============================================================
+   search — CRT arcade
+   ============================================================ */
+
+[data-variation="b"] .search-wrapper {
+  border-color: #1f3a30;
+  background: #05090a;
+}
+
+[data-variation="b"] .search-wrapper:focus-within {
+  border-color: var(--accent);
+  box-shadow:
+    0 0 14px rgba(0, 255, 156, 0.3),
+    inset 0 0 14px rgba(0, 255, 156, 0.06);
+}
+
+[data-variation="b"] .search-input {
+  color: var(--accent);
+  text-shadow: 0 0 6px rgba(0, 255, 156, 0.3);
+}
+
+[data-variation="b"] .search-input::placeholder {
+  color: var(--accent-soft);
+  opacity: 0.6;
+}
+
+[data-variation="b"] .search-icon { color: var(--accent); }
+
+[data-variation="b"] .search-kbd {
+  border-color: var(--accent-soft);
+  color: var(--accent);
+}
+
+[data-variation="b"] .search-results {
+  background: #0a1410;
+  border-color: var(--accent-soft);
+  box-shadow:
+    0 0 22px rgba(0, 255, 156, 0.25),
+    inset 0 0 18px rgba(0, 255, 156, 0.05);
+}
+
+[data-variation="b"] .search-result {
+  border-bottom-color: rgba(0, 255, 156, 0.1);
+}
+
+[data-variation="b"] .search-result:hover,
+[data-variation="b"] .search-result.is-focus {
+  background: rgba(0, 255, 156, 0.08);
+}
+
+[data-variation="b"] .search-result.is-focus::before {
+  color: var(--accent);
+  text-shadow: 0 0 6px var(--accent);
+}
+
+[data-variation="b"] .search-result__title {
+  color: var(--accent);
+  text-shadow: 0 0 6px rgba(0, 255, 156, 0.3);
+}
+
+[data-variation="b"] .search-result__poster {
+  border-color: var(--accent-soft);
+  color: var(--accent);
+}
+
+[data-variation="b"] .search-result__type {
+  border-color: var(--accent-soft);
+  color: var(--accent);
+}
+
+[data-variation="b"] .search-result__score {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: #05090a;
+  text-shadow: 0 0 6px rgba(0, 255, 156, 0.45);
+  box-shadow: 0 0 8px rgba(0, 255, 156, 0.2);
+}
+
+[data-variation="b"] .search-hint__ar {
+  color: var(--accent-soft);
+}
+
+/* ============================================================
+   controls — CRT arcade
+   ============================================================ */
+
+[data-variation="b"] .dropdown-toggle {
+  border-color: #1f3a30;
+  background: #05090a;
+  color: var(--accent);
+  text-shadow: 0 0 6px rgba(0, 255, 156, 0.3);
+}
+
+[data-variation="b"] .dropdown-toggle:hover,
+[data-variation="b"] .custom-dropdown.is-open .dropdown-toggle {
+  border-color: var(--accent);
+  box-shadow:
+    0 0 14px rgba(0, 255, 156, 0.25),
+    inset 0 0 14px rgba(0, 255, 156, 0.06);
+}
+
+[data-variation="b"] .dropdown-toggle__caret {
+  border-top-color: var(--accent);
+}
+
+[data-variation="b"] .dropdown-menu {
+  background: #0a1410;
+  border-color: var(--accent-soft);
+  box-shadow:
+    0 0 22px rgba(0, 255, 156, 0.25),
+    inset 0 0 18px rgba(0, 255, 156, 0.05);
+}
+
+[data-variation="b"] .dropdown-item {
+  border-bottom-color: rgba(0, 255, 156, 0.1);
+}
+
+[data-variation="b"] .dropdown-item:hover,
+[data-variation="b"] .dropdown-item.active {
+  background: rgba(0, 255, 156, 0.08);
+}
+
+[data-variation="b"] .dropdown-item__ar {
+  color: var(--accent);
+  text-shadow: 0 0 6px rgba(0, 255, 156, 0.25);
+}
+
+[data-variation="b"] .dropdown-item.active::before {
+  color: var(--accent);
+  text-shadow: 0 0 6px var(--accent);
+}
+
+[data-variation="b"] .seg-group {
+  border-color: #1f3a30;
+  background: #05090a;
+}
+
+[data-variation="b"] .orient-btn,
+[data-variation="b"] .size-btn {
+  color: var(--accent-soft);
+}
+
+[data-variation="b"] .orient-btn:hover,
+[data-variation="b"] .size-btn:hover {
+  color: var(--accent);
+  background: rgba(0, 255, 156, 0.05);
+}
+
+[data-variation="b"] .orient-btn.active,
+[data-variation="b"] .size-btn.active {
+  background: var(--accent);
+  color: #001a10;
+  box-shadow:
+    0 0 14px rgba(0, 255, 156, 0.55),
+    inset 0 0 8px rgba(255, 255, 255, 0.2);
+}
+
+[data-variation="b"] .badge-tog {
+  border-color: #1f3a30;
+  background: #05090a;
+  color: var(--accent-soft);
+}
+
+[data-variation="b"] .badge-tog:hover {
+  border-color: var(--accent-soft);
+  color: var(--accent);
+}
+
+[data-variation="b"] .badge-tog__en {
+  color: var(--accent-soft);
+}
+
+[data-variation="b"] .badge-tog.is-on {
+  border-color: var(--accent);
+  background: rgba(0, 255, 156, 0.12);
+  color: var(--accent);
+  box-shadow:
+    0 0 14px rgba(0, 255, 156, 0.35),
+    inset 0 0 12px rgba(0, 255, 156, 0.08);
+  text-shadow: 0 0 6px rgba(0, 255, 156, 0.45);
+}
+
+[data-variation="b"] .badge-tog.is-on .badge-tog__check {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #001a10;
+  box-shadow: 0 0 10px var(--accent);
+}
+
+/* ============================================================
+   modal — CRT arcade
+   ============================================================ */
+
+[data-variation="b"] .info-link {
+  color: var(--accent);
+  border-color: var(--accent-soft);
+  text-shadow: 0 0 6px rgba(0, 255, 156, 0.35);
+}
+
+[data-variation="b"] .info-link:hover {
+  border-color: var(--accent);
+}
+
+[data-variation="b"] .modal-overlay {
+  background: rgba(0, 8, 5, 0.85);
+}
+
+[data-variation="b"] .modal-content {
+  background: #06100c;
+  border-color: var(--accent-soft);
+  box-shadow:
+    0 0 32px rgba(0, 255, 156, 0.25),
+    inset 0 0 36px rgba(0, 255, 156, 0.04);
+}
+
+[data-variation="b"] .modal-content::before,
+[data-variation="b"] .modal-content::after {
+  border-color: var(--accent);
+  opacity: 0.8;
+}
+
+[data-variation="b"] .modal-header {
+  background: #08160f;
+  border-bottom-color: var(--accent-soft);
+}
+
+[data-variation="b"] .modal-title__ar {
+  color: var(--accent);
+  text-shadow: 0 0 8px rgba(0, 255, 156, 0.4);
+}
+
+[data-variation="b"] .modal-title__en {
+  color: var(--accent-soft);
+}
+
+[data-variation="b"] .close-btn {
+  border-color: var(--accent-soft);
+  background: #04090a;
+  color: var(--accent-soft);
+}
+
+[data-variation="b"] .close-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 10px rgba(0, 255, 156, 0.35);
+}
+
+[data-variation="b"] .modal-section__title {
+  border-bottom-color: var(--accent-soft);
+}
+
+[data-variation="b"] .modal-section__title-ar {
+  color: var(--accent);
+  text-shadow: 0 0 6px rgba(0, 255, 156, 0.3);
+}
+
+/* legend — keep group colors but neon-ify backgrounds */
+[data-variation="b"] .legend-badge {
+  background: #04090a;
+  color: var(--ink);
+}
+
+/* category cards — phosphor frames */
+[data-variation="b"] .modal-item {
+  background: #04090a;
+  border-color: rgba(0, 255, 156, 0.18);
+}
+
+[data-variation="b"] .modal-item.theme-card {
+  border-inline-start-color: var(--grp-doctrinal);
+  box-shadow: inset 3px 0 12px rgba(180, 108, 255, 0.12);
+}
+
+[data-variation="b"] .modal-item.warning-card {
+  border-inline-start-color: var(--grp-moral);
+  box-shadow: inset 3px 0 12px rgba(255, 77, 106, 0.12);
+}
+
+[data-variation="b"] .modal-item.mechanic-card {
+  border-inline-start-color: var(--grp-behavior);
+  box-shadow: inset 3px 0 12px rgba(45, 212, 191, 0.12);
+}
+
+[data-variation="b"] .modal-item.theme-card:hover {
+  box-shadow:
+    inset 3px 0 16px rgba(180, 108, 255, 0.2),
+    0 0 16px rgba(180, 108, 255, 0.18);
+}
+
+[data-variation="b"] .modal-item.warning-card:hover {
+  box-shadow:
+    inset 3px 0 16px rgba(255, 77, 106, 0.2),
+    0 0 16px rgba(255, 77, 106, 0.18);
+}
+
+[data-variation="b"] .modal-item.mechanic-card:hover {
+  box-shadow:
+    inset 3px 0 16px rgba(45, 212, 191, 0.2),
+    0 0 16px rgba(45, 212, 191, 0.18);
+}
+
+[data-variation="b"] .modal-item__frame {
+  background: #02060a;
+  border-color: rgba(0, 255, 156, 0.15);
+}
+
+[data-variation="b"] .modal-item__icon[data-group="theme"]    { filter: drop-shadow(0 0 4px var(--grp-doctrinal)); }
+[data-variation="b"] .modal-item__icon[data-group="warning"]  { filter: drop-shadow(0 0 4px var(--grp-moral)); }
+[data-variation="b"] .modal-item__icon[data-group="mechanic"] { filter: drop-shadow(0 0 4px var(--grp-behavior)); }
+
+[data-variation="b"] .item-text strong {
+  color: var(--ink);
+}
+
+[data-variation="b"] .except-slash {
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent);
+}
+
+/* grades — neon glow per severity */
+[data-variation="b"] .grade-card {
+  background: #04090a;
+}
+
+[data-variation="b"] .grade-card.grade-sev-1 {
+  box-shadow:
+    0 0 18px rgba(255, 59, 59, 0.25),
+    inset 0 0 24px rgba(255, 59, 59, 0.05);
+}
+
+[data-variation="b"] .grade-card.grade-sev-2 {
+  box-shadow:
+    0 0 18px rgba(255, 138, 31, 0.25),
+    inset 0 0 24px rgba(255, 138, 31, 0.05);
+}
+
+[data-variation="b"] .grade-card.grade-sev-3 {
+  box-shadow:
+    0 0 18px rgba(255, 210, 58, 0.25),
+    inset 0 0 24px rgba(255, 210, 58, 0.05);
+}
+
+[data-variation="b"] .grade-badge {
+  text-shadow: 0 0 8px currentColor;
+  box-shadow: 0 0 10px currentColor;
+}
+
+[data-variation="b"] .grade-title__ar {
+  color: var(--ink);
+}

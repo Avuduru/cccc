@@ -1,0 +1,133 @@
+/* ============================================================
+   CCCC POLISH — header.css
+   Header card. Mirrors real classes: .card-header,
+   .header-content, .logo, .subtitle-en, .subtitle-ar.
+   Variation polish layered in variation-a.css / -b.css.
+   ============================================================ */
+
+.card-header {
+  border: 2px solid var(--line);
+  background: var(--bg-2);
+  padding: 28px 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* faint marquee corner bracket — pure CSS */
+.card-header::before,
+.card-header::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--ink-faint);
+  opacity: 0.5;
+}
+.card-header::before {
+  top: 8px; inset-inline-start: 8px;
+  border-inline-end: 0;
+  border-bottom: 0;
+}
+.card-header::after {
+  bottom: 8px; inset-inline-end: 8px;
+  border-inline-start: 0;
+  border-top: 0;
+}
+
+.header-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+}
+
+/* ---------- logo ---------- */
+.logo {
+  margin: 0;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  font-family: var(--font-pixel-en);
+  font-weight: 700;
+  font-size: 64px;
+  line-height: 1;
+  letter-spacing: 6px;
+  color: var(--ink);
+  position: relative;
+}
+
+.logo__char {
+  display: inline-block;
+  transition: transform 200ms ease, color 200ms ease,
+              text-shadow 200ms ease;
+}
+
+.logo:hover .logo__char:nth-child(1) { transform: translateY(-2px); }
+.logo:hover .logo__char:nth-child(2) { transform: translateY(-4px); }
+.logo:hover .logo__char:nth-child(3) { transform: translateY(-3px); }
+.logo:hover .logo__char:nth-child(4) { transform: translateY(-1px); }
+
+/* blinking arcade cursor */
+.logo__cursor {
+  display: inline-block;
+  width: 10px;
+  height: 56px;
+  margin-inline-start: 4px;
+  background: var(--ink);
+  animation: logo-blink 1s steps(1) infinite;
+  vertical-align: bottom;
+}
+
+@keyframes logo-blink {
+  0%, 50%   { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* ---------- subtitles ---------- */
+.subtitle-en {
+  margin: 4px 0 0;
+  font-family: var(--font-pixel-en);
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+.subtitle-ar {
+  margin: 0;
+  font-family: var(--font-pixel-ar);
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  color: var(--ink);
+}
+
+/* ---------- meta strip ---------- */
+.header-meta {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  background: var(--bg-0);
+  font-family: var(--font-pixel-en);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.header-meta__pip {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink-faint);
+  animation: meta-pulse 2s ease-in-out infinite;
+}
+
+@keyframes meta-pulse {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 1; }
+}
