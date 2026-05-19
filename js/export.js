@@ -80,6 +80,57 @@ function downloadLink(url, filename) {
     setTimeout(() => { if (document.body.contains(link)) document.body.removeChild(link); }, 2000);
 }
 
+// Renders the synopsis element to an Image via SVG <foreignObject>.
+// foreignObject routes through the browser's native layout+text engine
+// (WebKit on iOS), so Arabic letter shaping is applied correctly —
+// no fillText splitting, no bidi fragmentation, no isolated-character forms.
+function synopsisToSVGImage(synEl, w, h) {
+    const cs = window.getComputedStyle(synEl);
+    const raw = (synEl.innerText || synEl.textContent)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+    // Inline every style the synopsis needs so the SVG sandbox has them.
+    // The sandbox cannot load external resources (Google Fonts CDN), so we
+    // list Handjet first and fall back to system Arabic fonts which also
+    // shape correctly on iOS (Geeza Pro / .Arabic UI Text).
+    const style = [
+        `font-family:${cs.fontFamily}`,
+        `font-size:${cs.fontSize}`,
+        `font-weight:${cs.fontWeight}`,
+        `line-height:${cs.lineHeight}`,
+        `color:${cs.color}`,
+        `direction:rtl`,
+        `text-align:right`,
+        `unicode-bidi:embed`,
+        `white-space:pre-wrap`,
+        `word-wrap:break-word`,
+        `overflow:hidden`,
+        `width:${w}px`,
+        `height:${h}px`,
+        `padding:${cs.padding}`,
+        `box-sizing:border-box`,
+    ].join(';');
+
+    const svg = [
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">`,
+        `<foreignObject x="0" y="0" width="${w}" height="${h}">`,
+        `<div xmlns="http://www.w3.org/1999/xhtml" style="${style}">${raw}</div>`,
+        `</foreignObject></svg>`,
+    ].join('');
+
+    const url = URL.createObjectURL(
+        new Blob([svg], { type: 'image/svg+xml;charset=utf-8' })
+    );
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+        img.onerror = e => { URL.revokeObjectURL(url); reject(e); };
+        img.src = url;
+    });
+}
+
 // Shared render pipeline: clone → wait for fonts → html2canvas → compress
 async function renderToBlob(originalCanvas) {
     const isVertical = originalCanvas.classList.contains('vertical');
@@ -123,46 +174,23 @@ async function renderToBlob(originalCanvas) {
 
     rescaleSynopsisInClone(clone);
 
-    // iOS fix — root cause: html2canvas uses Range.getClientRects() to measure each
-    // text segment. On iOS, for RTL Arabic text, getClientRects() returns >1 rect
-    // whenever the range offset is > 0 within its text node. html2canvas interprets
-    // >1 rects as a line-wrap and falls back to per-grapheme segmentation — one
-    // fillText() per character — so each Arabic letter renders in isolated form.
-    //
-    // Words at offset=0 (first word of each text node) get exactly 1 rect → stay
-    // whole → correctly shaped. That's why the first word of every paragraph is
-    // correct: each paragraph lives in its own DOM container, so its first word is
-    // always at offset 0.
-    //
-    // Fix: wrap every word in its own <span> in the clone. Each span owns a fresh
-    // text node starting at offset 0. html2canvas processes each span's text node
-    // independently, getClientRects() returns 1 rect per word, every word stays
-    // whole, and CoreText shapes the letters correctly.
-    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+    // Capture synopsis position now (clone still in DOM, layout fully settled).
+    // Used after html2canvas for the iOS SVG overlay — must be read before h2c
+    // because h2c creates its own internal iframe clone and may reflow the DOM.
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    let iosSynData = null;
+    if (isIOS) {
         const synEl = clone.querySelector('#synopsis-text');
         if (synEl && /[؀-ۿ]/.test(synEl.textContent)) {
-            const raw = synEl.innerText || synEl.textContent;
-            synEl.innerHTML = '';
-            raw.split(/\n+/).forEach((para, i) => {
-                if (i > 0) {
-                    // Preserve paragraph spacing with a blank line
-                    synEl.appendChild(document.createElement('br'));
-                    synEl.appendChild(document.createElement('br'));
-                }
-                // Split "word space word space …" — keep spaces as bare text nodes
-                // so they don't affect layout, wrap each word in its own span so
-                // its text node starts at offset 0.
-                para.split(/(\s+)/).forEach(token => {
-                    if (!token) return;
-                    if (/^\s+$/.test(token)) {
-                        synEl.appendChild(document.createTextNode(token));
-                    } else {
-                        const s = document.createElement('span');
-                        s.textContent = token;
-                        synEl.appendChild(s);
-                    }
-                });
-            });
+            const cloneRect = clone.getBoundingClientRect();
+            const r = synEl.getBoundingClientRect();
+            iosSynData = {
+                el: synEl,
+                ex: Math.round(r.left - cloneRect.left),
+                ey: Math.round(r.top  - cloneRect.top),
+                ew: Math.round(r.width),
+                eh: Math.round(r.height),
+            };
         }
     }
 
@@ -176,6 +204,30 @@ async function renderToBlob(originalCanvas) {
         height: clone.offsetHeight,
         windowWidth: exportWidth
     });
+
+    // iOS: html2canvas's bidi text splitting renders Arabic in isolated/disconnected
+    // letter forms. Bypass it entirely for the synopsis by rendering it separately
+    // via SVG <foreignObject>, which routes through WebKit's native layout engine
+    // and applies correct Arabic contextual shaping, then compositing onto the canvas.
+    if (iosSynData) {
+        const { el, ex, ey, ew, eh } = iosSynData;
+        if (ew > 0 && eh > 0) {
+            try {
+                const synImg = await synopsisToSVGImage(el, ew, eh);
+                const ctx = canvas.getContext('2d');
+                // Erase the broken html2canvas Arabic and fill with the card's
+                // background so the SVG text renders on a clean surface.
+                const cardBg = getComputedStyle(document.documentElement)
+                    .getPropertyValue('--bg-card').trim() || '#5c5c5c';
+                ctx.fillStyle = cardBg;
+                ctx.fillRect(ex, ey, ew, eh);
+                ctx.drawImage(synImg, ex, ey, ew, eh);
+            } catch (e) {
+                // SVG render failed — leave html2canvas output rather than a blank area
+                console.warn('iOS synopsis SVG render failed:', e);
+            }
+        }
+    }
 
     document.body.removeChild(exportContainer);
     return compressToMaxSize(canvas);
