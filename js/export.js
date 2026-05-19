@@ -123,33 +123,38 @@ async function renderToBlob(originalCanvas) {
 
     rescaleSynopsisInClone(clone);
 
-    // html2canvas splits Arabic text character-by-character for its internal bidi
-    // layout pass, so each fillText() call receives one isolated character and
-    // the font shaping engine has nothing to join.
+    // iOS fix: html2canvas runs the Unicode Bidi Algorithm and splits long Arabic
+    // paragraphs at line-break boundaries, emitting one fillText() call per segment.
+    // On iOS/WKWebView (CoreText), each isolated fillText() renders characters in
+    // their disconnected/isolated form — Arabic joining is lost.
     //
-    // Fix: hide Arabic text elements with transparent color so html2canvas renders
-    // only the background behind them, then overlay the text ourselves with a
-    // single fillText() per word and ctx.direction='rtl' — iOS canvas then applies
-    // proper Arabic contextual shaping (letter joining).
-    const arabicRE = /[؀-ۿ]/;
-    const arabicEls = [];
-    clone.querySelectorAll('#synopsis-text, .classification-label, #title-text, .genre-label, .stats-pill')
-        .forEach(el => {
-            if (!arabicRE.test(el.textContent)) return;
-            const cs = window.getComputedStyle(el);
-            arabicEls.push({
-                el,
-                text: el.textContent.trim(),
-                font: `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`,
-                color: cs.color,
+    // Short elements (labels, pills, title) are single words, so html2canvas wraps
+    // them in one fillText() call each, which shapes correctly even on iOS. Only
+    // the multi-line synopsis paragraph breaks. Fix: hide just the synopsis from
+    // html2canvas via opacity:0, then redraw it ourselves — one fillText() per
+    // wrapped line — so CoreText receives full words and applies correct shaping.
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    let synRedraw = null;
+
+    if (isIOS) {
+        const synEl = clone.querySelector('#synopsis-text');
+        if (synEl && /[؀-ۿ]/.test(synEl.textContent)) {
+            const cs = window.getComputedStyle(synEl);
+            synRedraw = {
+                el: synEl,
+                text: synEl.textContent.trim(),
+                // cs.fontSize already includes the "px" unit
                 fontSize: parseFloat(cs.fontSize),
-                lineHeight: cs.lineHeight === 'normal'
-                    ? parseFloat(cs.fontSize) * 1.2
-                    : parseFloat(cs.lineHeight),
-            });
-            el.style.color = 'transparent';
-            el.style.webkitTextFillColor = 'transparent';
-        });
+                lineHeight: parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.15,
+                color: cs.color,
+                font: `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`,
+            };
+            // opacity:0 is reliably skipped by html2canvas (unlike color:transparent,
+            // which on some iOS builds still triggers fillText with transparent alpha
+            // and can bleed through our later redraw).
+            synEl.style.opacity = '0';
+        }
+    }
 
     const canvas = await html2canvas(clone, {
         backgroundColor: null,
@@ -162,18 +167,21 @@ async function renderToBlob(originalCanvas) {
         windowWidth: exportWidth
     });
 
-    // Redraw Arabic text directly on the canvas with RTL shaping
-    if (arabicEls.length) {
+    // Redraw the synopsis with RTL-aware fillText so CoreText shapes each line correctly
+    if (synRedraw) {
+        const { el, text, fontSize, lineHeight, color, font } = synRedraw;
         const ctx = canvas.getContext('2d');
-        const cRect = exportContainer.getBoundingClientRect();
-        for (const { el, text, font, color, fontSize, lineHeight } of arabicEls) {
-            const r = el.getBoundingClientRect();
-            const ex = r.left - cRect.left;
-            const ey = r.top  - cRect.top;
-            const ew = r.width;
-            const eh = r.height;
-            if (ew <= 0 || eh <= 0 || !text) continue;
+        // Reference: clone's own bounding rect — html2canvas captures clone's
+        // coordinate space, so child positions must be relative to clone, not the
+        // outer exportContainer (which may have a different origin on some iOS builds).
+        const cloneRect = clone.getBoundingClientRect();
+        const r = el.getBoundingClientRect();
+        const ex = r.left - cloneRect.left;
+        const ey = r.top  - cloneRect.top;
+        const ew = r.width;
+        const eh = r.height;
 
+        if (ew > 0 && eh > 0 && text) {
             ctx.save();
             ctx.beginPath();
             ctx.rect(ex, ey, ew, eh);
@@ -183,7 +191,7 @@ async function renderToBlob(originalCanvas) {
             ctx.font = font;
             ctx.fillStyle = color;
 
-            // Word-wrap RTL: measure whole words, break at element width
+            // Word-wrap: accumulate words until a line exceeds element width, then break
             const words = text.split(/\s+/).filter(Boolean);
             const lines = [];
             let cur = '';
