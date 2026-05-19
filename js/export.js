@@ -123,33 +123,48 @@ async function renderToBlob(originalCanvas) {
 
     rescaleSynopsisInClone(clone);
 
-    // html2canvas splits Arabic text character-by-character for its internal bidi
-    // layout pass, so each fillText() call receives one isolated character and
-    // the font shaping engine has nothing to join.
+    // iOS fix — root cause: html2canvas uses Range.getClientRects() to measure each
+    // text segment. On iOS, for RTL Arabic text, getClientRects() returns >1 rect
+    // whenever the range offset is > 0 within its text node. html2canvas interprets
+    // >1 rects as a line-wrap and falls back to per-grapheme segmentation — one
+    // fillText() per character — so each Arabic letter renders in isolated form.
     //
-    // Fix: hide Arabic text elements with transparent color so html2canvas renders
-    // only the background behind them, then overlay the text ourselves with a
-    // single fillText() per word and ctx.direction='rtl' — iOS canvas then applies
-    // proper Arabic contextual shaping (letter joining).
-    const arabicRE = /[؀-ۿ]/;
-    const arabicEls = [];
-    clone.querySelectorAll('#synopsis-text, .classification-label, #title-text, .genre-label, .stats-pill')
-        .forEach(el => {
-            if (!arabicRE.test(el.textContent)) return;
-            const cs = window.getComputedStyle(el);
-            arabicEls.push({
-                el,
-                text: el.textContent.trim(),
-                font: `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`,
-                color: cs.color,
-                fontSize: parseFloat(cs.fontSize),
-                lineHeight: cs.lineHeight === 'normal'
-                    ? parseFloat(cs.fontSize) * 1.2
-                    : parseFloat(cs.lineHeight),
+    // Words at offset=0 (first word of each text node) get exactly 1 rect → stay
+    // whole → correctly shaped. That's why the first word of every paragraph is
+    // correct: each paragraph lives in its own DOM container, so its first word is
+    // always at offset 0.
+    //
+    // Fix: wrap every word in its own <span> in the clone. Each span owns a fresh
+    // text node starting at offset 0. html2canvas processes each span's text node
+    // independently, getClientRects() returns 1 rect per word, every word stays
+    // whole, and CoreText shapes the letters correctly.
+    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        const synEl = clone.querySelector('#synopsis-text');
+        if (synEl && /[؀-ۿ]/.test(synEl.textContent)) {
+            const raw = synEl.innerText || synEl.textContent;
+            synEl.innerHTML = '';
+            raw.split(/\n+/).forEach((para, i) => {
+                if (i > 0) {
+                    // Preserve paragraph spacing with a blank line
+                    synEl.appendChild(document.createElement('br'));
+                    synEl.appendChild(document.createElement('br'));
+                }
+                // Split "word space word space …" — keep spaces as bare text nodes
+                // so they don't affect layout, wrap each word in its own span so
+                // its text node starts at offset 0.
+                para.split(/(\s+)/).forEach(token => {
+                    if (!token) return;
+                    if (/^\s+$/.test(token)) {
+                        synEl.appendChild(document.createTextNode(token));
+                    } else {
+                        const s = document.createElement('span');
+                        s.textContent = token;
+                        synEl.appendChild(s);
+                    }
+                });
             });
-            el.style.color = 'transparent';
-            el.style.webkitTextFillColor = 'transparent';
-        });
+        }
+    }
 
     const canvas = await html2canvas(clone, {
         backgroundColor: null,
@@ -161,51 +176,6 @@ async function renderToBlob(originalCanvas) {
         height: clone.offsetHeight,
         windowWidth: exportWidth
     });
-
-    // Redraw Arabic text directly on the canvas with RTL shaping
-    if (arabicEls.length) {
-        const ctx = canvas.getContext('2d');
-        const cRect = exportContainer.getBoundingClientRect();
-        for (const { el, text, font, color, fontSize, lineHeight } of arabicEls) {
-            const r = el.getBoundingClientRect();
-            const ex = r.left - cRect.left;
-            const ey = r.top  - cRect.top;
-            const ew = r.width;
-            const eh = r.height;
-            if (ew <= 0 || eh <= 0 || !text) continue;
-
-            ctx.save();
-            ctx.beginPath();
-            ctx.rect(ex, ey, ew, eh);
-            ctx.clip();
-            ctx.direction = 'rtl';
-            ctx.textAlign = 'right';
-            ctx.font = font;
-            ctx.fillStyle = color;
-
-            // Word-wrap RTL: measure whole words, break at element width
-            const words = text.split(/\s+/).filter(Boolean);
-            const lines = [];
-            let cur = '';
-            for (const word of words) {
-                const test = cur ? `${cur} ${word}` : word;
-                if (ctx.measureText(test).width <= ew) {
-                    cur = test;
-                } else {
-                    if (cur) lines.push(cur);
-                    cur = word;
-                }
-            }
-            if (cur) lines.push(cur);
-
-            const maxLines = Math.floor(eh / lineHeight);
-            lines.slice(0, maxLines).forEach((line, i) => {
-                ctx.fillText(line, ex + ew, ey + fontSize + i * lineHeight);
-            });
-
-            ctx.restore();
-        }
-    }
 
     document.body.removeChild(exportContainer);
     return compressToMaxSize(canvas);
