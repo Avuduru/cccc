@@ -1,5 +1,18 @@
 import { state } from './state.js';
 
+// Module-level: runs the instant export.js is imported.
+// If the export button shows "v4 تصديـر" without clicking anything,
+// this new module loaded successfully.
+(() => {
+    const mark = () => {
+        const btn = document.getElementById('export-btn');
+        const span = btn && btn.querySelector('span:last-child');
+        if (span) span.textContent = 'v4 تصديـر';
+    };
+    if (document.readyState !== 'loading') mark();
+    else document.addEventListener('DOMContentLoaded', mark);
+})();
+
 const MAX_EXPORT_BYTES = 2 * 1024 * 1024;
 
 function rescaleSynopsisInClone(clone) {
