@@ -210,16 +210,19 @@ async function renderToBlob(originalCanvas) {
         windowWidth: exportWidth
     });
 
-    // Debug stamp — unconditional on iOS, confirms new code (v3) is executing.
+    // Debug stamp — centered, massive, impossible to miss.
     // Remove once Arabic fix is verified working.
     if (isIOS) {
         const dbgCtx = canvas.getContext('2d');
         dbgCtx.save();
-        dbgCtx.font = 'bold 36px monospace';
-        dbgCtx.fillStyle = 'red';
-        dbgCtx.fillRect(0, canvas.height - 60, 160, 60);
+        const bh = Math.round(canvas.height * 0.25);
+        const by = Math.round(canvas.height * 0.375);
+        dbgCtx.fillStyle = 'rgba(255,0,0,0.9)';
+        dbgCtx.fillRect(0, by, canvas.width, bh);
         dbgCtx.fillStyle = 'white';
-        dbgCtx.fillText('v3-iOS', 8, canvas.height - 16);
+        dbgCtx.font = `bold ${Math.round(bh * 0.6)}px monospace`;
+        dbgCtx.textAlign = 'center';
+        dbgCtx.fillText('v3-iOS RUNNING', canvas.width / 2, by + bh * 0.7);
         dbgCtx.restore();
     }
 
