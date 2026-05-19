@@ -215,12 +215,11 @@ async function renderToBlob(originalCanvas) {
             try {
                 const synImg = await synopsisToSVGImage(el, ew, eh);
                 const ctx = canvas.getContext('2d');
-                // Erase the broken html2canvas Arabic and fill with the card's
-                // background so the SVG text renders on a clean surface.
-                const cardBg = getComputedStyle(document.documentElement)
-                    .getPropertyValue('--bg-card').trim() || '#5c5c5c';
-                ctx.fillStyle = cardBg;
-                ctx.fillRect(ex, ey, ew, eh);
+                // Draw the correctly-shaped SVG text directly on top of the
+                // html2canvas output. The connected Arabic glyphs are denser
+                // than the isolated h2c fragments, so they cover the artifacts.
+                // We do not clearRect because the card background (poster blur +
+                // overlay) was rendered by h2c and must be preserved.
                 ctx.drawImage(synImg, ex, ey, ew, eh);
             } catch (e) {
                 // SVG render failed — leave html2canvas output rather than a blank area
