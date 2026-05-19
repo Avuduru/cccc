@@ -277,6 +277,7 @@ async function renderToBlob(originalCanvas) {
 }
 
 export function handleExport() {
+    alert('v4 handleExport called'); // DEBUG — remove after confirmation
     const originalCanvas = document.getElementById('preview-canvas');
     const exportBtn = document.getElementById('export-btn');
     exportBtn.innerText = 'جاري التصدير...';
