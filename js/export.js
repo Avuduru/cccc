@@ -151,15 +151,14 @@ async function renderToBlob(originalCanvas) {
                 color: cs.color,
                 font: `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`,
             };
-            // data-html2canvas-ignore is html2canvas's own documented API for excluding
-            // elements from the render pass — the element is skipped at parse time,
-            // before any fillText() call is made. CSS-based hiding (opacity, color,
-            // visibility) all still enter the render pipeline and can produce phantom
-            // text fragments on iOS even when the computed value is transparent/hidden.
-            synEl.setAttribute('data-html2canvas-ignore', '');
         }
     }
 
+    // ignoreElements is html2canvas's programmatic skip API — the callback fires
+    // during DOM traversal and returning true drops the element + its entire subtree
+    // before any fillText() is attempted. Attribute/CSS tricks (data-html2canvas-ignore,
+    // opacity:0, color:transparent) still enter the render pipeline on iOS and produce
+    // the same broken bidi-split output.
     const canvas = await html2canvas(clone, {
         backgroundColor: null,
         scale: 1,
@@ -168,7 +167,8 @@ async function renderToBlob(originalCanvas) {
         logging: false,
         width: exportWidth,
         height: clone.offsetHeight,
-        windowWidth: exportWidth
+        windowWidth: exportWidth,
+        ignoreElements: synRedraw ? (el) => el === synRedraw.el : undefined
     });
 
     // Redraw the synopsis with RTL-aware fillText so CoreText shapes each line correctly
