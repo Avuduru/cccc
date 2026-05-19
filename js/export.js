@@ -215,19 +215,22 @@ async function renderToBlob(originalCanvas) {
     // via SVG <foreignObject>, which routes through WebKit's native layout engine
     // and applies correct Arabic contextual shaping, then compositing onto the canvas.
     if (iosSynData) {
+        // Debug stamp: if this text appears in the bottom-left of the export,
+        // the new code (v3) is confirmed running on this device.
+        const dbgCtx = canvas.getContext('2d');
+        dbgCtx.save();
+        dbgCtx.font = 'bold 28px monospace';
+        dbgCtx.fillStyle = 'rgba(255,0,0,0.85)';
+        dbgCtx.fillText('v3-iOS', 12, canvas.height - 12);
+        dbgCtx.restore();
+
         const { el, ex, ey, ew, eh } = iosSynData;
         if (ew > 0 && eh > 0) {
             try {
                 const synImg = await synopsisToSVGImage(el, ew, eh);
                 const ctx = canvas.getContext('2d');
-                // Draw the correctly-shaped SVG text directly on top of the
-                // html2canvas output. The connected Arabic glyphs are denser
-                // than the isolated h2c fragments, so they cover the artifacts.
-                // We do not clearRect because the card background (poster blur +
-                // overlay) was rendered by h2c and must be preserved.
                 ctx.drawImage(synImg, ex, ey, ew, eh);
             } catch (e) {
-                // SVG render failed — leave html2canvas output rather than a blank area
                 console.warn('iOS synopsis SVG render failed:', e);
             }
         }
