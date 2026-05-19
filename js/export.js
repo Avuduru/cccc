@@ -142,17 +142,21 @@ async function renderToBlob(originalCanvas) {
             const cs = window.getComputedStyle(synEl);
             synRedraw = {
                 el: synEl,
-                text: synEl.textContent.trim(),
-                // cs.fontSize already includes the "px" unit
+                // innerText preserves paragraph line-breaks (\n) from the contenteditable
+                // div; textContent does too for programmatically-set text, but innerText
+                // is safer for any browser-inserted <br>/<div> paragraph elements.
+                text: synEl.innerText || synEl.textContent,
                 fontSize: parseFloat(cs.fontSize),
                 lineHeight: parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.15,
                 color: cs.color,
                 font: `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`,
             };
-            // opacity:0 is reliably skipped by html2canvas (unlike color:transparent,
-            // which on some iOS builds still triggers fillText with transparent alpha
-            // and can bleed through our later redraw).
-            synEl.style.opacity = '0';
+            // data-html2canvas-ignore is html2canvas's own documented API for excluding
+            // elements from the render pass — the element is skipped at parse time,
+            // before any fillText() call is made. CSS-based hiding (opacity, color,
+            // visibility) all still enter the render pipeline and can produce phantom
+            // text fragments on iOS even when the computed value is transparent/hidden.
+            synEl.setAttribute('data-html2canvas-ignore', '');
         }
     }
 
@@ -181,7 +185,7 @@ async function renderToBlob(originalCanvas) {
         const ew = r.width;
         const eh = r.height;
 
-        if (ew > 0 && eh > 0 && text) {
+        if (ew > 0 && eh > 0 && text.trim()) {
             ctx.save();
             ctx.beginPath();
             ctx.rect(ex, ey, ew, eh);
@@ -191,25 +195,36 @@ async function renderToBlob(originalCanvas) {
             ctx.font = font;
             ctx.fillStyle = color;
 
-            // Word-wrap: accumulate words until a line exceeds element width, then break
-            const words = text.split(/\s+/).filter(Boolean);
-            const lines = [];
-            let cur = '';
-            for (const word of words) {
-                const test = cur ? `${cur} ${word}` : word;
-                if (ctx.measureText(test).width <= ew) {
-                    cur = test;
-                } else {
-                    if (cur) lines.push(cur);
-                    cur = word;
-                }
-            }
-            if (cur) lines.push(cur);
+            // Split on paragraph breaks first so inter-paragraph spacing is preserved.
+            // innerText uses \n for paragraph/line separators in contenteditable divs.
+            const paragraphs = text.split(/\n+/).map(p => p.trim()).filter(Boolean);
+            let curY = ey + fontSize;   // current baseline position
+            const maxY = ey + eh;       // clipped bottom edge
 
-            const maxLines = Math.floor(eh / lineHeight);
-            lines.slice(0, maxLines).forEach((line, i) => {
-                ctx.fillText(line, ex + ew, ey + fontSize + i * lineHeight);
-            });
+            for (const para of paragraphs) {
+                if (curY > maxY) break;
+                // Word-wrap each paragraph independently
+                const words = para.split(/\s+/).filter(Boolean);
+                const lines = [];
+                let cur = '';
+                for (const word of words) {
+                    const test = cur ? `${cur} ${word}` : word;
+                    if (ctx.measureText(test).width <= ew) {
+                        cur = test;
+                    } else {
+                        if (cur) lines.push(cur);
+                        cur = word;
+                    }
+                }
+                if (cur) lines.push(cur);
+
+                for (const line of lines) {
+                    if (curY > maxY) break;
+                    ctx.fillText(line, ex + ew, curY);
+                    curY += lineHeight;
+                }
+                curY += lineHeight * 0.5; // half-line gap between paragraphs
+            }
 
             ctx.restore();
         }
