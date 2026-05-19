@@ -179,6 +179,21 @@ async function renderToBlob(originalCanvas) {
 
     rescaleSynopsisInClone(clone);
 
+    // DEBUG: inject a giant red banner into the clone BEFORE html2canvas runs.
+    // If this appears in the export, html2canvas is using our clone correctly.
+    // If it doesn't appear, html2canvas is rendering something else entirely.
+    const debugBanner = document.createElement('div');
+    debugBanner.style.cssText = [
+        'position:absolute', 'top:35%', 'left:0', 'right:0', 'height:30%',
+        'background:red', 'z-index:99999', 'display:flex',
+        'align-items:center', 'justify-content:center',
+        'color:white', 'font-size:80px', 'font-family:monospace',
+        'font-weight:bold', 'pointer-events:none'
+    ].join(';');
+    debugBanner.textContent = 'v3 DEBUG';
+    clone.style.position = 'relative';
+    clone.appendChild(debugBanner);
+
     // Capture synopsis position now (clone still in DOM, layout fully settled).
     // Used after html2canvas for the iOS SVG overlay — must be read before h2c
     // because h2c creates its own internal iframe clone and may reflow the DOM.
