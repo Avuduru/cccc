@@ -91,12 +91,16 @@ function synopsisToSVGImage(synEl, w, h) {
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
 
-    // Inline every style the synopsis needs so the SVG sandbox has them.
-    // The sandbox cannot load external resources (Google Fonts CDN), so we
-    // list Handjet first and fall back to system Arabic fonts which also
-    // shape correctly on iOS (Geeza Pro / .Arabic UI Text).
+    // SVG images loaded via blob: URLs do not render <foreignObject> content
+    // on iOS Safari — the image loads but the foreignObject is silently empty.
+    // Use a data URI instead; iOS Safari renders foreignObject correctly that way.
+    //
+    // The SVG sandbox cannot load external resources (Google Fonts CDN), so
+    // Handjet will not be available. Use guaranteed iOS system Arabic fonts
+    // (Geeza Pro, .Arabic UI Text) — they shape Arabic correctly and ensure
+    // the text is actually visible rather than silently transparent.
     const style = [
-        `font-family:${cs.fontFamily}`,
+        `font-family:"Geeza Pro",".Arabic UI Text","Arabic UI Text",sans-serif`,
         `font-size:${cs.fontSize}`,
         `font-weight:${cs.fontWeight}`,
         `line-height:${cs.lineHeight}`,
@@ -120,14 +124,15 @@ function synopsisToSVGImage(synEl, w, h) {
         `</foreignObject></svg>`,
     ].join('');
 
-    const url = URL.createObjectURL(
-        new Blob([svg], { type: 'image/svg+xml;charset=utf-8' })
-    );
+    // Encode to data URI: btoa() only handles Latin-1, so encode the UTF-8
+    // SVG string (which contains Arabic) via encodeURIComponent first.
+    const dataURI = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+
     return new Promise((resolve, reject) => {
         const img = new Image();
-        img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
-        img.onerror = e => { URL.revokeObjectURL(url); reject(e); };
-        img.src = url;
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = dataURI;
     });
 }
 
