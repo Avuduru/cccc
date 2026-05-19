@@ -210,19 +210,24 @@ async function renderToBlob(originalCanvas) {
         windowWidth: exportWidth
     });
 
+    // Debug stamp — unconditional on iOS, confirms new code (v3) is executing.
+    // Remove once Arabic fix is verified working.
+    if (isIOS) {
+        const dbgCtx = canvas.getContext('2d');
+        dbgCtx.save();
+        dbgCtx.font = 'bold 36px monospace';
+        dbgCtx.fillStyle = 'red';
+        dbgCtx.fillRect(0, canvas.height - 60, 160, 60);
+        dbgCtx.fillStyle = 'white';
+        dbgCtx.fillText('v3-iOS', 8, canvas.height - 16);
+        dbgCtx.restore();
+    }
+
     // iOS: html2canvas's bidi text splitting renders Arabic in isolated/disconnected
     // letter forms. Bypass it entirely for the synopsis by rendering it separately
     // via SVG <foreignObject>, which routes through WebKit's native layout engine
     // and applies correct Arabic contextual shaping, then compositing onto the canvas.
     if (iosSynData) {
-        // Debug stamp: if this text appears in the bottom-left of the export,
-        // the new code (v3) is confirmed running on this device.
-        const dbgCtx = canvas.getContext('2d');
-        dbgCtx.save();
-        dbgCtx.font = 'bold 28px monospace';
-        dbgCtx.fillStyle = 'rgba(255,0,0,0.85)';
-        dbgCtx.fillText('v3-iOS', 12, canvas.height - 12);
-        dbgCtx.restore();
 
         const { el, ex, ey, ew, eh } = iosSynData;
         if (ew > 0 && eh > 0) {
