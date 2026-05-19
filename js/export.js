@@ -154,11 +154,16 @@ async function renderToBlob(originalCanvas) {
         }
     }
 
-    // ignoreElements is html2canvas's programmatic skip API — the callback fires
-    // during DOM traversal and returning true drops the element + its entire subtree
-    // before any fillText() is attempted. Attribute/CSS tricks (data-html2canvas-ignore,
-    // opacity:0, color:transparent) still enter the render pipeline on iOS and produce
-    // the same broken bidi-split output.
+    // html2canvas creates a full document clone placed in an iframe before rendering.
+    // ignoreElements and data-html2canvas-ignore both fail because they compare against
+    // our off-screen clone's element references, but html2canvas calls them with elements
+    // from its *own internal clone* — different JS objects, so reference equality is
+    // always false and the synopsis is never excluded.
+    //
+    // onclone fires after html2canvas has fully built its internal clone but before
+    // rendering starts. The second argument is the cloned target element itself, giving
+    // us direct access. Clearing innerHTML there guarantees html2canvas has no text to
+    // render in the synopsis area regardless of any CSS or attribute on our clone.
     const canvas = await html2canvas(clone, {
         backgroundColor: null,
         scale: 1,
@@ -168,7 +173,12 @@ async function renderToBlob(originalCanvas) {
         width: exportWidth,
         height: clone.offsetHeight,
         windowWidth: exportWidth,
-        ignoreElements: synRedraw ? (el) => el === synRedraw.el : undefined
+        onclone: synRedraw
+            ? (_doc, clonedEl) => {
+                const syn = clonedEl.querySelector('#synopsis-text');
+                if (syn) syn.innerHTML = '';
+              }
+            : undefined
     });
 
     // Redraw the synopsis with RTL-aware fillText so CoreText shapes each line correctly
