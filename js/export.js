@@ -2,6 +2,30 @@ import { state } from './state.js';
 
 const MAX_EXPORT_BYTES = 2 * 1024 * 1024;
 
+// Horizontal export: html2canvas can't render -webkit-box (line-clamp), so the
+// export CSS switches h2 to display:block which loses the "...". Re-add it by
+// binary-searching the longest prefix that fits within 2-line height.
+function truncateLongTitle(clone, isVertical) {
+    if (isVertical) return; // vertical uses CSS single-line-clamp + max-width
+    const h2 = clone.querySelector('#title-text');
+    if (!h2 || !h2.innerText.trim()) return;
+
+    const fontSize = parseFloat(getComputedStyle(h2).fontSize);
+    const maxH = fontSize * 2.2; // matches .export-mode .header-info h2 max-height:2.2em
+
+    if (h2.scrollHeight <= maxH) return; // already fits
+
+    const original = h2.innerText;
+    let lo = 0, hi = original.length;
+    while (hi - lo > 1) {
+        const mid = (lo + hi) >> 1;
+        h2.innerText = original.slice(0, mid).trimEnd() + '…';
+        if (h2.scrollHeight <= maxH) lo = mid;
+        else hi = mid;
+    }
+    h2.innerText = original.slice(0, lo).trimEnd() + '…';
+}
+
 function rescaleSynopsisInClone(clone) {
     if (state.synopsisSize && state.synopsisSize !== 'auto') return;
     const el = clone.querySelector('#synopsis-text');
@@ -121,6 +145,7 @@ async function renderToBlob(originalCanvas) {
     // Extra buffer for slower iOS devices
     await new Promise(r => setTimeout(r, 300));
 
+    truncateLongTitle(clone, isVertical);
     rescaleSynopsisInClone(clone);
 
     // iOS: WebKit returns phantom extra rects from Range.getClientRects() for

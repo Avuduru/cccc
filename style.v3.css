@@ -1242,12 +1242,16 @@ body {
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     display: block !important;
+    max-width: 100% !important;
     -webkit-line-clamp: unset !important;
     line-clamp: unset !important;
     -webkit-box-orient: unset !important;
 }
 .export-mode .header-info h2.single-line-clamp {
     white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
     max-height: 1.1em !important;
 }
 .vertical .genre-label { display: flex !important; }
