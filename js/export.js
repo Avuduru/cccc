@@ -154,8 +154,7 @@ async function renderToBlob(originalCanvas) {
             FrameRange.prototype.getClientRects = function () {
                 const rects = orig.call(this);
                 if (rects.length > 1 && /[؀-ۿ]/.test(this.toString())) {
-                    const br = this.getBoundingClientRect();
-                    return { length: 1, 0: br, item: (i) => i === 0 ? br : null };
+                    return { length: 1, 0: rects[0], item: (i) => i === 0 ? rects[0] : null };
                 }
                 return rects;
             };
