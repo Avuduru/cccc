@@ -714,12 +714,10 @@ export function adjustTitleSize() {
 
     // Reset all scaling
     el.removeAttribute('data-length');
-    el.classList.remove('title-scale-1', 'title-scale-2', 'title-scale-3', 'single-line-clamp');
+    el.classList.remove('title-scale-1', 'title-scale-2', 'title-scale-3');
 
     if (isVertical) {
-        // Vertical: auto-fit to single line, ellipsis fallback for >5 words
-        const wordCount = el.innerText.trim().split(/\s+/).length;
-        fitVerticalTitle(el, wordCount);
+        fitVerticalTitle(el);
     } else {
         // Horizontal: character-count based scaling (unchanged)
         const t = { med: 20, long: 40, xl: 60 };
@@ -729,31 +727,25 @@ export function adjustTitleSize() {
     }
 }
 
-function fitVerticalTitle(el, wordCount) {
+function fitVerticalTitle(el) {
     const scales = ['title-scale-1', 'title-scale-2', 'title-scale-3'];
 
-    function fitsOneLine() {
-        const fontSize = parseFloat(getComputedStyle(el).fontSize);
-        return el.scrollHeight <= fontSize * 1.5; // ~1 line with tolerance
+    function fitsTwoLines() {
+        return el.scrollHeight <= el.clientHeight + 2; // +2 for sub-pixel tolerance
     }
 
     // Check at base size
-    if (fitsOneLine()) return;
+    if (fitsTwoLines()) return;
 
     // Try each progressively smaller scale
     for (const scale of scales) {
         el.classList.add(scale);
-        if (fitsOneLine()) return;
+        if (fitsTwoLines()) return;
         el.classList.remove(scale);
     }
 
-    // Still doesn't fit — keep smallest scale
+    // Still doesn't fit — keep smallest scale, CSS -webkit-line-clamp: 2 clips the rest
     el.classList.add(scales[scales.length - 1]);
-
-    // If >5 words, clamp to 1 line with ellipsis
-    if (wordCount > 5) {
-        el.classList.add('single-line-clamp');
-    }
 }
 
 export function updateDisplayedInfo() {

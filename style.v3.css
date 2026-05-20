@@ -1218,6 +1218,8 @@ body {
     text-align: center;
     z-index: 10;
     margin: 0 !important;
+    padding: 0 5%;
+    box-sizing: border-box;
 }
 .vertical .classification-label { width: 100%; text-align: center !important; }
 .vertical .header-info h2 {
@@ -1237,25 +1239,6 @@ body {
 .vertical .header-info h2.title-scale-1 { font-size: calc(var(--canvas-v-title-size) * 0.75) !important; }
 .vertical .header-info h2.title-scale-2 { font-size: calc(var(--canvas-v-title-size) * 0.6) !important; }
 .vertical .header-info h2.title-scale-3 { font-size: calc(var(--canvas-v-title-size) * 0.5) !important; }
-.vertical .header-info h2.single-line-clamp {
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    display: block !important;
-    max-width: 100% !important;
-    text-align: start !important;
-    -webkit-line-clamp: unset !important;
-    line-clamp: unset !important;
-    -webkit-box-orient: unset !important;
-}
-.export-mode .header-info h2.single-line-clamp {
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    max-width: 100% !important;
-    text-align: start !important;
-    max-height: 1.1em !important;
-}
 .vertical .genre-label { display: flex !important; }
 .vertical .synopsis-wrapper {
     position: absolute !important;
@@ -1791,6 +1774,10 @@ body {
     overflow: hidden !important;
     max-height: 2.2em !important;
     margin-bottom: 8px !important;
+}
+.export-mode.vertical .header-info {
+    padding: 0 60px !important;
+    box-sizing: border-box !important;
 }
 .export-mode #synopsis-text {
     display: block !important;

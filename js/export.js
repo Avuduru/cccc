@@ -2,11 +2,10 @@ import { state } from './state.js';
 
 const MAX_EXPORT_BYTES = 2 * 1024 * 1024;
 
-// Horizontal export: html2canvas can't render -webkit-box (line-clamp), so the
-// export CSS switches h2 to display:block which loses the "...". Re-add it by
-// binary-searching the longest prefix that fits within 2-line height.
-function truncateLongTitle(clone, isVertical) {
-    if (isVertical) return; // vertical uses CSS single-line-clamp + max-width
+// html2canvas can't render -webkit-box (line-clamp), so export CSS switches h2
+// to display:block which loses the "...". Re-add it by binary-searching the
+// longest prefix that fits within 2-line height. Applies to both orientations.
+function truncateLongTitle(clone) {
     const h2 = clone.querySelector('#title-text');
     if (!h2 || !h2.innerText.trim()) return;
 
@@ -145,7 +144,7 @@ async function renderToBlob(originalCanvas) {
     // Extra buffer for slower iOS devices
     await new Promise(r => setTimeout(r, 300));
 
-    truncateLongTitle(clone, isVertical);
+    truncateLongTitle(clone);
     rescaleSynopsisInClone(clone);
 
     // iOS: WebKit returns phantom extra rects from Range.getClientRects() for
