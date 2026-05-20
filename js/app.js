@@ -1,4 +1,4 @@
-import { initUI, updatePreview, renderControls, drawBlurredBackground, updateDisplayedInfo, adjustTitleSize } from './ui.js';
+import { initUI, updatePreview, renderControls, drawBlurredBackground, updateDisplayedInfo, adjustTitleSize, reAdjustLayout } from './ui.js';
 import { handleSearch } from './api.js';
 import { handleExport, handleCopyToClipboard } from './export.js';
 import { debounce } from './utils.js';
@@ -160,6 +160,11 @@ function setupEventListeners() {
             renderControls();
             updatePreview();
             updateDisplayedInfo();
+
+            // Re-run layout measurements after the browser has had a full render
+            // cycle in the new orientation — fixes timing issues with container
+            // query recalculation when switching between orientations.
+            requestAnimationFrame(() => requestAnimationFrame(() => reAdjustLayout()));
 
             // Enable/Disable Drag based on orientation
             // User requested to remove ability to move elements in vertical mode (Step 721)

@@ -391,6 +391,11 @@ export function updatePreview() {
     });
 }
 
+export function reAdjustLayout() {
+    adjustTitleSize();
+    fitSynopsisToContainer();
+}
+
 // New Helper: Shrink text until it fits container
 // New Helper: Shrink text until it fits container
 function fitSynopsisToContainer() {
