@@ -386,6 +386,7 @@ export function updatePreview() {
     // DYNAMIC SYNOPSIS SCALING (Overflow/Fit-to-Box)
     // We defer this slightly to allow DOM reflow
     requestAnimationFrame(() => {
+        adjustTitleSize();
         fitSynopsisToContainer();
     });
 }

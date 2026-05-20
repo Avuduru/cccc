@@ -159,6 +159,7 @@ function setupEventListeners() {
             state.orientation = btn.dataset.value;
             renderControls();
             updatePreview();
+            updateDisplayedInfo();
 
             // Enable/Disable Drag based on orientation
             // User requested to remove ability to move elements in vertical mode (Step 721)
