@@ -80,8 +80,6 @@ function downloadLink(url, filename) {
     setTimeout(() => { if (document.body.contains(link)) document.body.removeChild(link); }, 2000);
 }
 
-// Renders the synopsis element to an Image via SVG <foreignObject>.
-
 // Shared render pipeline: clone → wait for fonts → html2canvas → compress
 async function renderToBlob(originalCanvas) {
     const isVertical = originalCanvas.classList.contains('vertical');
@@ -125,17 +123,17 @@ async function renderToBlob(originalCanvas) {
 
     rescaleSynopsisInClone(clone);
 
-    // iOS fix — two independent layers targeting the two known triggers:
+    // iOS fix: on WebKit, Range.getClientRects() returns phantom extra rects for
+    // Arabic text at non-zero offsets within a text node. html2canvas treats >1
+    // rects as a line-wrap and falls back to per-grapheme rendering — one fillText
+    // per character — so each Arabic letter renders in isolated (disconnected) form.
     //
-    // 1. letter-spacing:0 in CSS ensures html2canvas reads a numeric 0 (not the
-    //    keyword "normal") so it takes the word-level segmentation path.
-    //
-    // 2. Range.getClientRects() on iOS WebKit returns >1 rect for Arabic text at
-    //    non-zero offsets within a text node, which html2canvas misreads as a line
-    //    break and falls back to per-grapheme rendering (isolated letter forms).
-    //    Patching getClientRects inside h2c's iframe via onclone forces it to return
-    //    a single bounding rect for Arabic ranges, keeping html2canvas on the
-    //    word-level path where CoreText receives full context and shapes correctly.
+    // Fix (two layers):
+    // 1. letter-spacing:0 on #synopsis-text (CSS) ensures h2c reads a numeric 0,
+    //    not the keyword "normal", keeping it on the word-level segmentation path.
+    // 2. Patch Range.getClientRects inside h2c's iframe via onclone: return only
+    //    the first non-zero-width rect for Arabic ranges, suppressing the phantoms
+    //    without distorting the word's actual RTL position.
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
     const canvas = await html2canvas(clone, {
@@ -154,7 +152,9 @@ async function renderToBlob(originalCanvas) {
             FrameRange.prototype.getClientRects = function () {
                 const rects = orig.call(this);
                 if (rects.length > 1 && /[؀-ۿ]/.test(this.toString())) {
-                    return { length: 1, 0: rects[0], item: (i) => i === 0 ? rects[0] : null };
+                    // rects[0] may be a zero-width phantom; find the first real rect
+                    const real = Array.from(rects).find(r => r.width > 0) || rects[0];
+                    return { length: 1, 0: real, item: (i) => i === 0 ? real : null };
                 }
                 return rects;
             };
@@ -171,9 +171,8 @@ export function handleExport() {
     exportBtn.innerText = 'جاري التصدير...';
 
     // Opening window.open('','_blank') before renderToBlob suspends the original
-    // tab on iOS, freezing the async render. Fix: run renderToBlob first (original
-    // tab stays active), then open the result. iOS 16+ maintains user-gesture trust
-    // through async promise chains, so window.open still works in .then().
+    // tab on iOS, freezing the async render mid-execution. Run renderToBlob first
+    // (original tab stays active), then open the result URL directly.
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
     renderToBlob(originalCanvas)
@@ -184,13 +183,8 @@ export function handleExport() {
             const url = URL.createObjectURL(blob);
 
             if (isIOS) {
-                // Open the image directly in a new tab. On iOS the user can then
-                // long-press → Save Image, or use the Share button → Save to Photos.
                 const tab = window.open(url, '_blank');
-                if (!tab) {
-                    // Popup blocked — navigate current tab to the image instead
-                    window.location.href = url;
-                }
+                if (!tab) window.location.href = url;
                 logClassification('export');
 
             } else if (navigator.share && navigator.canShare) {
