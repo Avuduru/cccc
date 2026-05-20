@@ -1,9 +1,0 @@
-{
-    "name": "avuduru/cccc",
-    "description": "CCCC Rating App",
-    "require": {
-        "php": ">=7.4",
-        "ext-pdo": "*",
-        "ext-pdo_mysql": "*"
-    }
-}
