@@ -123,17 +123,12 @@ async function renderToBlob(originalCanvas) {
 
     rescaleSynopsisInClone(clone);
 
-    // iOS fix: on WebKit, Range.getClientRects() returns phantom extra rects for
-    // Arabic text at non-zero offsets within a text node. html2canvas treats >1
-    // rects as a line-wrap and falls back to per-grapheme rendering — one fillText
-    // per character — so each Arabic letter renders in isolated (disconnected) form.
-    //
-    // Fix (two layers):
-    // 1. letter-spacing:0 on #synopsis-text (CSS) ensures h2c reads a numeric 0,
-    //    not the keyword "normal", keeping it on the word-level segmentation path.
-    // 2. Patch Range.getClientRects inside h2c's iframe via onclone: return only
-    //    the first non-zero-width rect for Arabic ranges, suppressing the phantoms
-    //    without distorting the word's actual RTL position.
+    // iOS: WebKit returns phantom extra rects from Range.getClientRects() for
+    // Arabic text at non-zero offsets within a text node. html2canvas treats
+    // >1 rects as a line-wrap and falls back to per-grapheme rendering — one
+    // fillText() per character — so each letter renders in isolated form.
+    // Patch getClientRects inside h2c's iframe via onclone: return only the
+    // first non-zero-width rect (the real word position), suppressing phantoms.
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
     const canvas = await html2canvas(clone, {
@@ -152,7 +147,6 @@ async function renderToBlob(originalCanvas) {
             FrameRange.prototype.getClientRects = function () {
                 const rects = orig.call(this);
                 if (rects.length > 1 && /[؀-ۿ]/.test(this.toString())) {
-                    // rects[0] may be a zero-width phantom; find the first real rect
                     const real = Array.from(rects).find(r => r.width > 0) || rects[0];
                     return { length: 1, 0: real, item: (i) => i === 0 ? real : null };
                 }
@@ -170,9 +164,10 @@ export function handleExport() {
     const exportBtn = document.getElementById('export-btn');
     exportBtn.innerText = 'جاري التصدير...';
 
+    // iOS: navigator.share({ files }) triggers the document share sheet, which
     // Opening window.open('','_blank') before renderToBlob suspends the original
-    // tab on iOS, freezing the async render mid-execution. Run renderToBlob first
-    // (original tab stays active), then open the result URL directly.
+    // tab on iOS, freezing the async render. Run renderToBlob first, then open
+    // the result URL directly in a new tab.
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
     renderToBlob(originalCanvas)

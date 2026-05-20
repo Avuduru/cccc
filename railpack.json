@@ -1,7 +1,5 @@
 {
-  "providers": {
-    "php": {
-      "version": "8.1"
-    }
+  "packages": {
+    "php": "8.2"
   }
 }
