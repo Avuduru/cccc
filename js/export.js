@@ -125,35 +125,18 @@ async function renderToBlob(originalCanvas) {
 
     rescaleSynopsisInClone(clone);
 
-    // iOS: html2canvas fragments Arabic text during its bidi layout pass, rendering
-    // each character in isolated form (no letter joining). Fix: use onclone to set
-    // visibility:hidden on the synopsis in h2c's internal document clone — this makes
-    // h2c skip rendering the text while preserving layout and background. After h2c
-    // completes, redraw the synopsis ourselves with one ctx.fillText() call per line
-    // so CoreText receives full-word context and applies correct Arabic shaping.
+    // iOS fix — two independent layers targeting the two known triggers:
+    //
+    // 1. letter-spacing:0 in CSS ensures html2canvas reads a numeric 0 (not the
+    //    keyword "normal") so it takes the word-level segmentation path.
+    //
+    // 2. Range.getClientRects() on iOS WebKit returns >1 rect for Arabic text at
+    //    non-zero offsets within a text node, which html2canvas misreads as a line
+    //    break and falls back to per-grapheme rendering (isolated letter forms).
+    //    Patching getClientRects inside h2c's iframe via onclone forces it to return
+    //    a single bounding rect for Arabic ranges, keeping html2canvas on the
+    //    word-level path where CoreText receives full context and shapes correctly.
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-    let iosSyn = null;
-
-    if (isIOS) {
-        const synEl = clone.querySelector('#synopsis-text');
-        if (synEl && /[؀-ۿ]/.test(synEl.textContent)) {
-            const cs = window.getComputedStyle(synEl);
-            const cloneRect = clone.getBoundingClientRect();
-            const r = synEl.getBoundingClientRect();
-            iosSyn = {
-                el:         synEl,
-                text:       synEl.innerText || synEl.textContent,
-                ex:         Math.round(r.left - cloneRect.left),
-                ey:         Math.round(r.top  - cloneRect.top),
-                ew:         Math.round(r.width),
-                eh:         Math.round(r.height),
-                fontSize:   parseFloat(cs.fontSize),
-                lineHeight: parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.15,
-                color:      cs.color,
-                font:       `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`,
-            };
-        }
-    }
 
     const canvas = await html2canvas(clone, {
         backgroundColor: null,
@@ -164,53 +147,20 @@ async function renderToBlob(originalCanvas) {
         width: exportWidth,
         height: clone.offsetHeight,
         windowWidth: exportWidth,
-        onclone: iosSyn ? (_doc, clonedEl) => {
-            const syn = clonedEl.querySelector('#synopsis-text');
-            if (syn) syn.style.visibility = 'hidden';
+        onclone: isIOS ? (_doc) => {
+            const FrameRange = _doc.defaultView && _doc.defaultView.Range;
+            if (!FrameRange) return;
+            const orig = FrameRange.prototype.getClientRects;
+            FrameRange.prototype.getClientRects = function () {
+                const rects = orig.call(this);
+                if (rects.length > 1 && /[؀-ۿ]/.test(this.toString())) {
+                    const br = this.getBoundingClientRect();
+                    return { length: 1, 0: br, item: (i) => i === 0 ? br : null };
+                }
+                return rects;
+            };
         } : undefined,
     });
-
-    if (iosSyn) {
-        const { text, ex, ey, ew, eh, fontSize, lineHeight, color, font } = iosSyn;
-        const ctx = canvas.getContext('2d');
-        ctx.save();
-        ctx.beginPath();
-        ctx.rect(ex, ey, ew, eh);
-        ctx.clip();
-        ctx.direction = 'rtl';
-        ctx.textAlign = 'right';
-        ctx.font = font;
-        ctx.fillStyle = color;
-
-        const paragraphs = text.split(/\n+/).map(p => p.trim()).filter(Boolean);
-        let curY = ey + fontSize;
-        const maxY = ey + eh;
-
-        for (const para of paragraphs) {
-            if (curY > maxY) break;
-            const words = para.split(/\s+/).filter(Boolean);
-            const lines = [];
-            let cur = '';
-            for (const word of words) {
-                const test = cur ? `${cur} ${word}` : word;
-                if (ctx.measureText(test).width <= ew) {
-                    cur = test;
-                } else {
-                    if (cur) lines.push(cur);
-                    cur = word;
-                }
-            }
-            if (cur) lines.push(cur);
-
-            for (const line of lines) {
-                if (curY > maxY) break;
-                ctx.fillText(line, ex + ew, curY);
-                curY += lineHeight;
-            }
-            curY += lineHeight * 0.5;
-        }
-        ctx.restore();
-    }
 
     document.body.removeChild(exportContainer);
     return compressToMaxSize(canvas);
