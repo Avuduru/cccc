@@ -1730,12 +1730,6 @@ body {
     background-size: cover !important;
     background-position: center !important;
 }
-.export-mode.vertical .poster-container {
-    max-height: none !important;
-    height: auto !important;
-    width: 75% !important;
-    aspect-ratio: var(--poster-aspect-ratio, 2/3) !important;
-}
 .export-mode #synopsis-text { line-height: 1.15 !important; }
 .export-mode.vertical {
     width: 1200px !important;
@@ -1746,7 +1740,6 @@ body {
     position: relative !important;
 }
 .export-mode.vertical .canvas-content { justify-content: space-between !important; }
-.export-mode.vertical .poster-container { margin-bottom: 0 !important; }
 .export-mode.vertical .stickers-container { margin-top: 0 !important; }
 
 #preview-canvas.export-mode.vertical {
@@ -1775,6 +1768,8 @@ body {
     top: 330px !important; right: 60px !important;
     width: 528px !important; height: 792px !important;
     max-height: 792px !important; max-width: 528px !important;
+    aspect-ratio: unset !important;
+    margin-bottom: 0 !important;
 }
 .export-mode.vertical .synopsis-wrapper {
     top: 330px !important; left: 60px !important;
