@@ -1,0 +1,7 @@
+{
+    "name": "avuduru/cccc",
+    "description": "CCCC Rating App",
+    "require": {
+        "php": "^8.1"
+    }
+}
