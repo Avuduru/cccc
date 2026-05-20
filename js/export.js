@@ -1,18 +1,5 @@
 import { state } from './state.js';
 
-// Module-level: runs the instant export.js is imported.
-// If the export button shows "v4 تصديـر" without clicking anything,
-// this new module loaded successfully.
-(() => {
-    const mark = () => {
-        const btn = document.getElementById('export-btn');
-        const span = btn && btn.querySelector('span:last-child');
-        if (span) span.textContent = 'v4 تصديـر';
-    };
-    if (document.readyState !== 'loading') mark();
-    else document.addEventListener('DOMContentLoaded', mark);
-})();
-
 const MAX_EXPORT_BYTES = 2 * 1024 * 1024;
 
 function rescaleSynopsisInClone(clone) {
@@ -94,60 +81,6 @@ function downloadLink(url, filename) {
 }
 
 // Renders the synopsis element to an Image via SVG <foreignObject>.
-// foreignObject routes through the browser's native layout+text engine
-// (WebKit on iOS), so Arabic letter shaping is applied correctly —
-// no fillText splitting, no bidi fragmentation, no isolated-character forms.
-function synopsisToSVGImage(synEl, w, h) {
-    const cs = window.getComputedStyle(synEl);
-    const raw = (synEl.innerText || synEl.textContent)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-
-    // SVG images loaded via blob: URLs do not render <foreignObject> content
-    // on iOS Safari — the image loads but the foreignObject is silently empty.
-    // Use a data URI instead; iOS Safari renders foreignObject correctly that way.
-    //
-    // The SVG sandbox cannot load external resources (Google Fonts CDN), so
-    // Handjet will not be available. Use guaranteed iOS system Arabic fonts
-    // (Geeza Pro, .Arabic UI Text) — they shape Arabic correctly and ensure
-    // the text is actually visible rather than silently transparent.
-    const style = [
-        `font-family:"Geeza Pro",".Arabic UI Text","Arabic UI Text",sans-serif`,
-        `font-size:${cs.fontSize}`,
-        `font-weight:${cs.fontWeight}`,
-        `line-height:${cs.lineHeight}`,
-        `color:${cs.color}`,
-        `direction:rtl`,
-        `text-align:right`,
-        `unicode-bidi:embed`,
-        `white-space:pre-wrap`,
-        `word-wrap:break-word`,
-        `overflow:hidden`,
-        `width:${w}px`,
-        `height:${h}px`,
-        `padding:${cs.padding}`,
-        `box-sizing:border-box`,
-    ].join(';');
-
-    const svg = [
-        `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">`,
-        `<foreignObject x="0" y="0" width="${w}" height="${h}">`,
-        `<div xmlns="http://www.w3.org/1999/xhtml" style="${style}">${raw}</div>`,
-        `</foreignObject></svg>`,
-    ].join('');
-
-    // Encode to data URI: btoa() only handles Latin-1, so encode the UTF-8
-    // SVG string (which contains Arabic) via encodeURIComponent first.
-    const dataURI = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
-
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => resolve(img);
-        img.onerror = reject;
-        img.src = dataURI;
-    });
-}
 
 // Shared render pipeline: clone → wait for fonts → html2canvas → compress
 async function renderToBlob(originalCanvas) {
@@ -192,37 +125,32 @@ async function renderToBlob(originalCanvas) {
 
     rescaleSynopsisInClone(clone);
 
-    // DEBUG: inject a giant red banner into the clone BEFORE html2canvas runs.
-    // If this appears in the export, html2canvas is using our clone correctly.
-    // If it doesn't appear, html2canvas is rendering something else entirely.
-    const debugBanner = document.createElement('div');
-    debugBanner.style.cssText = [
-        'position:absolute', 'top:35%', 'left:0', 'right:0', 'height:30%',
-        'background:red', 'z-index:99999', 'display:flex',
-        'align-items:center', 'justify-content:center',
-        'color:white', 'font-size:80px', 'font-family:monospace',
-        'font-weight:bold', 'pointer-events:none'
-    ].join(';');
-    debugBanner.textContent = 'v3 DEBUG';
-    clone.style.position = 'relative';
-    clone.appendChild(debugBanner);
-
-    // Capture synopsis position now (clone still in DOM, layout fully settled).
-    // Used after html2canvas for the iOS SVG overlay — must be read before h2c
-    // because h2c creates its own internal iframe clone and may reflow the DOM.
+    // iOS: html2canvas fragments Arabic text during its bidi layout pass, rendering
+    // each character in isolated form (no letter joining). Fix: use onclone to set
+    // visibility:hidden on the synopsis in h2c's internal document clone — this makes
+    // h2c skip rendering the text while preserving layout and background. After h2c
+    // completes, redraw the synopsis ourselves with one ctx.fillText() call per line
+    // so CoreText receives full-word context and applies correct Arabic shaping.
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-    let iosSynData = null;
+    let iosSyn = null;
+
     if (isIOS) {
         const synEl = clone.querySelector('#synopsis-text');
         if (synEl && /[؀-ۿ]/.test(synEl.textContent)) {
+            const cs = window.getComputedStyle(synEl);
             const cloneRect = clone.getBoundingClientRect();
             const r = synEl.getBoundingClientRect();
-            iosSynData = {
-                el: synEl,
-                ex: Math.round(r.left - cloneRect.left),
-                ey: Math.round(r.top  - cloneRect.top),
-                ew: Math.round(r.width),
-                eh: Math.round(r.height),
+            iosSyn = {
+                el:         synEl,
+                text:       synEl.innerText || synEl.textContent,
+                ex:         Math.round(r.left - cloneRect.left),
+                ey:         Math.round(r.top  - cloneRect.top),
+                ew:         Math.round(r.width),
+                eh:         Math.round(r.height),
+                fontSize:   parseFloat(cs.fontSize),
+                lineHeight: parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.15,
+                color:      cs.color,
+                font:       `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`,
             };
         }
     }
@@ -235,41 +163,53 @@ async function renderToBlob(originalCanvas) {
         logging: false,
         width: exportWidth,
         height: clone.offsetHeight,
-        windowWidth: exportWidth
+        windowWidth: exportWidth,
+        onclone: iosSyn ? (_doc, clonedEl) => {
+            const syn = clonedEl.querySelector('#synopsis-text');
+            if (syn) syn.style.visibility = 'hidden';
+        } : undefined,
     });
 
-    // Debug stamp — centered, massive, impossible to miss.
-    // Remove once Arabic fix is verified working.
-    if (isIOS) {
-        const dbgCtx = canvas.getContext('2d');
-        dbgCtx.save();
-        const bh = Math.round(canvas.height * 0.25);
-        const by = Math.round(canvas.height * 0.375);
-        dbgCtx.fillStyle = 'rgba(255,0,0,0.9)';
-        dbgCtx.fillRect(0, by, canvas.width, bh);
-        dbgCtx.fillStyle = 'white';
-        dbgCtx.font = `bold ${Math.round(bh * 0.6)}px monospace`;
-        dbgCtx.textAlign = 'center';
-        dbgCtx.fillText('v3-iOS RUNNING', canvas.width / 2, by + bh * 0.7);
-        dbgCtx.restore();
-    }
+    if (iosSyn) {
+        const { text, ex, ey, ew, eh, fontSize, lineHeight, color, font } = iosSyn;
+        const ctx = canvas.getContext('2d');
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(ex, ey, ew, eh);
+        ctx.clip();
+        ctx.direction = 'rtl';
+        ctx.textAlign = 'right';
+        ctx.font = font;
+        ctx.fillStyle = color;
 
-    // iOS: html2canvas's bidi text splitting renders Arabic in isolated/disconnected
-    // letter forms. Bypass it entirely for the synopsis by rendering it separately
-    // via SVG <foreignObject>, which routes through WebKit's native layout engine
-    // and applies correct Arabic contextual shaping, then compositing onto the canvas.
-    if (iosSynData) {
+        const paragraphs = text.split(/\n+/).map(p => p.trim()).filter(Boolean);
+        let curY = ey + fontSize;
+        const maxY = ey + eh;
 
-        const { el, ex, ey, ew, eh } = iosSynData;
-        if (ew > 0 && eh > 0) {
-            try {
-                const synImg = await synopsisToSVGImage(el, ew, eh);
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(synImg, ex, ey, ew, eh);
-            } catch (e) {
-                console.warn('iOS synopsis SVG render failed:', e);
+        for (const para of paragraphs) {
+            if (curY > maxY) break;
+            const words = para.split(/\s+/).filter(Boolean);
+            const lines = [];
+            let cur = '';
+            for (const word of words) {
+                const test = cur ? `${cur} ${word}` : word;
+                if (ctx.measureText(test).width <= ew) {
+                    cur = test;
+                } else {
+                    if (cur) lines.push(cur);
+                    cur = word;
+                }
             }
+            if (cur) lines.push(cur);
+
+            for (const line of lines) {
+                if (curY > maxY) break;
+                ctx.fillText(line, ex + ew, curY);
+                curY += lineHeight;
+            }
+            curY += lineHeight * 0.5;
         }
+        ctx.restore();
     }
 
     document.body.removeChild(exportContainer);
@@ -277,18 +217,15 @@ async function renderToBlob(originalCanvas) {
 }
 
 export function handleExport() {
-    alert('v4 handleExport called'); // DEBUG — remove after confirmation
     const originalCanvas = document.getElementById('preview-canvas');
     const exportBtn = document.getElementById('export-btn');
     exportBtn.innerText = 'جاري التصدير...';
 
-    // iOS: navigator.share({ files }) triggers the document share sheet, which
-    // does NOT include "Save to Photos". The fix: open a blank tab synchronously
-    // (within the gesture, before any async work) so Safari doesn't block it as
-    // a popup, then navigate it to the blob URL after rendering. The user then
-    // sees the image fullscreen with Safari's native Share → "Save Image" UI.
+    // Opening window.open('','_blank') before renderToBlob suspends the original
+    // tab on iOS, freezing the async render. Fix: run renderToBlob first (original
+    // tab stays active), then open the result. iOS 16+ maintains user-gesture trust
+    // through async promise chains, so window.open still works in .then().
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-    const iosTab = isIOS ? window.open('', '_blank') : null;
 
     renderToBlob(originalCanvas)
         .then(async blob => {
@@ -297,8 +234,14 @@ export function handleExport() {
             const filename = getFilename();
             const url = URL.createObjectURL(blob);
 
-            if (isIOS && iosTab) {
-                iosTab.location.href = url;
+            if (isIOS) {
+                // Open the image directly in a new tab. On iOS the user can then
+                // long-press → Save Image, or use the Share button → Save to Photos.
+                const tab = window.open(url, '_blank');
+                if (!tab) {
+                    // Popup blocked — navigate current tab to the image instead
+                    window.location.href = url;
+                }
                 logClassification('export');
 
             } else if (navigator.share && navigator.canShare) {
