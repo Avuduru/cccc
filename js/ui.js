@@ -529,7 +529,15 @@ export function showSearchResults(data, type) {
 
             const div = document.createElement('div');
             div.className = 'search-result-item';
-            div.innerHTML = `<img src="${poster}"> <span>${title}</span>`;
+            
+            const img = document.createElement('img');
+            img.src = poster;
+            
+            const span = document.createElement('span');
+            span.textContent = title;
+            
+            div.appendChild(img);
+            div.appendChild(span);
             div.addEventListener('click', () => selectItem(item, type));
             container.appendChild(div);
 
