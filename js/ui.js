@@ -388,12 +388,55 @@ export function updatePreview() {
     requestAnimationFrame(() => {
         adjustTitleSize();
         fitSynopsisToContainer();
+        adjustVerticalPositions();
     });
 }
 
 export function reAdjustLayout() {
     adjustTitleSize();
     fitSynopsisToContainer();
+    adjustVerticalPositions();
+}
+
+// Safety net: if the header (title + pills) overflows past the poster/synopsis
+// start position, push them down dynamically. Only activates for vertical layout
+// when the header actually exceeds the CSS-defined budget.
+export function adjustVerticalPositions(container) {
+    if (!container) container = document.getElementById('preview-canvas');
+    if (!container || !container.classList.contains('vertical')) return;
+
+    const header = container.querySelector('.header-info');
+    const poster = container.querySelector('.poster-container');
+    const synopsis = container.querySelector('.synopsis-wrapper');
+    if (!header || !poster || !synopsis) return;
+
+    // Reset to CSS defaults so we measure the true CSS top
+    poster.style.top = '';
+    synopsis.style.top = '';
+
+    const contentEl = container.querySelector('.canvas-content');
+    const contentH = contentEl ? contentEl.offsetHeight : container.offsetHeight;
+    const headerBottom = header.offsetTop + header.offsetHeight;
+    const posterTop = poster.offsetTop;
+    const gap = contentH * 0.015; // 1.5% breathing room
+
+    console.log('[DEBUG] adjustVerticalPositions values:', {
+        contentH,
+        headerOffsetTop: header.offsetTop,
+        headerHeight: header.offsetHeight,
+        headerBottom,
+        posterTop,
+        gap,
+        overflows: headerBottom > posterTop - gap
+    });
+
+    // Only intervene if header bottom is too close to or past poster top
+    if (headerBottom > posterTop - gap) {
+        const newTopPx = headerBottom + gap;
+        console.log('[DEBUG] Setting new top:', newTopPx + 'px');
+        poster.style.setProperty('top', newTopPx + 'px', 'important');
+        synopsis.style.setProperty('top', newTopPx + 'px', 'important');
+    }
 }
 
 // New Helper: Shrink text until it fits container
@@ -808,8 +851,8 @@ export function updateDisplayedInfo() {
     const clippedSynopsis = (state.meta.synopsis || '').split('\n').slice(0, 8).join('\n');
     els.synopsisText().innerText = clippedSynopsis;
 
-    // Trigger Fit-to-Box Scaling
-    requestAnimationFrame(() => fitSynopsisToContainer());
+    // Trigger Fit-to-Box Scaling and Layout Adjustments
+    requestAnimationFrame(() => reAdjustLayout());
 
     if (state.meta.poster) {
         els.posterImg().style.backgroundImage = `url(${state.meta.poster})`;

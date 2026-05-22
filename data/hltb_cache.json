@@ -5,5 +5,12 @@
             "main_story": 12.5,
             "game_name": "Sly 3: Honor Among Thieves"
         }
+    },
+    "sekiro: shadows die twice": {
+        "ts": 1779423657,
+        "data": {
+            "main_story": 30,
+            "game_name": "Sekiro: Shadows Die Twice"
+        }
     }
 }

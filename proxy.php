@@ -126,8 +126,69 @@ function filterNSFWFromRAWG($data)
         }
     }
 
-    // Ensure we don't return more than 5 after filtering
-    $data['results'] = array_slice($filtered, 0, 5);
+    $data['results'] = $filtered;
+    return $data;
+}
+
+/**
+ * Smart Search Sorting Algorithm
+ * Blends semantic title relevance with API-specific popularity metrics
+ * to push major titles to the top and filter out obscure fan-clips/DLCs.
+ */
+function applySmartSort($data, $type, $query)
+{
+    $dataKey = 'results';
+    if ($type === 'anime' || $type === 'manga') $dataKey = 'data';
+    else if ($type === 'book') $dataKey = 'docs';
+
+    if (!isset($data[$dataKey]) || !is_array($data[$dataKey])) return $data;
+
+    $items = $data[$dataKey];
+    $queryLower = strtolower(trim($query));
+
+    foreach ($items as &$item) {
+        $title = '';
+        $popularity = 0;
+
+        if ($type === 'movie' || $type === 'tv') {
+            $title = $item['title'] ?? $item['name'] ?? '';
+            $popularity = $item['popularity'] ?? 0;
+        } else if ($type === 'game') {
+            $title = $item['name'] ?? '';
+            $popularity = $item['added'] ?? 0;
+        } else if ($type === 'anime' || $type === 'manga') {
+            $title = $item['title'] ?? $item['title_english'] ?? '';
+            $popularity = $item['members'] ?? 0;
+        } else if ($type === 'book') {
+            $title = $item['title'] ?? '';
+            $popularity = ($item['readinglog_count'] ?? 0) + ($item['ratings_count'] ?? 0);
+        }
+
+        $titleLower = strtolower($title);
+
+        $relevance = 1.0;
+        if ($titleLower === $queryLower) {
+            $relevance = 10.0;
+        } elseif (strpos($titleLower, $queryLower) === 0) {
+            $relevance = 5.0;
+        } elseif (strpos($titleLower, $queryLower) !== false) {
+            $relevance = 2.0;
+        }
+
+        $item['_smart_score'] = $relevance * ($popularity + 1);
+    }
+    unset($item);
+
+    usort($items, function($a, $b) {
+        return $b['_smart_score'] <=> $a['_smart_score'];
+    });
+
+    foreach ($items as &$item) {
+        unset($item['_smart_score']);
+    }
+    
+    $data[$dataKey] = array_slice($items, 0, 5);
+
     return $data;
 }
 
@@ -358,8 +419,8 @@ switch ($type) {
 
     case 'game':
         // RAWG API - comprehensive game database (free and paid games)
-        // Fetch 10 to give room for NSFW filtering
-        $url = "https://api.rawg.io/api/games?key=$RAWG_KEY&search=" . urlencode($query) . "&page_size=10";
+        // Fetch 20 to give room for NSFW filtering and smart sorting
+        $url = "https://api.rawg.io/api/games?key=$RAWG_KEY&search=" . urlencode($query) . "&page_size=20";
         break;
 
     case 'game_details':
@@ -465,12 +526,12 @@ switch ($type) {
     case 'manga':
         // Jikan API does not require a key
         // Exclude Hentai (genre ID 12) but keep Ecchi (genre ID 9)
-        $url = "https://api.jikan.moe/v4/$type?q=" . urlencode($query) . "&limit=5&genres_exclude=12";
+        $url = "https://api.jikan.moe/v4/$type?q=" . urlencode($query) . "&limit=20&genres_exclude=12";
         break;
 
     case 'book':
         // Open Library API - completely free, no key needed, no rate limits
-        $url = "https://openlibrary.org/search.json?q=" . urlencode($query) . "&limit=5";
+        $url = "https://openlibrary.org/search.json?q=" . urlencode($query) . "&limit=20";
         break;
 
     case 'log':
@@ -779,19 +840,22 @@ switch ($type) {
 if ($url) {
     $response = fetchUrl($url);
 
-    // Filter out anime from TV/movie results
-    if ($type === 'tv' || $type === 'movie') {
-        $data = json_decode($response, true);
-        if ($data && !isset($data['error'])) {
+    $data = json_decode($response, true);
+    if ($data && !isset($data['error'])) {
+        
+        // 1. Run safety & logic filters
+        if ($type === 'tv' || $type === 'movie') {
             $data = filterAnimeFromTMDB($data);
-            $response = json_encode($data);
-        }
-    } else if ($type === 'game') {
-        $data = json_decode($response, true);
-        if ($data && !isset($data['error'])) {
+        } else if ($type === 'game') {
             $data = filterNSFWFromRAWG($data);
-            $response = json_encode($data);
         }
+        
+        // 2. Apply Smart Sort (Applies to ALL 6 types)
+        if (in_array($type, ['movie', 'tv', 'game', 'anime', 'manga', 'book'])) {
+            $data = applySmartSort($data, $type, $query);
+        }
+
+        $response = json_encode($data);
     }
 
     echo $response;

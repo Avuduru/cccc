@@ -1,4 +1,5 @@
 import { state } from './state.js';
+import { adjustVerticalPositions } from './ui.js';
 
 const MAX_EXPORT_BYTES = 2 * 1024 * 1024;
 
@@ -146,6 +147,7 @@ async function renderToBlob(originalCanvas) {
 
     truncateLongTitle(clone);
     rescaleSynopsisInClone(clone);
+    adjustVerticalPositions(clone);
 
     // iOS: WebKit returns phantom extra rects from Range.getClientRects() for
     // Arabic text at non-zero offsets within a text node. html2canvas treats
@@ -193,6 +195,10 @@ export function handleExport() {
     // tab on iOS, freezing the async render. Run renderToBlob first, then open
     // the result URL directly in a new tab.
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    
+    // Truly robust check for any mobile or tablet device (catches modern iPads disguised as Macs)
+    const isMobileOrTablet = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent) || 
+                             (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
     renderToBlob(originalCanvas)
         .then(async blob => {
@@ -206,8 +212,8 @@ export function handleExport() {
                 if (!tab) window.location.href = url;
                 logClassification('export');
 
-            } else if (navigator.share && navigator.canShare) {
-                // Android: Web Share API works correctly there
+            } else if (isMobileOrTablet && navigator.share && navigator.canShare) {
+                // Mobile/Tablets (Android & iPads): Web Share API works correctly here
                 const file = new File([blob], filename, { type: 'image/png' });
                 if (navigator.canShare({ files: [file] })) {
                     try {

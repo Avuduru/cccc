@@ -234,7 +234,7 @@ function setupEventListeners() {
     const titleText = document.getElementById('title-text');
     titleText.addEventListener('input', () => {
         state.meta.title = titleText.innerText;
-        adjustTitleSize();
+        reAdjustLayout();
     });
 
     // Manual Mode - File Upload

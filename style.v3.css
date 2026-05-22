@@ -1221,7 +1221,7 @@ body {
     padding: 0 5%;
     box-sizing: border-box;
 }
-.vertical .classification-label { width: 100%; text-align: center !important; }
+.vertical .classification-label { width: 100%; text-align: center !important; margin-bottom: 6px; }
 .vertical .header-info h2 {
     -webkit-line-clamp: 2 !important;
     line-clamp: 2 !important;
@@ -1260,8 +1260,8 @@ body {
     text-align: start !important;
 }
 .vertical .genre-row {
-    margin-top: 2cqw !important;
-    margin-bottom: 3cqw !important;
+    margin-top: 1cqw !important;
+    margin-bottom: 1cqw !important;
     justify-content: center !important;
 }
 
@@ -1751,7 +1751,7 @@ body {
 }
 .export-mode.vertical .classification-label {
     font-size: 50px !important;
-    margin-bottom: 25px !important;
+    margin-bottom: 15px !important;
 }
 .export-mode.vertical .poster-container {
     top: 330px !important; right: 60px !important;
@@ -1805,12 +1805,14 @@ body {
     gap: 12px !important;
     padding: 24px 24px 0 24px !important;
     align-items: flex-end !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
 }
 .export-mode.horizontal .sticker-item {
     padding: 14px 14px 0 14px !important;
-    max-width: none !important;
     width: 210px !important;
-    flex-shrink: 0 !important;
+    flex-shrink: 1 !important;
     align-self: auto !important;
 }
 .export-mode.horizontal .sticker-item img {
@@ -1830,6 +1832,9 @@ body {
     padding: 12px !important;
     gap: 9px !important;
     align-items: flex-end !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
 }
 .export-mode.vertical .stickers-grid-canvas.few-icons {
     gap: 9px !important;
@@ -1856,9 +1861,8 @@ body {
     aspect-ratio: unset !important;
     height: auto !important;
     width: 208px !important;
-    max-width: none !important;
     padding: 0 !important;
-    flex-shrink: 0 !important;
+    flex-shrink: 1 !important;
     align-self: flex-end !important;
 }
 .export-mode.vertical .sticker-item img {
