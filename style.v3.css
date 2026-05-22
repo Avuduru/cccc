@@ -1312,7 +1312,7 @@ body {
 }
 .vertical .modern-watermark.vertical-only {
     position: absolute !important;
-    top: 80%;
+    top: 81%;
     right: 27%;
     width: auto !important;
     transform: translateX(50%) !important;
@@ -1322,6 +1322,7 @@ body {
     margin: 0 !important;
     white-space: nowrap;
     pointer-events: auto;
+    z-index: 15;
 }
 
 .stickers-grid-canvas {
@@ -1798,7 +1799,8 @@ body {
     padding: 14px 38px !important;
     transform: none !important;
     margin-right: -130px !important;
-    top: 76.6% !important;
+    top: 77.5% !important;
+    z-index: 15 !important;
 }
 /* Fix html2canvas cqw/vh bugs for horizontal stickers */
 .export-mode.horizontal .stickers-grid-canvas {
