@@ -1,16 +1,11 @@
-Options -MultiViews
 RewriteEngine On
-RewriteBase /
 
-# 1. Redirect index.html to the root /
-RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/index\.html [NC]
-RewriteRule ^ / [R=301,L]
+# 1. Externally redirect .html requests to clean URLs (force clean URLs)
+RewriteCond %{THE_REQUEST} \s/+(.*?)\.html[\s?] [NC]
+RewriteRule ^ /%1 [R=301,L,NE]
 
-# 2. Redirect general .html files to their clean paths
-RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/([^/]+)\.html [NC]
-RewriteRule ^ %1 [R=301,L]
-
-# 3. Internally serve the .html file when a clean URL is requested
+# 2. Internally serve the .html file when a clean URL is requested
 RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME}.html -f
-RewriteRule ^([^/]+)/?$ $1.html [L]
+RewriteRule ^(.*)$ $1.html [L]
