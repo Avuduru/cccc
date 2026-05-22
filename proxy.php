@@ -467,9 +467,28 @@ switch ($type) {
             exit;
         }
 
+        // SECURITY: Prevent Server-Side Request Forgery (SSRF)
+        $url = filter_var($query, FILTER_VALIDATE_URL);
+        if (!$url || !preg_match('/^https?:\/\//i', $url)) {
+            http_response_code(400);
+            echo "Invalid image URL scheme.";
+            exit;
+        }
+
+        // SECURITY: Block internal network scanning (localhost, 192.168.x, 10.x, etc.)
+        $host = parse_url($url, PHP_URL_HOST);
+        $ip = gethostbyname($host);
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+            http_response_code(403);
+            echo "Access to internal networks is forbidden.";
+            exit;
+        }
+
         // Fetch the image
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $query);
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS); // Strictly HTTP/S
+        curl_setopt($ch, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
