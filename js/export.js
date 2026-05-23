@@ -137,7 +137,7 @@ async function renderToBlob(originalCanvas) {
     // font hasn't been applied+shaped in the newly created off-screen clone yet.
     // Explicitly calling fonts.load() forces those instances to be activated.
     // Sizes match export-mode CSS: --canvas-title-size:106px, --canvas-synopsis-size:40px
-    await document.fonts.load('800 106px Handjet');
+    await document.fonts.load('900 106px Handjet');
     await document.fonts.load('400 40px Handjet');
     // Two rAF passes guarantee the browser has completed at least one full
     // layout+paint cycle on the off-screen clone before html2canvas reads it.

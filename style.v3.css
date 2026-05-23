@@ -1034,7 +1034,8 @@ body {
 
 .header-info h2 {
     font-family: var(--font-ar);
-    font-weight: 800;
+    font-weight: 900;
+    font-variation-settings: "wght" 900;
     font-size: var(--canvas-title-size);
     margin: 0;
     padding: 0;
@@ -1357,7 +1358,7 @@ body {
     padding: 0.8cqw 0.8cqw 0 0.8cqw;
     flex: 0 1 auto;
     width: 18%;
-    max-width: 15vh;
+    max-width: 19.4cqh;
     min-width: 0;
 }
 .sticker-item img { width: 100%; height: 100%; object-fit: contain; }
