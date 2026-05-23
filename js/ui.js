@@ -865,9 +865,13 @@ function fitVerticalTitle(el) {
     void el.offsetHeight; // Force browser reflow to apply 100% size instantly
 
     // 2. Measure if it naturally wrapped to 2 lines at 100% size
-    // -webkit-line-clamp: 2 makes clientHeight exactly 2 lines. So half of clientHeight is 1 line.
-    const oneLineThreshold = (el.clientHeight / 2) * 1.5;
-    if (el.scrollHeight > oneLineThreshold) {
+    const computed = window.getComputedStyle(el);
+    let lh = parseFloat(computed.lineHeight);
+    if (isNaN(lh)) {
+        lh = parseFloat(computed.fontSize) * 1.15; // Fallback if line-height is 'normal'
+    }
+
+    if (el.scrollHeight > lh * 1.5) {
         canvas.classList.add('has-2-line-title');
     }
     // Note: We don't need an 'else', it stays removed if it fits on 1 line.
