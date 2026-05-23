@@ -837,7 +837,6 @@ function selectItem(item, type) {
 export function adjustTitleSize() {
     const el = els.titleText();
     if (!el) return;
-    const len = el.innerText.length;
     const isVertical = state.orientation === 'vertical';
 
     // Reset all scaling
@@ -847,12 +846,31 @@ export function adjustTitleSize() {
     if (isVertical) {
         fitVerticalTitle(el);
     } else {
-        // Horizontal: character-count based scaling (unchanged)
-        const t = { med: 20, long: 40, xl: 60 };
-        if (len >= t.med && len < t.long) el.dataset.length = 'medium';
-        else if (len >= t.long && len < t.xl) el.dataset.length = 'long';
-        else if (len >= t.xl) el.dataset.length = 'xl';
+        fitHorizontalTitle(el);
     }
+}
+
+function fitHorizontalTitle(el) {
+    const canvas = document.getElementById('preview-canvas');
+
+    // 1. Temporarily strip class to measure true 100% base size safely
+    const was2Line = canvas.classList.contains('horizontal-has-2-line-title');
+    canvas.classList.remove('horizontal-has-2-line-title');
+    void el.offsetHeight; // Force browser reflow to apply 100% size instantly
+
+    // 2. Measure if it naturally wrapped to 2 lines at 100% size
+    const computed = window.getComputedStyle(el);
+    let lh = parseFloat(computed.lineHeight);
+    if (isNaN(lh)) {
+        lh = parseFloat(computed.fontSize) * 1.15; // Fallback if line-height is 'normal'
+    }
+
+    if (el.scrollHeight > lh * 1.5) {
+        canvas.classList.add('horizontal-has-2-line-title');
+    }
+
+    // Force reflow again so CSS updates
+    void el.offsetHeight;
 }
 
 function fitVerticalTitle(el) {

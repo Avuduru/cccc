@@ -1049,9 +1049,10 @@ body {
     unicode-bidi: isolate;
     color: #fff;
 }
-.header-info h2[data-length="medium"] { font-size: calc(var(--canvas-title-size) * 0.85); }
-.header-info h2[data-length="long"]   { font-size: calc(var(--canvas-title-size) * 0.7); }
-.header-info h2[data-length="xl"]     { font-size: calc(var(--canvas-title-size) * 0.55); }
+/* Exactly 50% multiplier for 2-line horizontal titles */
+.horizontal-has-2-line-title .header-info h2 { 
+    font-size: calc(var(--canvas-title-size) * 0.5) !important; 
+}
 
 .genre-row {
     display: flex;
@@ -1802,6 +1803,9 @@ body {
     overflow: hidden !important;
     max-height: 2.2em !important;
     margin-bottom: 8px !important;
+}
+.export-mode.horizontal-has-2-line-title .header-info h2 {
+    font-size: 53px !important; /* Exactly 50% of 106px base */
 }
 .export-mode.vertical .header-info {
     padding: 0 60px !important;
