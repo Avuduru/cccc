@@ -1333,7 +1333,7 @@ body {
     bottom: auto !important;
     left: 50%;
     width: auto !important;
-    margin-top: 2cqw !important;
+    /* margin-top is handled dynamically by JS! */
     transform: translateX(-50%) !important;
     display: flex;
     justify-content: center;
@@ -1750,10 +1750,6 @@ body {
 }
 .export-mode.vertical .canvas-content { justify-content: space-between !important; }
 .export-mode.vertical .stickers-container { margin-top: 0 !important; }
-.export-mode.vertical .stickers-grid-canvas.few-icons .sticker-item {
-    width: 23% !important;
-    max-width: none !important;
-}
 
 #preview-canvas.export-mode.vertical {
     width: 1200px !important;
@@ -1822,13 +1818,21 @@ body {
     padding: 14px 38px !important;
     top: 100% !important;
     bottom: auto !important;
-    margin-top: 8px !important;
     left: 0 !important;
     right: 0 !important;
-    margin: 0 auto !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
     width: max-content !important;
     transform: none !important;
-    top: auto !important;
+    /* margin-top is handled dynamically by JS! */
+}
+.export-mode.vertical .stickers-grid-canvas.few-icons .sticker-item {
+    width: 23.5% !important;
+    max-width: none !important;
+}
+.export-mode.vertical .stickers-grid-canvas:not(.few-icons) .sticker-item {
+    width: 19.5% !important;
+    max-width: none !important;
 }
 /* Fix html2canvas cqw/vh bugs for horizontal stickers */
 .export-mode.horizontal .stickers-grid-canvas {

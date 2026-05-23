@@ -437,6 +437,28 @@ export function adjustVerticalPositions(container) {
         poster.style.setProperty('top', newTopPx + 'px', 'important');
         synopsis.style.setProperty('top', newTopPx + 'px', 'important');
     }
+
+    // --- Dynamically Center Classifier Pill in the Gap Zone ---
+    const watermark = container.querySelector('.modern-watermark.vertical-only');
+    const stickers = container.querySelector('.stickers-grid-canvas');
+    if (watermark && stickers) {
+        // Reset inline margin to measure natural layout
+        watermark.style.marginTop = '';
+        
+        const posterBottom = poster.offsetTop + poster.offsetHeight;
+        const stickersTop = stickers.offsetTop;
+        const availableGap = stickersTop - posterBottom;
+        
+        if (availableGap > 0) {
+            const pillHeight = watermark.offsetHeight;
+            // Pill is anchored top:100% inside poster (excluding 2px border). 
+            // We add 2px to ensure the math starts from the true outer bottom edge.
+            const marginPx = (availableGap - pillHeight) / 2 + 2; 
+            const safeMargin = Math.max(marginPx, 2); // Maintain at least 2px breathing room
+            
+            watermark.style.setProperty('margin-top', safeMargin + 'px', 'important');
+        }
+    }
 }
 
 // New Helper: Shrink text until it fits container
