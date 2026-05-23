@@ -3,7 +3,6 @@
 node_modules/
 vendor/
 data/*.jsonl
-CLAUDE.md
 php.ini
 demo.html
 Demo/
@@ -12,10 +11,4 @@ Polished_CCCC/
 design-handoff/
 test_export.py
 test_export_result.png
-Sticker.md
-ClassifierPill.md
-PreviewCanvas.md
-ExportMode.md
-Title.md
-resolution.md
-ContentPills.md
+Docs/
