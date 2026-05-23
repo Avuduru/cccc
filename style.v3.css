@@ -1312,10 +1312,10 @@ body {
 }
 .vertical .modern-watermark.vertical-only {
     position: absolute !important;
-    top: 81%;
-    right: 27%;
+    bottom: -8%;
+    left: 50%;
     width: auto !important;
-    transform: translateX(50%) !important;
+    transform: translateX(-50%) !important;
     display: flex;
     justify-content: center;
     box-sizing: border-box;
@@ -1797,10 +1797,10 @@ body {
 .export-mode.vertical .modern-watermark {
     font-size: 36px !important;
     padding: 14px 38px !important;
-    transform: none !important;
-    margin-right: -130px !important;
-    top: 77.5% !important;
-    z-index: 15 !important;
+    bottom: -60px !important;
+    transform: translateX(-50%) !important;
+    top: auto !important;
+    margin-right: 0 !important;
 }
 /* Fix html2canvas cqw/vh bugs for horizontal stickers */
 .export-mode.horizontal .stickers-grid-canvas {
