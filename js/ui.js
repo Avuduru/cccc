@@ -438,26 +438,52 @@ export function adjustVerticalPositions(container) {
         synopsis.style.setProperty('top', newTopPx + 'px', 'important');
     }
 
-    // --- Dynamically Center Classifier Pill in the Gap Zone ---
+    // --- Dynamic Layout Allocator: Gap, Pill, and Stickers ---
     const watermark = container.querySelector('.modern-watermark.vertical-only');
-    const stickers = container.querySelector('.stickers-grid-canvas');
-    if (watermark && stickers) {
-        // Reset inline margin to measure natural layout
+    const stickersGrid = container.querySelector('.stickers-grid-canvas');
+    if (watermark && stickersGrid) {
+        // Reset inline overrides to measure natural layout bounds
         watermark.style.marginTop = '';
-        
+        stickersGrid.style.height = '';
+
         const posterBottom = poster.offsetTop + poster.offsetHeight;
-        const stickersTop = stickers.offsetTop;
-        const availableGap = stickersTop - posterBottom;
+        // canvasBottom is the container height minus the 1.5% padding reserve
+        const canvasBottom = contentH - (contentH * 0.015);
+        const remaining = canvasBottom - posterBottom;
         
-        if (availableGap > 0) {
-            const pillHeight = watermark.offsetHeight;
-            // Pill is anchored top:100% inside poster (excluding 2px border). 
-            // We add 2px to ensure the math starts from the true outer bottom edge.
-            const marginPx = (availableGap - pillHeight) / 2 + 2; 
-            const safeMargin = Math.max(marginPx, 2); // Maintain at least 2px breathing room
-            
-            watermark.style.setProperty('margin-top', safeMargin + 'px', 'important');
+        const pillH = watermark.offsetHeight;
+        // Strict minimum padding above and below the pill (e.g. 2.5% of canvas height)
+        const minPadding = contentH * 0.025; 
+        const requiredPillSpace = pillH + (minPadding * 2);
+        
+        // Max ideal height for stickers (e.g., 21% of canvas width)
+        // Preview: 800 * 0.21 = 168px. Export: 1200 * 0.21 = 252px.
+        const maxStickerH = container.offsetWidth * 0.21; 
+        
+        const availableForStickers = remaining - requiredPillSpace;
+        
+        let finalStickerH;
+        let finalPadding;
+
+        if (availableForStickers >= maxStickerH) {
+            // SCENARIO 1: Plenty of room.
+            // Use maximum sticker height, evenly distribute extra space as padding.
+            finalStickerH = maxStickerH;
+            finalPadding = (remaining - pillH - finalStickerH) / 2;
+        } else {
+            // SCENARIO 2: Cramped (e.g. 2-line title).
+            // Mandate minimum padding, force stickers to shrink to remaining space.
+            finalPadding = minPadding;
+            finalStickerH = availableForStickers;
+            if (finalStickerH < 0) finalStickerH = 0; // Safety floor
         }
+        
+        // 1. Force stickers grid to its mathematically assigned height
+        stickersGrid.style.setProperty('height', finalStickerH + 'px', 'important');
+        
+        // 2. Position the pill. (Origin is top:100% inside poster, so it starts at posterBottom - 2px border)
+        // We add 2px to ensure the visual gap matches the mathematical padding.
+        watermark.style.setProperty('margin-top', (finalPadding + 2) + 'px', 'important');
     }
 }
 
