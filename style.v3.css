@@ -1240,6 +1240,11 @@ body {
 .vertical .header-info h2.title-scale-1 { font-size: calc(var(--canvas-v-title-size) * 0.75) !important; }
 .vertical .header-info h2.title-scale-2 { font-size: calc(var(--canvas-v-title-size) * 0.6) !important; }
 .vertical .header-info h2.title-scale-3 { font-size: calc(var(--canvas-v-title-size) * 0.5) !important; }
+
+/* Exactly 50% of the base 0.9 multiplier for 2-line titles */
+.vertical.has-2-line-title .header-info h2 { 
+    font-size: calc(var(--canvas-v-title-size) * 0.45) !important; 
+}
 .vertical .genre-label { display: flex !important; flex-wrap: nowrap !important; overflow: visible; }
 .vertical .genre-row {
     flex-wrap: nowrap !important;
@@ -1774,7 +1779,7 @@ body {
     margin-bottom: 8px !important;
 }
 .export-mode.vertical.has-2-line-title .header-info h2 {
-    font-size: 100px !important; /* Slightly smaller than 114px */
+    font-size: 51.3px !important; /* Exactly 50% of 102.6px base */
 }
 .export-mode.vertical .poster-container {
     top: 330px !important; right: 60px !important;

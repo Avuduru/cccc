@@ -859,24 +859,30 @@ function fitVerticalTitle(el) {
     const scales = ['title-scale-1', 'title-scale-2', 'title-scale-3'];
     const canvas = document.getElementById('preview-canvas');
 
-    function fitsTwoLines() {
-        return el.scrollHeight <= el.clientHeight + 2; // +2 for sub-pixel tolerance
-    }
-    
-    // Detect if it wrapped to 2 lines at the base size
-    // We measure if scrollHeight > 1.5 * line-height. 
+    // 1. Temporarily strip all scaling classes to measure true 100% base size safely
+    const was2Line = canvas.classList.contains('has-2-line-title');
+    canvas.classList.remove('has-2-line-title');
+    void el.offsetHeight; // Force browser reflow to apply 100% size instantly
+
+    // 2. Measure if it naturally wrapped to 2 lines at 100% size
     // -webkit-line-clamp: 2 makes clientHeight exactly 2 lines. So half of clientHeight is 1 line.
     const oneLineThreshold = (el.clientHeight / 2) * 1.5;
     if (el.scrollHeight > oneLineThreshold) {
         canvas.classList.add('has-2-line-title');
-    } else {
-        canvas.classList.remove('has-2-line-title');
+    }
+    // Note: We don't need an 'else', it stays removed if it fits on 1 line.
+
+    // Force reflow again so scaling logic reads the new actual font size (e.g. 50%)
+    void el.offsetHeight;
+
+    function fitsTwoLines() {
+        return el.scrollHeight <= el.clientHeight + 2; // +2 for sub-pixel tolerance
     }
 
-    // Check at base size
+    // Check at current enforced size
     if (fitsTwoLines()) return;
 
-    // Try each progressively smaller scale
+    // Try each progressively smaller scale (usually bypassed if .has-2-line-title enforced 50%)
     for (const scale of scales) {
         el.classList.add(scale);
         if (fitsTwoLines()) return;
