@@ -477,9 +477,33 @@ export function adjustVerticalPositions(container) {
             finalStickerH = availableForStickers;
             if (finalStickerH < 0) finalStickerH = 0; // Safety floor
         }
-        
-        // 1. Force stickers grid to its mathematically assigned height
-        stickersGrid.style.setProperty('height', finalStickerH + 'px', 'important');
+        // --- html2canvas Flexbox Bug Fix ---
+        // If there are many stickers (e.g. 7), flex-shrink compresses their width.
+        // Modern browsers scale aspect-ratio perfectly, but html2canvas leaves the height stretched, warping them.
+        // Fix: Mathematically calculate the absolute maximum width allowed, and explicitly set width AND height.
+        const numStickers = stickersGrid.children.length;
+        if (numStickers > 0) {
+            // Is it export mode? We can tell if contentH is exactly 1500px, or we can just calculate safely.
+            const isExport = container.classList.contains('export-mode') || contentH >= 1500;
+            const gap = isExport ? 18 : (container.offsetWidth * 0.015);
+            const sidePadding = container.offsetWidth * 0.03; // 1.5% left + 1.5% right
+            const availableWidth = container.offsetWidth - sidePadding;
+            const totalGapWidth = (numStickers - 1) * gap;
+            
+            // The maximum square size before flex-shrink would trigger
+            const maxAllowedSquare = (availableWidth - totalGapWidth) / numStickers;
+            
+            // The final size is the minimum of what the gap allows and what the width allows
+            const finalStickerSize = Math.min(finalStickerH, maxAllowedSquare);
+            
+            stickersGrid.style.setProperty('height', finalStickerSize + 'px', 'important');
+            Array.from(stickersGrid.children).forEach(item => {
+                item.style.setProperty('width', finalStickerSize + 'px', 'important');
+                item.style.setProperty('height', finalStickerSize + 'px', 'important');
+            });
+        } else {
+            stickersGrid.style.setProperty('height', finalStickerH + 'px', 'important');
+        }
         
         // 2. Position the pill. (Origin is top:100% inside poster, so it starts at posterBottom - 2px border)
         // We add 2px to ensure the visual gap matches the mathematical padding.
@@ -833,9 +857,20 @@ export function adjustTitleSize() {
 
 function fitVerticalTitle(el) {
     const scales = ['title-scale-1', 'title-scale-2', 'title-scale-3'];
+    const canvas = document.getElementById('preview-canvas');
 
     function fitsTwoLines() {
         return el.scrollHeight <= el.clientHeight + 2; // +2 for sub-pixel tolerance
+    }
+    
+    // Detect if it wrapped to 2 lines at the base size
+    // We measure if scrollHeight > 1.5 * line-height. 
+    // -webkit-line-clamp: 2 makes clientHeight exactly 2 lines. So half of clientHeight is 1 line.
+    const oneLineThreshold = (el.clientHeight / 2) * 1.5;
+    if (el.scrollHeight > oneLineThreshold) {
+        canvas.classList.add('has-2-line-title');
+    } else {
+        canvas.classList.remove('has-2-line-title');
     }
 
     // Check at base size

@@ -1769,6 +1769,13 @@ body {
     font-size: 50px !important;
     margin-bottom: 15px !important;
 }
+.export-mode.vertical.has-2-line-title .classification-label {
+    font-size: 36px !important;
+    margin-bottom: 8px !important;
+}
+.export-mode.vertical.has-2-line-title .header-info h2 {
+    font-size: 100px !important; /* Slightly smaller than 114px */
+}
 .export-mode.vertical .poster-container {
     top: 330px !important; right: 60px !important;
     width: 528px !important; height: 792px !important;
@@ -1865,7 +1872,7 @@ body {
     height: 100% !important;
     max-height: 100% !important;
     width: auto !important;
-    flex: 0 1 auto !important;
+    flex: 0 0 auto !important; /* DO NOT shrink. JS explicitly calculates pixel width */
     min-width: 0 !important;
     min-height: 0 !important;
     padding: 0 !important;
@@ -1880,7 +1887,7 @@ body {
 
 /* Export vertical: Same logic, inherits perfectly */
 .export-mode.vertical .sticker-item {
-    flex-shrink: 1 !important;
+    flex-shrink: 0 !important;
 }
 .export-mode.vertical .sticker-placeholder::before {
     font-size: 22px !important;
