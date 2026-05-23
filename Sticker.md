@@ -35,9 +35,9 @@ The filename pattern is `{category_id}{severity_level}.png` (e.g. `جنس1.png` 
 └── .canvas-content
     ├── .poster-column
     │   ├── .poster-container > .poster-div
+    │   │   └── .modern-watermark.vertical-only
     │   └── .modern-watermark.horizontal-only
     └── .info-content-right
-        ├── .modern-watermark.vertical-only
         ├── .header-info (title, genres, score)
         ├── .synopsis-wrapper
         └── #active-stickers (.stickers-grid-canvas)  ← STICKERS

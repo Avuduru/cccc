@@ -1181,12 +1181,12 @@ body {
 .vertical .poster-column { display: contents; }
 .vertical .poster-container {
     position: absolute !important;
-    top: 26%; right: 5%;
+    top: 22%; right: 5%;
     width: 44% !important;
     height: 52.8% !important;
     max-height: 52.8% !important;
     flex-shrink: 0;
-    z-index: 5;
+    z-index: 15;
     border: 2px solid rgba(255, 255, 255, 0.25);
     margin: 0 !important;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
