@@ -804,6 +804,22 @@ function fitVerticalTitle(el) {
     el.classList.add(scales[scales.length - 1]);
 }
 
+function fitGenreRow(el) {
+    if (state.orientation !== 'vertical') return;
+    const scales = ['genre-scale-1', 'genre-scale-2', 'genre-scale-3'];
+    el.classList.remove(...scales);
+    
+    if (el.scrollWidth <= el.clientWidth + 2) return; // Fits naturally
+    
+    for (const scale of scales) {
+        el.classList.add(scale);
+        if (el.scrollWidth <= el.clientWidth + 2) return;
+        el.classList.remove(scale);
+    }
+    // Keep smallest scale if it still doesn't fit
+    el.classList.add(scales[scales.length - 1]);
+}
+
 export function updateDisplayedInfo() {
     const title = state.meta.title || '';
     els.titleText().innerText = title;
@@ -877,6 +893,9 @@ export function updateDisplayedInfo() {
     // ROBUST Aspect Ratio Fix REMOVED to lock aspect ratio (per user request)
     // This allows CSS (A4 or 2:3) to control the container size, cropping images if needed.
 
+    if (state.orientation === 'vertical') {
+        fitGenreRow(els.genreText().parentElement);
+    }
     adjustTitleSize();
 }
 

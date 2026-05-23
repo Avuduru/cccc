@@ -1241,6 +1241,16 @@ body {
 .vertical .header-info h2.title-scale-2 { font-size: calc(var(--canvas-v-title-size) * 0.6) !important; }
 .vertical .header-info h2.title-scale-3 { font-size: calc(var(--canvas-v-title-size) * 0.5) !important; }
 .vertical .genre-label { display: flex !important; }
+.vertical .genre-row {
+    flex-wrap: nowrap !important;
+    width: 100%;
+    justify-content: center;
+    overflow: visible;
+}
+.vertical .genre-row.genre-scale-1 .genre-pill { font-size: calc(var(--canvas-genre-size) * 0.85); padding: 0.4cqw 0.9cqw; }
+.vertical .genre-row.genre-scale-2 .genre-pill { font-size: calc(var(--canvas-genre-size) * 0.7); padding: 0.3cqw 0.7cqw; }
+.vertical .genre-row.genre-scale-3 .genre-pill { font-size: calc(var(--canvas-genre-size) * 0.6); padding: 0.2cqw 0.5cqw; }
+.vertical .genre-row .genre-pill { flex-shrink: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .vertical .synopsis-wrapper {
     position: absolute !important;
     top: 26%; left: 5%;
@@ -1799,9 +1809,12 @@ body {
     font-size: 36px !important;
     padding: 14px 38px !important;
     bottom: -60px !important;
-    transform: translateX(-50%) !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin: 0 auto !important;
+    width: max-content !important;
+    transform: none !important;
     top: auto !important;
-    margin-right: 0 !important;
 }
 /* Fix html2canvas cqw/vh bugs for horizontal stickers */
 .export-mode.horizontal .stickers-grid-canvas {
