@@ -19,7 +19,21 @@ if ($file === '') {
 if (file_exists($file . '.html')) {
     // Return standard 200 OK and serve the HTML content
     http_response_code(200);
-    include $file . '.html';
+    $html = file_get_contents($file . '.html');
+
+    // Dynamic CSS cache busting
+    if (file_exists('style.v3.css')) {
+        $cssTime = filemtime('style.v3.css');
+        $html = preg_replace('/href="style\.v3\.css(?:\?v=[^"]*)?"/', 'href="style.v3.css?v=' . $cssTime . '"', $html);
+    }
+
+    // Dynamic JS cache busting
+    if (file_exists('js/app.js')) {
+        $jsTime = filemtime('js/app.js');
+        $html = preg_replace('/src="js\/app\.js(?:\?v=[^"]*)?"/', 'src="js/app.js?v=' . $jsTime . '"', $html);
+    }
+
+    echo $html;
     exit;
 }
 
