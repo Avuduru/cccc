@@ -11,7 +11,6 @@ Polished_CCCC/
 design-handoff/
 test_export.py
 test_export_result.png
-Docs/
 data/hltb_cache.json
 test_output.txt
 test_proxy.php
