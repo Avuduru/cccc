@@ -17,3 +17,4 @@ test_output.txt
 test_proxy.php
 cacert.pem
 watermark_fix.css
+local-router.php
