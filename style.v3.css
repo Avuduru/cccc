@@ -885,10 +885,11 @@ body {
     width: 100%;
 }
 .info-panel.vertical {
-    --card-h: min(720px, 80vh);
-    --card-w: calc(var(--card-h) * 0.8);
-    width: var(--card-w);
-    height: var(--card-h);
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    height: auto;
+    max-height: min(720px, 80vh);
+    max-width: calc(min(720px, 80vh) * 0.8);
     margin: 0 auto;
 }
 
