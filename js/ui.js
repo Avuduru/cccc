@@ -564,13 +564,17 @@ export function drawBlurredBackground(url) {
         canvas.width = canvas.offsetWidth * 1.2; // Slightly larger for better quality
         canvas.height = canvas.offsetHeight * 1.2;
 
-        ctx.filter = 'blur(15px)';
-
         const scale = Math.max(canvas.width / img.width, canvas.height / img.height);
         const x = (canvas.width / 2) - (img.width / 2) * scale;
         const y = (canvas.height / 2) - (img.height / 2) * scale;
 
+        // Draw the image sharp first
         ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+
+        // Apply StackBlur (Radius 25) directly to the canvas pixels for 100% cross-browser and html2canvas support
+        if (typeof StackBlur !== 'undefined') {
+            StackBlur.canvasRGBA(canvas, 0, 0, canvas.width, canvas.height, 25);
+        }
     };
     img.src = url;
 }
