@@ -1035,9 +1035,9 @@ body {
     unicode-bidi: isolate;
     color: #fff;
 }
-/* Exactly 50% multiplier for 2-line horizontal titles */
+/* Exactly 30% multiplier for 2-line horizontal titles */
 .horizontal-has-2-line-title .header-info h2 { 
-    font-size: calc(var(--canvas-title-size) * 0.5) !important; 
+    font-size: calc(var(--canvas-title-size) * 0.3) !important; 
 }
 
 .genre-row {
@@ -1228,9 +1228,9 @@ body {
 .vertical .header-info h2.title-scale-2 { font-size: calc(var(--canvas-v-title-size) * 0.6) !important; }
 .vertical .header-info h2.title-scale-3 { font-size: calc(var(--canvas-v-title-size) * 0.5) !important; }
 
-/* Exactly 50% of the base 0.9 multiplier for 2-line titles */
+/* Exactly 30% of the base 0.9 multiplier for 2-line titles (0.27) */
 .vertical.has-2-line-title .header-info h2 { 
-    font-size: calc(var(--canvas-v-title-size) * 0.45) !important; 
+    font-size: calc(var(--canvas-v-title-size) * 0.27) !important; 
 }
 .vertical .genre-label { display: flex !important; flex-wrap: nowrap !important; overflow: visible; }
 .vertical .genre-row {
@@ -1766,7 +1766,7 @@ body {
     margin-bottom: 8px !important;
 }
 .export-mode.vertical.has-2-line-title .header-info h2 {
-    font-size: 51.3px !important; /* Exactly 50% of 102.6px base */
+    font-size: 30.78px !important; /* Exactly 30% of 102.6px base */
 }
 .export-mode.vertical .poster-container {
     top: 330px !important; right: 60px !important;
@@ -1791,7 +1791,7 @@ body {
     margin-bottom: 8px !important;
 }
 .export-mode.horizontal-has-2-line-title .header-info h2 {
-    font-size: 53px !important; /* Exactly 50% of 106px base */
+    font-size: 31.8px !important; /* Exactly 30% of 106px base */
 }
 .export-mode.vertical .header-info {
     padding: 0 60px !important;
