@@ -981,10 +981,8 @@ export function updateDisplayedInfo() {
         els.scoreBadge().classList.add('hidden');
     }
 
-    // Clip synopsis to 4 lines
-    // Clip synopsis to 8 lines (allow more for horizontal/flex)
-    const clippedSynopsis = (state.meta.synopsis || '').split('\n').slice(0, 8).join('\n');
-    els.synopsisText().innerText = clippedSynopsis;
+    // Inject full synopsis text and let CSS/JS-scaling handle visual constraints
+    els.synopsisText().innerText = state.meta.synopsis || '';
 
     // Trigger Fit-to-Box Scaling and Layout Adjustments
     requestAnimationFrame(() => reAdjustLayout());

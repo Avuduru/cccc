@@ -11,3 +11,11 @@ RewriteRule ^ /%1 [R=301,L,NE]
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^(.*)$ index.php [QSA,L]
+
+# === CACHE BUSTING RULES ===
+# Force browsers to revalidate HTML, CSS, and JS files before using cache
+<IfModule mod_headers.c>
+    <FilesMatch "\.(html|css|js)$">
+        Header set Cache-Control "no-cache, must-revalidate"
+    </FilesMatch>
+</IfModule>

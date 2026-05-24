@@ -156,6 +156,34 @@ function setupEventListeners() {
             orientButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
 
+            // 1. SURGICAL LAYOUT CLEANUP (Before switching)
+            const canvas = document.getElementById('preview-canvas');
+
+            // Clean Title leaks
+            canvas.classList.remove('has-2-line-title', 'horizontal-has-2-line-title');
+
+            // Clean Genre leaks
+            const genreRow = document.getElementById('genre-text').parentElement;
+            if (genreRow) genreRow.classList.remove('genre-scale-1', 'genre-scale-2', 'genre-scale-3');
+
+            // Clean Vertical Position leaks
+            const poster = document.querySelector('.poster-container');
+            if (poster) poster.style.top = '';
+            const synopsis = document.querySelector('.synopsis-wrapper');
+            if (synopsis) synopsis.style.top = '';
+            const watermark = document.querySelector('.modern-watermark.vertical-only');
+            if (watermark) watermark.style.marginTop = '';
+
+            // Clean Sticker sizing overrides
+            const stickersGrid = document.querySelector('.stickers-grid-canvas');
+            if (stickersGrid) {
+                stickersGrid.style.height = '';
+                Array.from(stickersGrid.children).forEach(item => {
+                    item.style.width = '';
+                    item.style.height = '';
+                });
+            }
+
             state.orientation = btn.dataset.value;
             renderControls();
             updatePreview();
@@ -208,25 +236,6 @@ function setupEventListeners() {
 
     // Synopsis
     el.synopsisText.addEventListener('input', (e) => {
-        let text = e.target.innerText;
-
-        // Character limit check (roughly enough for 4 lines)
-        if (text.length > 350) {
-            text = text.substring(0, 350);
-            e.target.innerText = text;
-        }
-
-        const lines = text.split('\n');
-        if (lines.length > 4) {
-            e.target.innerText = lines.slice(0, 4).join('\n');
-            // Move cursor to end
-            const range = document.createRange();
-            const sel = window.getSelection();
-            range.selectNodeContents(e.target);
-            range.collapse(false);
-            sel.removeAllRanges();
-            sel.addRange(range);
-        }
         state.meta.synopsis = e.target.innerText;
     });
 
