@@ -1,4 +1,4 @@
-import { initUI, updatePreview, renderControls, drawBlurredBackground, updateDisplayedInfo, adjustTitleSize, reAdjustLayout } from './ui.js';
+import { initUI, updatePreview, renderControls, drawBlurredBackground, updateDisplayedInfo, adjustTitleSize, reAdjustLayout, preloadStickers } from './ui.js';
 import { handleSearch } from './api.js';
 import { handleExport, handleCopyToClipboard } from './export.js';
 import { debounce } from './utils.js';
@@ -10,6 +10,8 @@ function init() {
     setupDesignSettings();
     initUI();
     setupEventListeners();
+    // Silently preload stickers in the background to prevent click delay
+    setTimeout(preloadStickers, 500);
 }
 
 function setupDesignSettings() {

@@ -1033,3 +1033,26 @@ export function formatArabicPlural(count, type) {
     if (lastTwo >= 3 && lastTwo <= 10) return `${num} ${w.p3_10}`;
     return `${num} ${w.p11}`;
 }
+
+export function preloadStickers() {
+    // Only preload once to save bandwidth
+    if (window._stickersPreloaded) return;
+    window._stickersPreloaded = true;
+
+    const cacheImage = (src) => {
+        const img = new Image();
+        img.src = src;
+    };
+
+    // Preload Mawjoodat (Severities 1, 2, 3)
+    CATEGORIES.Mawjoodat.forEach(cat => {
+        for (let i = 1; i <= 3; i++) {
+            cacheImage(`assets/icons/${cat.icon}${i}.png?v=2`);
+        }
+    });
+
+    // Preload Mustathniyat (Exception Badges 0)
+    CATEGORIES.Mustathniyat.forEach(item => {
+        cacheImage(`assets/icons/${item.icon}0.png?v=2`);
+    });
+}
