@@ -910,8 +910,8 @@ body {
 
 /* Fallback for when browsers (e.g. Brave) block Javascript Canvas Manipulation */
 .fallback-css-blur {
-    filter: blur(12px);
-    -webkit-filter: blur(12px);
+    filter: blur(9px);
+    -webkit-filter: blur(9px);
     transform: scale(1.1); /* Prevents transparent bleeding on the edges */
 }
 .bg-overlay {
