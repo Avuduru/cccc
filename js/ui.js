@@ -577,7 +577,7 @@ export function drawBlurredBackground(url) {
         // Apply StackBlur (Radius 25) directly to the canvas pixels for 100% cross-browser and html2canvas support
         if (typeof StackBlur !== 'undefined') {
             try {
-                StackBlur.canvasRGBA(canvas, 0, 0, canvas.width, canvas.height, 25);
+                StackBlur.canvasRGBA(canvas, 0, 0, canvas.width, canvas.height, 22);
             } catch (e) {
                 console.warn('[Blur Engine] StackBlur blocked by browser security (e.g. Brave Shields). Falling back to CSS blur.');
                 canvas.classList.add('fallback-css-blur');

@@ -910,8 +910,8 @@ body {
 
 /* Fallback for when browsers (e.g. Brave) block Javascript Canvas Manipulation */
 .fallback-css-blur {
-    filter: blur(15px);
-    -webkit-filter: blur(15px);
+    filter: blur(12px);
+    -webkit-filter: blur(12px);
     transform: scale(1.1); /* Prevents transparent bleeding on the edges */
 }
 .bg-overlay {
@@ -920,7 +920,7 @@ body {
     background: rgba(0, 0, 0, 0.7);
     z-index: 2;
 }
-.vertical .bg-overlay { background: rgba(0, 0, 0, 0.80); }
+.vertical .bg-overlay { background: rgba(0, 0, 0, 0.70); }
 
 .canvas-content {
     position: relative;
