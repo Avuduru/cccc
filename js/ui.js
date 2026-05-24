@@ -560,6 +560,9 @@ export function drawBlurredBackground(url) {
     const img = new Image();
     img.crossOrigin = "Anonymous";
     img.onload = () => {
+        // Remove any old fallback classes when a new image loads
+        canvas.classList.remove('fallback-css-blur');
+
         // Set internal resolution based on display size
         canvas.width = canvas.offsetWidth * 1.2; // Slightly larger for better quality
         canvas.height = canvas.offsetHeight * 1.2;
@@ -573,7 +576,15 @@ export function drawBlurredBackground(url) {
 
         // Apply StackBlur (Radius 25) directly to the canvas pixels for 100% cross-browser and html2canvas support
         if (typeof StackBlur !== 'undefined') {
-            StackBlur.canvasRGBA(canvas, 0, 0, canvas.width, canvas.height, 25);
+            try {
+                StackBlur.canvasRGBA(canvas, 0, 0, canvas.width, canvas.height, 25);
+            } catch (e) {
+                console.warn('[Blur Engine] StackBlur blocked by browser security (e.g. Brave Shields). Falling back to CSS blur.');
+                canvas.classList.add('fallback-css-blur');
+            }
+        } else {
+            console.warn('[Blur Engine] StackBlur CDN was blocked. Falling back to CSS blur.');
+            canvas.classList.add('fallback-css-blur');
         }
     };
     img.src = url;

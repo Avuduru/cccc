@@ -907,6 +907,13 @@ body {
     opacity: 0.9;
     z-index: 1;
 }
+
+/* Fallback for when browsers (e.g. Brave) block Javascript Canvas Manipulation */
+.fallback-css-blur {
+    filter: blur(15px);
+    -webkit-filter: blur(15px);
+    transform: scale(1.1); /* Prevents transparent bleeding on the edges */
+}
 .bg-overlay {
     position: absolute;
     inset: 0;
