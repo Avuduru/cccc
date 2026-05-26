@@ -185,17 +185,78 @@ async function renderToBlob(originalCanvas) {
     return compressToMaxSize(canvas);
 }
 
+function showExportModal(url) {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.style.zIndex = '999999';
+
+    const content = document.createElement('div');
+    content.className = 'modal-content modal-slide-up';
+    content.style.maxWidth = '90vw';
+    content.style.width = 'auto';
+    content.style.padding = '0';
+    content.style.overflow = 'hidden';
+    content.style.background = 'var(--ink-2)';
+
+    const header = document.createElement('header');
+    header.className = 'modal-header';
+    header.style.borderBottom = 'none';
+    header.style.padding = '15px 20px';
+    header.style.background = 'var(--ink-3)';
+
+    const titleWrap = document.createElement('div');
+    titleWrap.className = 'modal-title-wrap';
+    titleWrap.innerHTML = `<span class="kicker"><span class="kicker-dot" style="background:#2ecc71"></span>نجاح</span><h2 style="font-size: 22px;">تم إنشاء البطاقة</h2>`;
+
+    const actions = document.createElement('div');
+    actions.className = 'modal-header-actions';
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'close-btn';
+    closeBtn.innerText = '×';
+    closeBtn.onclick = () => document.body.removeChild(overlay);
+
+    actions.appendChild(closeBtn);
+    header.appendChild(titleWrap);
+    header.appendChild(actions);
+
+    const body = document.createElement('div');
+    body.className = 'modal-body';
+    body.style.display = 'flex';
+    body.style.flexDirection = 'column';
+    body.style.alignItems = 'center';
+    body.style.gap = '15px';
+    body.style.padding = '0 20px 20px 20px';
+
+    const instructions = document.createElement('p');
+    instructions.innerText = 'اضغط مطولاً على الصورة لحفظها في جهازك';
+    instructions.style.color = 'var(--text-dim)';
+    instructions.style.fontSize = '14px';
+    instructions.style.margin = '0';
+
+    const img = document.createElement('img');
+    img.src = url;
+    img.style.maxWidth = '100%';
+    img.style.maxHeight = '65vh';
+    img.style.objectFit = 'contain';
+    img.style.borderRadius = '6px';
+    img.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+
+    body.appendChild(instructions);
+    body.appendChild(img);
+
+    content.appendChild(header);
+    content.appendChild(body);
+    overlay.appendChild(content);
+
+    document.body.appendChild(overlay);
+}
+
 export function handleExport() {
     const originalCanvas = document.getElementById('preview-canvas');
     const exportBtn = document.getElementById('export-btn');
     exportBtn.innerText = 'جاري التصدير...';
 
-    // iOS: navigator.share({ files }) triggers the document share sheet, which
-    // Opening window.open('','_blank') before renderToBlob suspends the original
-    // tab on iOS, freezing the async render. Run renderToBlob first, then open
-    // the result URL directly in a new tab.
-    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-    
     // Truly robust check for any mobile or tablet device (catches modern iPads disguised as Macs)
     const isMobileOrTablet = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent) || 
                              (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -207,28 +268,12 @@ export function handleExport() {
             const filename = getFilename();
             const url = URL.createObjectURL(blob);
 
-            if (isIOS) {
-                const tab = window.open(url, '_blank');
-                if (!tab) window.location.href = url;
+            if (isMobileOrTablet) {
+                // iPhone, iPad, Android all get the premium popup with the snap animation
+                showExportModal(url);
                 logClassification('export');
-
-            } else if (isMobileOrTablet && navigator.share && navigator.canShare) {
-                // Mobile/Tablets (Android & iPads): Web Share API works correctly here
-                const file = new File([blob], filename, { type: 'image/png' });
-                if (navigator.canShare({ files: [file] })) {
-                    try {
-                        await navigator.share({ files: [file] });
-                        logClassification('export');
-                    } catch (err) {
-                        if (err.name !== 'AbortError') console.error('Share failed:', err);
-                    }
-                    return;
-                }
-                downloadLink(url, filename);
-                logClassification('export');
-
             } else {
-                // Desktop: file download
+                // Desktop PCs and Macs get instant file downloads
                 downloadLink(url, filename);
                 logClassification('export');
                 setTimeout(() => URL.revokeObjectURL(url), 2000);
