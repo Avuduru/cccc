@@ -75,7 +75,8 @@ body {
     background-size: 24px 24px, 24px 24px, 100% 100%, 100% 100%;
     background-position: 0 0, 0 0, 0 0, 0 0;
     -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
+    font-variant-ligatures: normal;
+    font-feature-settings: "liga" 1;
 }
 
 .hidden { display: none !important; }
@@ -169,7 +170,6 @@ body {
     font-family: var(--font-mono);
     font-size: 11px;
     color: var(--text-1);
-    letter-spacing: 0.5px;
     text-transform: uppercase;
 }
 .status-dot {
@@ -216,7 +216,6 @@ body {
     gap: 8px;
     font-family: var(--font-mono);
     font-size: 11px;
-    letter-spacing: 1.2px;
     color: var(--text-1);
     text-transform: uppercase;
     direction: ltr;
