@@ -1,6 +1,6 @@
 import { initUI, updatePreview, renderControls, drawBlurredBackground, updateDisplayedInfo, adjustTitleSize, reAdjustLayout, preloadStickers } from './ui.js';
 import { handleSearch } from './api.js';
-import { handleExport, handleCopyToClipboard } from './export.js';
+import { handleExport, handleCopyToClipboard } from './export.js?v=modal_fix_1';
 import { debounce } from './utils.js';
 import { state } from './state.js';
 import { config } from './config.js';
