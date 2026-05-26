@@ -206,7 +206,7 @@ function showExportModal(url) {
 
     const titleWrap = document.createElement('div');
     titleWrap.className = 'modal-title-wrap';
-    titleWrap.innerHTML = `<span class="kicker"><span class="kicker-dot" style="background:#2ecc71"></span>نجاح</span><h2 style="font-size: 22px;">تم إنشاء البطاقة</h2>`;
+    titleWrap.innerHTML = `<span class="kicker"><span class="kicker-dot" style="background:#2ecc71"></span>تم</span><h2 style="font-size: 22px;">بطاقتك جاهزة للمشاركة</h2>`;
 
     const actions = document.createElement('div');
     actions.className = 'modal-header-actions';
@@ -229,7 +229,7 @@ function showExportModal(url) {
     body.style.padding = '0 20px 20px 20px';
 
     const instructions = document.createElement('p');
-    instructions.innerText = 'اضغط مطولاً على الصورة لحفظها في جهازك';
+    instructions.innerText = 'اضغط مطولاً على الصورة لحفظها';
     instructions.style.color = 'var(--text-dim)';
     instructions.style.fontSize = '14px';
     instructions.style.margin = '0';
