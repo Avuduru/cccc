@@ -1,5 +1,18 @@
 RewriteEngine On
 
+# === SECURITY: Block access to dotfiles and sensitive files ===
+# Prevents .env, .git, .gitignore etc. from being served over HTTP
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# Block direct access to PHP config, cert, and debug files
+<FilesMatch "(cacert\.pem|php\.ini|local-router\.php|test_proxy\.php|watermark_fix\.css)$">
+    Require all denied
+</FilesMatch>
+
+
+
 # Ensure root requests hit index.php first
 DirectoryIndex index.php
 
