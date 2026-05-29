@@ -1,5 +1,12 @@
 <?php
-header("Access-Control-Allow-Origin: *");
+// Restrict CORS to the production domain; allow any origin only in local dev
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+$allowedOrigins = ['https://muhafid.com', 'https://www.muhafid.com'];
+if (in_array($origin, $allowedOrigins, true)) {
+    header("Access-Control-Allow-Origin: {$origin}");
+} elseif (getenv('APP_ENV') === 'local') {
+    header("Access-Control-Allow-Origin: *");
+}
 header("Content-Type: application/json; charset=UTF-8");
 
 // --- Helper Functions ---
@@ -200,11 +207,12 @@ function applySmartSort($data, $type, $query)
 
 function hltbGet($url)
 {
+    $verifySSL = getenv('APP_ENV') !== 'local';
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_SSL_VERIFYPEER => false,
-        CURLOPT_SSL_VERIFYHOST => false,
+        CURLOPT_SSL_VERIFYPEER => $verifySSL,
+        CURLOPT_SSL_VERIFYHOST => $verifySSL ? 2 : false,
         CURLOPT_TIMEOUT => 10,
         CURLOPT_FOLLOWLOCATION => true,
         CURLOPT_HTTPHEADER => [
@@ -281,8 +289,8 @@ function searchHltb($gameName)
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST => true,
         CURLOPT_POSTFIELDS => $payload,
-        CURLOPT_SSL_VERIFYPEER => false,
-        CURLOPT_SSL_VERIFYHOST => false,
+        CURLOPT_SSL_VERIFYPEER => $verifySSL,
+        CURLOPT_SSL_VERIFYHOST => $verifySSL ? 2 : false,
         CURLOPT_TIMEOUT => 10,
         CURLOPT_HTTPHEADER => [
             'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36',
@@ -331,15 +339,15 @@ function fetchUrl($url, $headers = [])
     if (empty($url))
         return json_encode(['error' => 'No URL provided']);
 
+    $verifySSL = getenv('APP_ENV') !== 'local';
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_USERAGENT, 'NeetPSRating/1.0');
     curl_setopt($ch, CURLOPT_TIMEOUT, 10);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    // Fix SSL certificate issues on Windows (for development only)
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $verifySSL);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $verifySSL ? 2 : false);
 
     if (!empty($headers)) {
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
@@ -485,21 +493,22 @@ switch ($type) {
         }
 
         // Fetch the image
+        $verifySSL = getenv('APP_ENV') !== 'local';
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS); // Strictly HTTP/S
         curl_setopt($ch, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $verifySSL);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $verifySSL ? 2 : false);
         $imageData = curl_exec($ch);
         $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
         curl_close($ch);
 
         if ($imageData) {
             header("Content-Type: $contentType");
-            header("Access-Control-Allow-Origin: *");
+            // Image proxy CORS is handled by the top-level origin check above
             echo $imageData;
         } else {
             http_response_code(404);
