@@ -334,7 +334,7 @@ function searchHltb($gameName)
 }
 
 
-function fetchUrl($url, $headers = [], $postData = null)
+function fetchUrl($url, $headers = [], $postData = null, $timeout = 10)
 {
     if (empty($url))
         return json_encode(['error' => 'No URL provided']);
@@ -343,8 +343,9 @@ function fetchUrl($url, $headers = [], $postData = null)
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_USERAGENT, 'NeetPSRating/1.0');
-    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+    // Masquerade as a real browser to prevent blocks
+    curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+    curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $verifySSL);
     curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $verifySSL ? 2 : false);
@@ -895,7 +896,7 @@ function fetchAniListFallback($query, $type) {
         'Accept: application/json'
     ];
 
-    $response = fetchUrl('https://graphql.anilist.co', $headers, $payload);
+    $response = fetchUrl('https://graphql.anilist.co', $headers, $payload, 3);
     $anilistData = json_decode($response, true);
 
     if (!$anilistData || isset($anilistData['error'])) {
@@ -937,7 +938,7 @@ if ($url === 'ANILIST_PRIMARY') {
     if (!$data || isset($data['error']) || empty($data['data'])) {
         error_log("CCCC Warning: AniList GraphQL failed or returned empty. Falling back to Jikan API for: $query");
         $jikanUrl = "https://api.jikan.moe/v4/$type?q=" . urlencode($query) . "&limit=20&genres_exclude=12";
-        $response = fetchUrl($jikanUrl);
+        $response = fetchUrl($jikanUrl, [], null, 3);
         $data = json_decode($response, true);
     } else {
         $response = json_encode($data);
