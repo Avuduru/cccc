@@ -334,7 +334,7 @@ function searchHltb($gameName)
 }
 
 
-function fetchUrl($url, $headers = [])
+function fetchUrl($url, $headers = [], $postData = null)
 {
     if (empty($url))
         return json_encode(['error' => 'No URL provided']);
@@ -351,6 +351,11 @@ function fetchUrl($url, $headers = [])
 
     if (!empty($headers)) {
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    }
+    
+    if ($postData !== null) {
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
     }
 
     $output = curl_exec($ch);
@@ -552,9 +557,8 @@ switch ($type) {
 
     case 'anime':
     case 'manga':
-        // Jikan API does not require a key
-        // Exclude Hentai (genre ID 12) but keep Ecchi (genre ID 9)
-        $url = "https://api.jikan.moe/v4/$type?q=" . urlencode($query) . "&limit=20&genres_exclude=12";
+        // We use AniList as the primary source now, with Jikan as fallback
+        $url = 'ANILIST_PRIMARY';
         break;
 
     case 'book':
@@ -865,28 +869,101 @@ switch ($type) {
         exit;
 }
 
-if ($url) {
-    $response = fetchUrl($url);
-
-    $data = json_decode($response, true);
-    if ($data && !isset($data['error'])) {
-        
-        // 1. Run safety & logic filters
-        if ($type === 'tv' || $type === 'movie') {
-            $data = filterAnimeFromTMDB($data);
-        } else if ($type === 'game') {
-            $data = filterNSFWFromRAWG($data);
+function fetchAniListFallback($query, $type) {
+    $format = $type === 'anime' ? 'ANIME' : 'MANGA';
+    
+    // GraphQL query to fetch exact fields needed and automatically filter NSFW (isAdult: false)
+    $graphql = '{
+      Page(page: 1, perPage: 20) {
+        media(search: "' . addslashes($query) . '", type: ' . $format . ', isAdult: false, sort: POPULARITY_DESC) {
+          id
+          title { romaji english }
+          coverImage { extraLarge }
+          description
+          averageScore
+          episodes
+          chapters
+          volumes
+          genres
         }
-        
-        // 2. Apply Smart Sort (Applies to ALL 6 types)
-        if (in_array($type, ['movie', 'tv', 'game', 'anime', 'manga', 'book'])) {
-            $data = applySmartSort($data, $type, $query);
-        }
+      }
+    }';
 
-        $response = json_encode($data);
+    $payload = json_encode(['query' => $graphql]);
+    $headers = [
+        'Content-Type: application/json',
+        'Accept: application/json'
+    ];
+
+    $response = fetchUrl('https://graphql.anilist.co', $headers, $payload);
+    $anilistData = json_decode($response, true);
+
+    if (!$anilistData || isset($anilistData['error'])) {
+        return ['error' => $anilistData['error'] ?? 'AniList API Error'];
     }
 
-    echo $response;
+    $jikanFormat = ['data' => []];
+
+    if (isset($anilistData['data']['Page']['media'])) {
+        foreach ($anilistData['data']['Page']['media'] as $item) {
+            $jikanFormat['data'][] = [
+                'mal_id' => $item['id'], 
+                'title' => !empty($item['title']['english']) ? $item['title']['english'] : (!empty($item['title']['romaji']) ? $item['title']['romaji'] : 'Unknown Title'),
+                'title_english' => $item['title']['english'] ?? '',
+                'images' => [
+                    'jpg' => [
+                        'large_image_url' => $item['coverImage']['extraLarge'] ?? ''
+                    ]
+                ],
+                'synopsis' => strip_tags($item['description'] ?? ''),
+                'score' => isset($item['averageScore']) ? ($item['averageScore'] / 10) : 0,
+                'episodes' => $item['episodes'] ?? 0,
+                'chapters' => $item['chapters'] ?? 0,
+                'volumes' => $item['volumes'] ?? 0,
+                'genres' => array_map(function($g) { return ['name' => $g]; }, $item['genres'] ?? []),
+                'members' => 0 // Fallback for SmartSort
+            ];
+        }
+    }
+    
+    return $jikanFormat;
+}
+
+if ($url === 'ANILIST_PRIMARY') {
+    // --- REVERSED WATERFALL: ANILIST FIRST ---
+    $data = fetchAniListFallback($query, $type);
+    
+    // If AniList fails, times out, or returns 0 results, fall back to Jikan
+    if (!$data || isset($data['error']) || empty($data['data'])) {
+        error_log("CCCC Warning: AniList GraphQL failed or returned empty. Falling back to Jikan API for: $query");
+        $jikanUrl = "https://api.jikan.moe/v4/$type?q=" . urlencode($query) . "&limit=20&genres_exclude=12";
+        $response = fetchUrl($jikanUrl);
+        $data = json_decode($response, true);
+    } else {
+        $response = json_encode($data);
+    }
+} else if ($url) {
+    $response = fetchUrl($url);
+    $data = json_decode($response, true);
 } else {
     echo json_encode(['error' => 'Unknown error']);
+    exit;
 }
+
+if (isset($data) && $data && !isset($data['error'])) {
+    // 1. Run safety & logic filters
+    if ($type === 'tv' || $type === 'movie') {
+        $data = filterAnimeFromTMDB($data);
+    } else if ($type === 'game') {
+        $data = filterNSFWFromRAWG($data);
+    }
+    
+    // 2. Apply Smart Sort (Applies to ALL 6 types)
+    if (in_array($type, ['movie', 'tv', 'game', 'anime', 'manga', 'book'])) {
+        $data = applySmartSort($data, $type, $query);
+    }
+
+    $response = json_encode($data);
+}
+
+echo $response ?? json_encode(['error' => 'Unknown error']);
