@@ -879,7 +879,7 @@ function fetchAniListFallback($query, $type) {
         media(search: "' . addslashes($query) . '", type: ' . $format . ', isAdult: false, sort: POPULARITY_DESC) {
           id
           title { romaji english }
-          coverImage { extraLarge }
+          coverImage { extraLarge large }
           description
           averageScore
           episodes
@@ -913,6 +913,8 @@ function fetchAniListFallback($query, $type) {
                 'title_english' => $item['title']['english'] ?? '',
                 'images' => [
                     'jpg' => [
+                        'image_url' => $item['coverImage']['large'] ?? '',
+                        'small_image_url' => $item['coverImage']['large'] ?? '',
                         'large_image_url' => $item['coverImage']['extraLarge'] ?? ''
                     ]
                 ],
